@@ -141,7 +141,15 @@ void SearchReturner::SubmitResult(FileNode* node)
 	qDebug() << "Found Result!";
 //	QUdpSocket* m_sock = new QUdpSocket();
 
-	QString thingy = "$SR " + m_server->me()->nick + " " + node->name() + "\05" + QString::number(node->size()) + " " + "1/1" + "\05" + m_server->hubName() + " (" + m_server->ip() + ":" + QString::number(m_server->port()) + ")|";
+	QString path = node->name();
+	FileNode* parent = node->parent();
+	while ((parent) && (parent->name() != "<root>"))
+	{
+		path = parent->name() + "\\" + path;
+		parent = parent->parent();
+	}
+
+	QString thingy = "$SR " + m_server->me()->nick + " " + path + "\05" + QString::number(node->size()) + " " + "1/1" + "\05" + m_server->hubName() + " (" + m_server->ip() + ":" + QString::number(m_server->port()) + ")|";
 	QByteArray bleh = thingy.toLatin1();
 	qDebug() << bleh;
 	qDebug() << m_sock->writeDatagram(bleh, bleh.size(), m_client, m_port);

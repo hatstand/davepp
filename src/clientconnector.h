@@ -66,7 +66,7 @@ private:
 	bool supportsBZList;
 	
 	QTime m_sendTimer;
-	quint64 m_sendPos;
+	qint64 m_sendPos;
 };
 
 #endif

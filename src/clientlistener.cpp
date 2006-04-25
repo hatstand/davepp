@@ -255,6 +255,12 @@ void ClientListener::parseCommand(QString command)
 			emit result(TransferFailed);
 			m_socket->close();
 		}
+		else if (words[0] == MAXEDOUT)
+		{
+			changeState(Idle);
+			emit result(TransferFailed);
+			m_socket->close();
+		}
 		else
 			qDebug() << "\"" << words[0] << "\" not understood";
 	}

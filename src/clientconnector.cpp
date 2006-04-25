@@ -168,7 +168,7 @@ void ClientConnector::parseCommand(QString command)
 }
 
 void ClientConnector::sendSomeData()
-{
+{		  
 	if (m_socket->state() != QAbstractSocket::ConnectedState)
 	{
 		deleteLater();
@@ -191,12 +191,14 @@ void ClientConnector::sendSomeData()
 	
 	if (m_fileName == "MyList.DcLst")
 		data = FileListBuilder::instance()->huffmanList().mid(m_sendPos, uploadSpeed*1024);
+	else if(m_fileName == "MyList.bz2")
+		data = FileListBuilder::instance()->bzList().mid(m_sendPos, uploadSpeed*1024);
 	else
 		data = m_file.read(uploadSpeed*1024);
 	
-	m_socket->write(data);
-	m_sendPos += data.length();
+	m_sendPos += m_socket->write(data);
 	m_sendTimer.start();
+	m_socket->flush();
 }
 
 void ClientConnector::socketBytesWritten(qint64 num)
@@ -212,7 +214,7 @@ void ClientConnector::socketBytesWritten(qint64 num)
 	
 	emit progress(m_sendPos, m_fileLength);
 	
-	if ((Configuration::instance()->uploadSpeed() != 0) && (m_sendTimer.elapsed() < 1000))
+	if ((Configuration::instance()->uploadSpeed() != 0) && (m_sendTimer.elapsed() < 100))
 		QTimer::singleShot(1000 - m_sendTimer.elapsed(), this, SLOT(sendSomeData()));
 	else
 		sendSomeData();

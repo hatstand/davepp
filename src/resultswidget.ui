@@ -1,0 +1,253 @@
+<ui version="4.0" >
+ <author></author>
+ <comment></comment>
+ <exportmacro></exportmacro>
+ <class>UIResultsWidget</class>
+ <widget class="QWidget" name="UIResultsWidget" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>440</width>
+    <height>341</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <property name="margin" >
+    <number>9</number>
+   </property>
+   <property name="spacing" >
+    <number>6</number>
+   </property>
+   <item>
+    <widget class="QFrame" name="searchFrame" >
+     <property name="frameShape" >
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <layout class="QVBoxLayout" >
+      <property name="margin" >
+       <number>0</number>
+      </property>
+      <property name="spacing" >
+       <number>6</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" >
+        <property name="margin" >
+         <number>0</number>
+        </property>
+        <property name="spacing" >
+         <number>6</number>
+        </property>
+        <item>
+         <widget class="QLineEdit" name="searchBox" >
+          <property name="sizePolicy" >
+           <sizepolicy>
+            <hsizetype>7</hsizetype>
+            <vsizetype>1</vsizetype>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="searchButton" >
+          <property name="text" >
+           <string>Search</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton" >
+          <property name="text" >
+           <string>Options...</string>
+          </property>
+          <property name="checkable" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QFrame" name="optionsFrame" >
+        <property name="frameShape" >
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow" >
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" >
+         <property name="margin" >
+          <number>0</number>
+         </property>
+         <property name="spacing" >
+          <number>6</number>
+         </property>
+         <item>
+          <widget class="QComboBox" name="dataTypeBox" >
+           <item>
+            <property name="text" >
+             <string>Any file type</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Videos</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Music</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Compressed files</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Pictures</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Programs</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Documents</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Folders</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="sizeRestrictedBox" >
+           <item>
+            <property name="text" >
+             <string>Any size</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Bigger than...</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Smaller than...</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="sizeBox" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="maximum" >
+            <number>65000</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="sizeTypeBox" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="currentIndex" >
+            <number>2</number>
+           </property>
+           <item>
+            <property name="text" >
+             <string>bytes</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Kb</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Mb</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Gb</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="Q3ListView" name="listView" >
+     <property name="selectionMode" >
+      <enum>Q3ListView::Extended</enum>
+     </property>
+     <property name="allColumnsShowFocus" >
+      <bool>true</bool>
+     </property>
+     <property name="rootIsDecorated" >
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <pixmapfunction></pixmapfunction>
+ <customwidgets>
+  <customwidget>
+   <class>Q3ListView</class>
+   <extends></extends>
+   <header>q3listview.h</header>
+   <container>0</container>
+   <pixmap></pixmap>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>searchBox</tabstop>
+  <tabstop>searchButton</tabstop>
+  <tabstop>pushButton</tabstop>
+  <tabstop>dataTypeBox</tabstop>
+  <tabstop>sizeRestrictedBox</tabstop>
+  <tabstop>sizeBox</tabstop>
+  <tabstop>sizeTypeBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>optionsFrame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>376</x>
+     <y>23</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>342</x>
+     <y>52</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

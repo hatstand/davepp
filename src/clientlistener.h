@@ -83,6 +83,7 @@ private:
 
 	bool extendedClient;
 	bool supportsBZList;
+	bool supportsXmlBZList;
 
 signals:
 	void result(int code);

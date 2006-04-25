@@ -11,6 +11,7 @@ class FileList
 public:
 	FileList(QTextStream* stream);
 	FileList(FileNode* root);
+	FileList(QByteArray data);
 	~FileList();
 	void print();
 	

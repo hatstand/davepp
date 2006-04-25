@@ -38,7 +38,8 @@ HEADERS += server.h \
            configuration.h \
            filelistbuilder.h \
 			  searchreturner.h \
-			  commands.h
+			  commands.h \
+			  xmllistparser.h
 SOURCES += main.cpp \
            server.cpp \
            user.cpp \
@@ -61,11 +62,12 @@ SOURCES += main.cpp \
            shareeditdialog.cpp \
            configuration.cpp \
            filelistbuilder.cpp \
-			  searchreturner.cpp
+			  searchreturner.cpp \
+			  xmllistparser.cpp
 mainwindow.ui.commands = $$IDL_COMPILER
 hubwidget.ui.commands = $$IDL_COMPILER
 edithub.ui.commands = $$IDL_COMPILER
-QT = core qt3support network gui
+QT = core qt3support network gui xml
 TARGET = ../bin/daveplusplus
 CONFIG += \
 warn_on

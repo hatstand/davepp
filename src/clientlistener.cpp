@@ -57,7 +57,8 @@ ClientListener::ClientListener(Server* server, User* user)
    m_dclst(true),
    m_outFile(NULL),
 	supportsBZList(false),
-	extendedClient(false)
+	extendedClient(false),
+	supportsXmlBZList(false)
 {
 	m_tcpServer = new QTcpServer(this);
 	
@@ -145,15 +146,22 @@ void ClientListener::socketReadyRead()
 		// Do a whole load of decoding of the list (Huffman)
 		{
 			QByteArray decodedList;
-				  
-			if(!supportsBZList)
-				decodedList = Utilities::decodeList(m_dclistData);
+				 
+			if(supportsXmlBZList || supportsBZList)
+				decodedList = Utilities::decodeBZList(m_dclistData);
 			else
-				decodedList = Utilities::decodeBZList(m_dclistData); 
+				decodedList = Utilities::decodeList(m_dclistData);
 
-			QTextStream* stream = new QTextStream(decodedList);
-			FileList* fileList = new FileList(stream);
-			delete stream;
+			FileList* fileList;
+			
+			if(supportsXmlBZList)
+				fileList = new FileList(decodedList);
+			else
+			{
+				QTextStream* stream = new QTextStream(decodedList);
+				fileList = new FileList(stream);
+				delete stream;
+			}
 			
 			m_user->setFileList(fileList);
 		}
@@ -183,14 +191,21 @@ void ClientListener::parseCommand(QString command)
 			m_stream << MYNICK << " " << m_server->me()->nick << "|";
 			m_stream << "$Lock EXTENDEDPROTOCOLsomething Pk=DavePlusPlus|";
 			if(extendedClient)
-				m_stream << SUPPORTS << " BZList |";
+				m_stream << SUPPORTS << " BZList XmlBZList |";
 			m_stream << DIRECTION << " Download 1234|";
 			m_stream << "$Key " << Utilities::lockToKey(words[1]) << "|";
 			m_stream.flush();
 		}
 		else if(words[0] == SUPPORTS)
 		{
-			if(words[1].contains("BZList"))
+			if(words.contains("XmlBZList"))
+			{
+				supportsXmlBZList = true;
+				qDebug() << "XmlBZList";
+				if(m_dclst)
+					m_filename = "files.xml.bz2";
+			}
+			else if(words.contains("BZList"))
 			{
 				supportsBZList = true; // Supports the BZ2List extension
 				qDebug() << "BZList";

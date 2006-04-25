@@ -1,10 +1,13 @@
 #include "filelist.h"
 #include "filenode.h"
+#include "xmllistparser.h"
+
 #include <QIODevice>
 #include <QFile>
 #include <QDebug>
 #include <QTreeWidgetItem>
 #include <QTreeWidget>
+#include <QXmlInputSource>
 
 #include <assert.h>
 
@@ -18,7 +21,7 @@ FileList::FileList(QTextStream* stream)
 	{
 		QString line = stream->readLine();
 		QStringList l = line.split('|');
-		
+	
 		int indent = l[0].count('\t');
 		while (depth > indent) // Down 1 level
 		{
@@ -43,6 +46,19 @@ FileList::FileList(QTextStream* stream)
 FileList::FileList(FileNode* root)
 {
 	m_root = root;
+}
+
+FileList::FileList(QByteArray data)
+{
+	m_root = new FileNode(NULL, "<root>");
+
+	XmlListParser handler(m_root);
+	QXmlInputSource source;
+	source.setData(data);
+	QXmlSimpleReader reader;
+	reader.setContentHandler(&handler);
+
+	reader.parse(source);
 }
 
 void FileList::print()

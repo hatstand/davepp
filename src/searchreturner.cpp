@@ -12,12 +12,12 @@ SearchReturner::SearchReturner(Server* server, QHostAddress client, quint16 port
 	qDebug() << "Search started";
 
 		  
-	audio = "(mp3)|(mp2)|(wav)|(au)|(rm)|(mid)|(sm)$";
-	compressed = "(zip)|(arj)|(rar)|(lzh)|(gz)|(z)|(arc)|(pak)|(tar)|(bz2)$";
-	docs = "(doc)|(txt)|(wri)|(pdf)|(ps)|(tex)|(dvi)$";
-	execs = "(pm)|(exe)|(bat)|(com)$";
-	pictures = "(gif)|(jpg)|(jpeg)|(bmp)|(pcx)|(png)|(wmf)|(psd)|(svg)$";
-	videos = "(mpg)|(mpeg)|(avi)|(asf)|(mov)$";
+	audio = "\\.(mp3)|(mp2)|(wav)|(au)|(rm)|(mid)|(sm)$";
+	compressed = "\\.(zip)|(arj)|(rar)|(lzh)|(gz)|(z)|(arc)|(pak)|(tar)|(bz2)$";
+	docs = "\\.(doc)|(txt)|(wri)|(pdf)|(ps)|(tex)|(dvi)$";
+	execs = "\\.(pm)|(exe)|(bat)|(com)$";
+	pictures = "\\.(gif)|(jpg)|(jpeg)|(bmp)|(pcx)|(png)|(wmf)|(psd)|(svg)$";
+	videos = "\\.(mpg)|(mpeg)|(avi)|(asf)|(mov)$";
 		  
 	FileListBuilder* bob = FileListBuilder::instance();
 	m_list = bob->m_list;
@@ -68,7 +68,6 @@ SearchReturner::SearchReturner(Server* server, QHostAddress client, quint16 port
 			break;
 	}
 
-	
 	start();
 }
 

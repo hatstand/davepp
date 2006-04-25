@@ -46,6 +46,12 @@ public:
 		Transferring
 	};
 	
+	enum TransferResult
+	{
+		TransferFailed,
+		TransferSucceeded
+	};
+	
 	ConnectionState state();
 	QString error() {return m_error;}
 	quint64 speed() {return m_speed;}
@@ -61,6 +67,8 @@ protected slots:
 signals:
 	void stateChanged(int newState);
 	void speedChanged(quint64 speed);
+	void result(int code);
+	void progress(uint size, uint totalSize);
 	
 protected:
 	Server* m_server;

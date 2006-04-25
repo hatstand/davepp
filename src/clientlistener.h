@@ -39,12 +39,6 @@ public:
 	
 	void listenForClients(int port);
 	
-	enum TransferResult
-	{
-		TransferFailed,
-		TransferSucceeded
-	};
-	
 	bool isFileList() {return m_dclst;}
 	User* user() {return m_user;}
 	
@@ -84,10 +78,6 @@ private:
 	bool extendedClient;
 	bool supportsBZList;
 	bool supportsXmlBZList;
-
-signals:
-	void result(int code);
-	void progress(uint size, uint totalSize);
 };
 
 #endif

@@ -107,6 +107,7 @@ void TransferListItem::setFileUpload(ClientConnector* connector)
 	connect(connector, SIGNAL(destroyed()), SLOT(clientDestroyed()));
 	connect(connector, SIGNAL(infoChanged()), SLOT(clientInfoChanged()));
 	connect(connector, SIGNAL(speedChanged(quint64)), SLOT(clientSpeedChanged(quint64)));
+	connect(connector, SIGNAL(result(int)), SLOT(clientResult(int)));
 	
 	if (m_progress)
 	{
@@ -158,7 +159,7 @@ void TransferListItem::clientResult(int result)
 	if (m_user == NULL)
 		return;
 	
-	if (result == ClientListener::TransferFailed)
+	if (result == Client::TransferFailed)
 		m_progress->setText("Error: " + m_transfer->error());
 	else
 	{

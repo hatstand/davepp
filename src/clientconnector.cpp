@@ -148,6 +148,9 @@ void ClientConnector::parseCommand(QString command)
 			{
 				m_stream << "$Error File Not Available|";
 				deleteLater();
+				m_error = "File not found";
+				emit result(TransferFailed);
+				qDebug() << "File not found";
 			}
 			else
 				m_stream << FILELENGTH << " " << m_fileLength << "|";
@@ -160,6 +163,7 @@ void ClientConnector::parseCommand(QString command)
 		{
 			changeState(Transferring);
 			m_sendPos = m_offset - 1;
+			qDebug() << "**** Send" << m_offset << m_sendPos;
 			sendSomeData();
 		}
 		else
@@ -168,7 +172,8 @@ void ClientConnector::parseCommand(QString command)
 }
 
 void ClientConnector::sendSomeData()
-{		  
+{
+	qDebug() << "SendSomeData()";
 	if (m_socket->state() != QAbstractSocket::ConnectedState)
 	{
 		deleteLater();
@@ -199,6 +204,8 @@ void ClientConnector::sendSomeData()
 	m_sendPos += m_socket->write(data);
 	m_sendTimer.start();
 	m_socket->flush();
+	
+	qDebug() << "Writing" << data.size() << "bytes";
 }
 
 void ClientConnector::socketBytesWritten(qint64 num)

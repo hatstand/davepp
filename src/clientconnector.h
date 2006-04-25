@@ -48,7 +48,6 @@ private slots:
 	void sendSomeData();
 	
 signals:
-	void progress(uint size, uint totalSize);
 	void infoChanged();
 	
 private:

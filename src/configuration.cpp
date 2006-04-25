@@ -89,7 +89,9 @@ QMap<QString, QString> Configuration::sharedDirs()
 QString Configuration::sharedFilename(QString name)
 {
 	QString share = name.section('\\', 0, 0);
-	QString path = m_sharedDirs[share];
+	if (!m_sharedDirs.contains(share))
+		return QString::null;
+	QString path = m_sharedDirs.value(share);
 	QString ret = path + "/" + name.section('\\', 1, -1).replace('\\', '/');
 	
 	qDebug() << "From" << name << "to" << ret;

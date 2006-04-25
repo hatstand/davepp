@@ -55,7 +55,9 @@ ClientListener::ClientListener(Server* server, User* user)
    m_filename("MyList.DcLst"),
    m_offset(1),
    m_dclst(true),
-   m_outFile(NULL)
+   m_outFile(NULL),
+	supportsBZList(false),
+	extendedClient(false)
 {
 	m_tcpServer = new QTcpServer(this);
 	
@@ -124,9 +126,9 @@ void ClientListener::socketReadyRead()
 	m_size += bytesAvailable;
 	m_speedCount += bytesAvailable;
 	
-	if (!m_dclst)
+	if (!m_dclst) // Downloading a file
 		m_outFile->write(m_socket->readAll());
-	else
+	else // Downloading a dclist
 		m_dclistData.append(m_socket->readAll());
 	
 	emit progress(m_size, m_totalSize);
@@ -142,7 +144,12 @@ void ClientListener::socketReadyRead()
 		if(m_dclst)
 		// Do a whole load of decoding of the list (Huffman)
 		{
-			QByteArray decodedList = Utilities::decodeList(m_dclistData);
+			QByteArray decodedList;
+				  
+			if(!supportsBZList)
+				decodedList = Utilities::decodeList(m_dclistData);
+			else
+				decodedList = Utilities::decodeBZList(m_dclistData); 
 
 			QTextStream* stream = new QTextStream(decodedList);
 			FileList* fileList = new FileList(stream);
@@ -168,11 +175,28 @@ void ClientListener::parseCommand(QString command)
 		}
 		else if (words[0] == "$Lock")
 		{
+			if(words[1].split(" ")[0].startsWith("EXTENDEDPROTOCOL"))
+				extendedClient = true; // Client supports as least some extensions
+			else
+				extendedClient = false;
+				
 			m_stream << MYNICK << " " << m_server->me()->nick << "|";
-			m_stream << "$Lock something Pk=DavePlusPlus|";
+			m_stream << "$Lock EXTENDEDPROTOCOLsomething Pk=DavePlusPlus|";
+			if(extendedClient)
+				m_stream << SUPPORTS << " BZList |";
 			m_stream << DIRECTION << " Download 1234|";
 			m_stream << "$Key " << Utilities::lockToKey(words[1]) << "|";
 			m_stream.flush();
+		}
+		else if(words[0] == SUPPORTS)
+		{
+			if(words[1].contains("BZList"))
+			{
+				supportsBZList = true; // Supports the BZ2List extension
+				qDebug() << "BZList";
+				if(m_dclst)
+					m_filename = "MyList.bz2";
+			}
 		}
 		else if (words[0] == DIRECTION)
 		{

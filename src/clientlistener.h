@@ -80,6 +80,9 @@ private:
 	
 	QFile* m_outFile;
 
+	bool extendedClient;
+	bool supportsBZList;
+
 signals:
 	void result(int code);
 	void progress(uint size, uint totalSize);

@@ -522,8 +522,8 @@ QByteArray Utilities::decodeBZList(QByteArray inputData)
 	while(true)
 	{
 
-	unsigned int destLen = destLen * 2;
-	realloc(dest, sizeof(char) * destLen);
+	destLen = destLen * 2;
+	dest = (char*)realloc(dest, sizeof(char) * destLen);
 
 	int rc = BZ2_bzBuffToBuffDecompress(dest, &destLen, source, sourceLen, 0, 0);
 

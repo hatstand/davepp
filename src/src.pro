@@ -78,4 +78,5 @@ TEMPLATE = app
 hubwidget.ui.target = hubwidget.ui
 edithub.ui.target = edithub.ui
 mainwindow.ui.target = mainwindow.ui
+LIBS += -lbz2
 DEFINES += _GLIBCXX_CONCEPT_CHECKS

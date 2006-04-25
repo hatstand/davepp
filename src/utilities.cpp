@@ -25,6 +25,8 @@
 #include <set>
 #include <iostream>
 
+#include <bzlib.h>
+
 using namespace Utilities;
 
 QString Utilities::lockToKey(QString lock)
@@ -507,4 +509,128 @@ QByteArray BitArray::toByteArray()
 	}
 	
 	return ret;
+}
+
+QByteArray Utilities::decodeBZList(QByteArray inputData)
+{
+	char* source = inputData.data();
+	unsigned int sourceLen = inputData.size();
+
+	char* dest = NULL;
+	unsigned int destLen = sourceLen;
+
+	while(true)
+	{
+
+	unsigned int destLen = destLen * 2;
+	realloc(dest, sizeof(char) * destLen);
+
+	int rc = BZ2_bzBuffToBuffDecompress(dest, &destLen, source, sourceLen, 0, 0);
+
+	QByteArray* list;
+	
+	switch(rc)
+	{
+			case BZ_OK:
+			list = new QByteArray(dest, destLen);
+			free(dest);
+			return *list;
+
+			case BZ_OUTBUFF_FULL:
+			qDebug() << "BZ2: Output buffer too small";
+			break;
+		
+			case BZ_UNEXPECTED_EOF:
+			qWarning() << "BZ2: EOF on compressed list";
+			free(dest);
+			return NULL;
+
+			case BZ_MEM_ERROR:
+			qWarning() << "BZ2: Insufficient Memory";
+			free(dest);
+			return NULL;
+
+			case BZ_DATA_ERROR:
+			qWarning() << "BZ2: Data integrity error in compressed list";
+			free(dest);
+			return NULL;
+
+			case BZ_PARAM_ERROR:
+			qWarning() << "BZ2: Parameters error";
+			free(dest);
+			return NULL;
+
+			case BZ_DATA_ERROR_MAGIC:
+			qWarning() << "BZ2: No magic here";
+			free(dest);
+			return NULL;
+
+			case BZ_CONFIG_ERROR:
+			qWarning() << "BZ2: Library miscompiled";
+			free(dest);
+			return NULL;
+
+			default:
+			qWarning() << "BZ2: Unknown error";
+			free(dest);
+			return NULL;
+		}
+	
+	}
+}
+
+QByteArray Utilities::encodeBZList(QByteArray inputData)
+{
+	char* source = inputData.data();
+	unsigned int sourceLen = inputData.size();
+
+	unsigned int destLen = ((double)sourceLen * 1.01) + 600;
+	char* dest = (char*)malloc(sizeof(char) * destLen);
+
+	int rc = BZ2_bzBuffToBuffCompress(dest, &destLen, source, sourceLen, 4, 0, 30);
+
+	QByteArray* list;
+	
+	switch(rc)
+	{
+		case BZ_CONFIG_ERROR:
+		qWarning() << "BZ2: Library miscompiled";
+		free(dest);
+		return NULL;
+
+		case BZ_PARAM_ERROR:
+		qWarning() << "BZ2: parameters error";
+		free(dest);
+		return NULL;
+
+		case BZ_MEM_ERROR:
+		qWarning() << "BZ2: Insufficient memory";
+		free(dest);
+		return NULL;
+
+		case BZ_OUTBUFF_FULL:
+		qWarning() << "BZ2: Output buffer full - Shouldn't happen";
+		free(dest);
+		return NULL;
+
+		case BZ_DATA_ERROR:
+		qWarning() << "BZ2: Data integrity error";
+		free(dest);
+		return NULL;
+
+		case BZ_DATA_ERROR_MAGIC:
+		qWarning() << "BZ2: No magic here";
+		free(dest);
+		return NULL;
+
+		case BZ_UNEXPECTED_EOF:
+		qWarning() << "BZ2: Unexpected EOF";
+		free(dest);
+		return NULL;
+
+		case BZ_OK:
+		list = new QByteArray(dest, destLen);
+		free(dest);
+		return *list;
+	}
 }

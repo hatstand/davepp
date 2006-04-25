@@ -67,6 +67,11 @@ namespace Utilities
 	char* dcmakekey(const char *lock);
 	
 	QByteArray decodeList(QByteArray inputData);
+	QByteArray decodeBZList(QByteArray inputData);
+
+	QByteArray encodeList(QByteArray inputData);
+	QByteArray encodeBZList(QByteArray inputData);
+
 	quint32 get_bit(QByteArray data, quint32* cur_pos);
 	quint32 get_bits(QByteArray data, quint32* cur_pos, qint32 nb_bit);
 	void useHufNode(hufencode tblenc[256], hufnode* node, quint32 bits_len, quint32 bits);
@@ -74,8 +79,8 @@ namespace Utilities
 	QByteArray* add_bit(QByteArray* data, quint32* bit_pos, uchar bit_value);
 	void freeHufNode(hufnode* node);
 	//bool huf_insert_glist(hufnode* a, hufnode* b);
-	QByteArray encodeList(QByteArray inputData);
 	QString niceSize(quint64 size);
+
 }
 
 #endif

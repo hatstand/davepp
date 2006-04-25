@@ -29,7 +29,9 @@
 #include <QTimer>
 
 ClientConnector::ClientConnector(Server* server)
- : Client(server)
+ : Client(server),
+ 	extendedClient(false),
+	supportsBZList(false)
 {
 	m_socket = new QTcpSocket(this);
 	
@@ -70,8 +72,8 @@ void ClientConnector::socketConnected()
 	changeState(Handshaking);
 	qDebug() << "Connected";
 	
-	m_stream << "MYNICK " << m_server->me()->nick << "|";
-	m_stream << "$Lock something Pk=DavePlusPlus|";
+	m_stream << MYNICK << " " << m_server->me()->nick << "|";
+	m_stream << "$Lock EXTENDEDPROTOCOLsomething Pk=DavePlusPlus|";
 	m_stream.flush();
 }
 
@@ -97,14 +99,23 @@ void ClientConnector::parseCommand(QString command)
 		else if (words[0] == "$Lock")
 		{
 			m_lock = words[1];
+			if(m_lock.startsWith("EXTENDEDPROTOCOL"))
+				extendedClient = true;
+		}
+		else if (words[0] == SUPPORTS)
+		{
+			if(words[1].contains("BZList"))
+				supportsBZList = true;
 		}
 		else if (words[0] == DIRECTION)
 		{
 		}
 		else if (words[0] == "$Key")
 		{
+			if(extendedClient)
+				m_stream << SUPPORTS << " BZList |";
 			qDebug() << "Sending key:" << Utilities::lockToKey(m_lock);
-			m_stream << DIRECTION << " Download 1234|";
+			m_stream << DIRECTION << " Upload 1234|";
 			m_stream << "$Key " << Utilities::lockToKey(m_lock) << "|";
 			m_stream.flush();
 		}
@@ -119,6 +130,8 @@ void ClientConnector::parseCommand(QString command)
 			FileListBuilder* builder = FileListBuilder::instance();
 			if (m_fileName == "MyList.DcLst")
 				m_fileLength = builder->huffmanList().length();
+			else if(m_fileName == "MyList.bz2")
+				m_fileLength = builder->bzList().length();
 			else
 			{
 				QString fileName = Configuration::instance()->sharedFilename(m_fileName);

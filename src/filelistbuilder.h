@@ -39,6 +39,7 @@ public:
 	
 	FileList* list();
 	QByteArray huffmanList();
+	QByteArray bzList();
 	quint64 totalSize();
 	
 	static FileListBuilder* instance();
@@ -53,6 +54,7 @@ private:
 	Configuration* m_config;
 	FileList* m_list;
 	QByteArray m_huffmanList;
+	QByteArray m_BZList;
 	QMutex m_mutex;
 
 	friend SearchReturner::SearchReturner(Server* server, QHostAddress client, quint16 port, bool sizeRestricted, bool isMaxSize, quint64 size, int datatype, QString pattern);

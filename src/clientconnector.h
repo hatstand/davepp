@@ -26,6 +26,7 @@
 
 class Server;
 
+// Uploading
 class ClientConnector : public Client
 {
 Q_OBJECT
@@ -60,6 +61,9 @@ private:
 	quint64 m_offset;
 	quint64 m_fileLength;
 	QFile m_file;
+
+	bool extendedClient;
+	bool supportsBZList;
 	
 	QTime m_sendTimer;
 	quint64 m_sendPos;

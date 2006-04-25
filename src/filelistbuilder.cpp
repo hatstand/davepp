@@ -48,7 +48,7 @@ void FileListBuilder::run()
 	QMap<QString, QString> sharedDirs(m_config->sharedDirs());
 	FileNode* root = new FileNode(NULL, "<root>");
 	
-	uint totalSteps = 2 + sharedDirs.count();
+	uint totalSteps = 3 + sharedDirs.count();
 	uint step = 0;
 	emit progress(step, totalSteps);
 	
@@ -76,8 +76,11 @@ void FileListBuilder::run()
 	
 	QByteArray huffmanList = Utilities::encodeList(dcList.toAscii());
 	emit progress(step++, totalSteps);
+	QByteArray BZList = Utilities::encodeBZList(dcList.toAscii());
+	emit progress(step++, totalSteps);
 	m_mutex.lock();
 	m_huffmanList = huffmanList;
+	m_BZList = BZList;
 	m_mutex.unlock();
 }
 
@@ -93,6 +96,14 @@ QByteArray FileListBuilder::huffmanList()
 {
 	m_mutex.lock();
 	QByteArray ret = m_huffmanList;
+	m_mutex.unlock();
+	return ret;
+} 
+
+QByteArray FileListBuilder::bzList()
+{
+	m_mutex.lock();
+	QByteArray ret = m_BZList;
 	m_mutex.unlock();
 	return ret;
 }

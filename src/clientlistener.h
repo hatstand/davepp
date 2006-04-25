@@ -28,6 +28,7 @@
 
 class User;
 
+// Downloading
 class ClientListener : public Client
 {
 	Q_OBJECT

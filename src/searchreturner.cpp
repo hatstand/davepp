@@ -21,6 +21,13 @@ SearchReturner::SearchReturner(Server* server, QHostAddress client, quint16 port
 		  
 	FileListBuilder* bob = FileListBuilder::instance();
 	m_list = bob->m_list;
+
+	if(m_list == NULL)
+	{
+		qWarning() << "No filelist present";
+		return;
+	}
+	
 	list_mutex = &(bob->m_mutex);
 
 	m_folders = false;

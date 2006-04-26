@@ -122,11 +122,20 @@ void ClientConnector::parseCommand(QString command)
 			m_stream << "$Key " << Utilities::lockToKey(m_lock) << "|";
 			m_stream.flush();
 		}
-		else if (words[0] == GET)
+		else if (words[0] == GET || words[0] == "$UGetBlock")
 		{
-			QString temp = command.section(" ", 1);
-			m_fileName = temp.section("$", 0, 0);
-			m_offset = temp.section("$", 1).toLongLong();
+			if(words[0] == GET)
+			{
+				QString temp = command.section(" ", 1);
+				m_fileName = temp.section("$", 0, 0);
+				m_offset = temp.section("$", 1).toLongLong();
+			}
+			else
+			{
+				m_offset = words[1].toULongLong() + 1;
+				m_fileName = words[3];
+				m_numbytes = words[2].toLongLong();;
+			}
 			
 			emit infoChanged();
 			
@@ -151,18 +160,33 @@ void ClientConnector::parseCommand(QString command)
 			
 			if (m_fileLength <= 0)
 			{
-				m_stream << "$Error File Not Available|";
+				if(words[0] == GET)
+					m_stream << "$Error File Not Available|";
+				else
+					m_stream << "$Failed File Not Available|";
 				deleteLater();
 				m_error = "File not found";
 				emit result(TransferFailed);
 				qDebug() << "File not found";
+				m_stream.flush();
+				return;
 			}
 			else
 				m_stream << FILELENGTH << " " << m_fileLength << "|";
 			
-			m_stream.flush();
+			if(words[0] == GET)
+				m_numbytes = m_fileLength - m_offset + 1;
+			else
+			{
+				if(m_numbytes + m_offset > m_fileLength || m_numbytes < 0)
+					m_numbytes = m_fileLength - m_offset + 1;
+
+				m_stream << "$Sending " << "<" << m_offset + m_numbytes -1 << " - " << m_offset - 1 << ">|";
+			}
 			
-			qDebug() << "Uploading" << m_fileName << "from position" << m_offset << "(length" << m_fileLength << ")";
+			m_stream.flush();
+
+			qDebug() << "Uploading" << m_fileName << "from position" << m_offset << "(length" << m_numbytes << ")";
 		}
 		else if (words[0] == SEND)
 		{
@@ -186,7 +210,7 @@ void ClientConnector::sendSomeData()
 		return;
 	}
 	
-	if (m_sendPos >= m_fileLength)
+	if (m_sendPos >= m_numbytes)
 	{
 		m_socket->close();
 		deleteLater();
@@ -198,15 +222,19 @@ void ClientConnector::sendSomeData()
 	int uploadSpeed = Configuration::instance()->uploadSpeed();
 	if (uploadSpeed <= 0)
 		uploadSpeed = 50;
+
+	int uploadBytes = uploadSpeed * 1024;
+	if(uploadBytes > m_numbytes)
+		uploadBytes = m_numbytes;
 	
 	if (m_fileName == "MyList.DcLst")
-		data = FileListBuilder::instance()->huffmanList().mid(m_sendPos, uploadSpeed*1024);
+		data = FileListBuilder::instance()->huffmanList().mid(m_sendPos, uploadBytes);
 	else if(m_fileName == "MyList.bz2")
-		data = FileListBuilder::instance()->bzList().mid(m_sendPos, uploadSpeed*1024);
+		data = FileListBuilder::instance()->bzList().mid(m_sendPos, uploadBytes);
 	else if(m_fileName == "files.xml.bz2")
-		data = FileListBuilder::instance()->xmlBZList().mid(m_sendPos, uploadSpeed*1024);
+		data = FileListBuilder::instance()->xmlBZList().mid(m_sendPos, uploadBytes);
 	else
-		data = m_file.read(uploadSpeed*1024);
+		data = m_file.read(uploadBytes);
 	
 	m_sendPos += m_socket->write(data);
 	m_sendTimer.start();

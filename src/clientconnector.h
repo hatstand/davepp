@@ -59,6 +59,7 @@ private:
 	QString m_fileName;
 	quint64 m_offset;
 	quint64 m_fileLength;
+	qint64 m_numbytes;
 	QFile m_file;
 
 	bool extendedClient;

@@ -28,7 +28,7 @@
 FileListBuilder* fileListBuilderInstance = NULL;
 
 FileListBuilder::FileListBuilder(Configuration* config)
- : m_config(config), m_list(NULL)
+ : m_config(config), m_list(NULL), doc()
 {
 	fileListBuilderInstance = this;
 }
@@ -47,8 +47,13 @@ void FileListBuilder::run()
 {
 	QMap<QString, QString> sharedDirs(m_config->sharedDirs());
 	FileNode* root = new FileNode(NULL, "<root>");
+
+	QDomElement begin = doc.createElement("FileListing");
+	begin.setAttribute("Version", "1");
+	begin.setAttribute("Generator", "Dave++");
+	doc.appendChild(begin);
 	
-	uint totalSteps = 3 + sharedDirs.count();
+	uint totalSteps = 4 + sharedDirs.count();
 	uint step = 0;
 	emit progress(step, totalSteps);
 	
@@ -57,6 +62,11 @@ void FileListBuilder::run()
 	{
 		it.next();
 		new FileNode(root, QDir(it.value()), it.key());
+
+		QDomElement el = doc.createElement("Directory");
+		el.setAttribute("Name", it.value());
+		begin.appendChild(el);
+
 		emit progress(step++, totalSteps);
 	}
 	
@@ -72,15 +82,20 @@ void FileListBuilder::run()
 	foreach (FileNode* child, root->children())
 	{
 		dcList += writeNodeToDcList(child, "");
+		writeNodeToXmlList(child, &begin);
 	}
 	
 	QByteArray huffmanList = Utilities::encodeList(dcList.toAscii());
 	emit progress(step++, totalSteps);
 	QByteArray BZList = Utilities::encodeBZList(dcList.toAscii());
 	emit progress(step++, totalSteps);
+	qDebug() << doc.toString();
+	QByteArray XmlBZList = Utilities::encodeBZList(doc.toByteArray());
+	emit progress(step++, totalSteps);
 	m_mutex.lock();
 	m_huffmanList = huffmanList;
 	m_BZList = BZList;
+	m_XmlBZList = XmlBZList;
 	m_mutex.unlock();
 }
 
@@ -122,6 +137,28 @@ QString FileListBuilder::writeNodeToDcList(FileNode* node, QString indent)
 			ret += writeNodeToDcList(child, indent + "\t");
 		}
 		return ret;
+	}
+}
+
+void FileListBuilder::writeNodeToXmlList(FileNode* node, QDomElement* root)
+{
+	if(!node->isDir())
+	{
+		QDomElement el = doc.createElement("File");
+		el.setAttribute("Size", node->size());
+		el.setAttribute("Name", node->name());
+		root->appendChild(el);
+	}
+	else
+	{
+		QDomElement el = doc.createElement("Directory");
+		el.setAttribute("Name", node->name());
+		root->appendChild(el);
+
+		foreach (FileNode* child, node->children())
+		{
+			writeNodeToXmlList(child, &el);
+		}
 	}
 }
 

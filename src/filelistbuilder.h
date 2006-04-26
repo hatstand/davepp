@@ -23,6 +23,7 @@
 #include <QThread>
 #include <QBuffer>
 #include <QMutex>
+#include <QDomElement>
 
 #include "searchreturner.h"
 
@@ -50,12 +51,15 @@ signals:
 private:
 	void run();
 	QString writeNodeToDcList(FileNode* node, QString indent);
+	void writeNodeToXmlList(FileNode* node, QDomElement* doc);
 	
 	Configuration* m_config;
 	FileList* m_list;
 	QByteArray m_huffmanList;
 	QByteArray m_BZList;
+	QByteArray m_XmlBZList;
 	QMutex m_mutex;
+	QDomDocument doc;
 
 	friend SearchReturner::SearchReturner(Server* server, QHostAddress client, quint16 port, bool sizeRestricted, bool isMaxSize, quint64 size, int datatype, QString pattern);
 };

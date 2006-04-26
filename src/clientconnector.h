@@ -63,6 +63,7 @@ private:
 
 	bool extendedClient;
 	bool supportsBZList;
+	bool supportsXmlBZList;
 	
 	QTime m_sendTimer;
 	qint64 m_sendPos;

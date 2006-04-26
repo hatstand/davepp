@@ -41,6 +41,7 @@ public:
 	FileList* list();
 	QByteArray huffmanList();
 	QByteArray bzList();
+	QByteArray xmlBZList();
 	quint64 totalSize();
 	
 	static FileListBuilder* instance();

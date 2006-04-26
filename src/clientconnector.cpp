@@ -31,7 +31,8 @@
 ClientConnector::ClientConnector(Server* server)
  : Client(server),
  	extendedClient(false),
-	supportsBZList(false)
+	supportsBZList(false),
+	supportsXmlBZList(false)
 {
 	m_socket = new QTcpSocket(this);
 	
@@ -106,6 +107,8 @@ void ClientConnector::parseCommand(QString command)
 		{
 			if(words[1].contains("BZList"))
 				supportsBZList = true;
+			if(words[1].contains("XmlBZList"))
+				supportsXmlBZList = true;
 		}
 		else if (words[0] == DIRECTION)
 		{
@@ -113,7 +116,7 @@ void ClientConnector::parseCommand(QString command)
 		else if (words[0] == "$Key")
 		{
 			if(extendedClient)
-				m_stream << SUPPORTS << " BZList |";
+				m_stream << SUPPORTS << " BZList XmlBZList |";
 			qDebug() << "Sending key:" << Utilities::lockToKey(m_lock);
 			m_stream << DIRECTION << " Upload 1234|";
 			m_stream << "$Key " << Utilities::lockToKey(m_lock) << "|";
@@ -132,6 +135,8 @@ void ClientConnector::parseCommand(QString command)
 				m_fileLength = builder->huffmanList().length();
 			else if(m_fileName == "MyList.bz2")
 				m_fileLength = builder->bzList().length();
+			else if(m_fileName == "files.xml.bz2")
+				m_fileLength = builder->xmlBZList().length();
 			else
 			{
 				QString fileName = Configuration::instance()->sharedFilename(m_fileName);
@@ -198,6 +203,8 @@ void ClientConnector::sendSomeData()
 		data = FileListBuilder::instance()->huffmanList().mid(m_sendPos, uploadSpeed*1024);
 	else if(m_fileName == "MyList.bz2")
 		data = FileListBuilder::instance()->bzList().mid(m_sendPos, uploadSpeed*1024);
+	else if(m_fileName == "files.xml.bz2")
+		data = FileListBuilder::instance()->xmlBZList().mid(m_sendPos, uploadSpeed*1024);
 	else
 		data = m_file.read(uploadSpeed*1024);
 	

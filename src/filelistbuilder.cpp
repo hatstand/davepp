@@ -63,9 +63,9 @@ void FileListBuilder::run()
 		it.next();
 		new FileNode(root, QDir(it.value()), it.key());
 
-		QDomElement el = doc.createElement("Directory");
-		el.setAttribute("Name", it.value());
-		begin.appendChild(el);
+//		QDomElement el = doc.createElement("Directory");
+//		el.setAttribute("Name", it.value());
+//		begin.appendChild(el);
 
 		emit progress(step++, totalSteps);
 	}
@@ -119,6 +119,14 @@ QByteArray FileListBuilder::bzList()
 {
 	m_mutex.lock();
 	QByteArray ret = m_BZList;
+	m_mutex.unlock();
+	return ret;
+}
+
+QByteArray FileListBuilder::xmlBZList()
+{
+	m_mutex.lock();
+	QByteArray ret = m_XmlBZList;
 	m_mutex.unlock();
 	return ret;
 }

@@ -35,6 +35,7 @@ ClientConnector::ClientConnector(Server* server)
 	supportsXmlBZList(false)
 {
 	m_socket = new QTcpSocket(this);
+	m_timer = new QTimer(this);
 	
 	connect(m_socket, SIGNAL(hostFound()), SLOT(socketHostFound()));
 	connect(m_socket, SIGNAL(connected()), SLOT(socketConnected()));
@@ -42,6 +43,9 @@ ClientConnector::ClientConnector(Server* server)
 	connect(m_socket, SIGNAL(readyRead()), SLOT(socketReadyRead()));
 	connect(m_socket, SIGNAL(bytesWritten(qint64)), SLOT(socketBytesWritten(qint64)));
 	connect(m_socket, SIGNAL(disconnected()), SLOT(socketDisconnected()));
+
+	connect(m_timer, SIGNAL(timeout()), SLOT(sendSomeData()));
+	m_timer->setSingleShot(true);
 	
 	m_stream.setDevice(m_socket);
 	
@@ -133,7 +137,7 @@ void ClientConnector::parseCommand(QString command)
 			else
 			{
 				m_offset = words[1].toULongLong() + 1;
-				m_fileName = words[3];
+				m_fileName = command.section(" ", 3);
 				m_numbytes = words[2].toLongLong();;
 			}
 			
@@ -210,7 +214,7 @@ void ClientConnector::sendSomeData()
 		return;
 	}
 	
-	if (m_sendPos >= m_numbytes)
+	if (m_sendPos >= m_numbytes + m_offset - 1)
 	{
 		m_socket->close();
 		deleteLater();
@@ -257,7 +261,10 @@ void ClientConnector::socketBytesWritten(qint64 num)
 	emit progress(m_sendPos, m_fileLength);
 	
 	if ((Configuration::instance()->uploadSpeed() != 0) && (m_sendTimer.elapsed() < 100))
-		QTimer::singleShot(1000 - m_sendTimer.elapsed(), this, SLOT(sendSomeData()));
+	{
+		m_timer->start(1000 - m_sendTimer.elapsed());
+//		QTimer::singleShot(1000 - m_sendTimer.elapsed(), this, SLOT(sendSomeData()));
+	}
 	else
 		sendSomeData();
 }

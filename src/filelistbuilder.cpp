@@ -89,7 +89,7 @@ void FileListBuilder::run()
 	emit progress(step++, totalSteps);
 	QByteArray BZList = Utilities::encodeBZList(dcList.toAscii());
 	emit progress(step++, totalSteps);
-	qDebug() << doc.toString();
+//	qDebug() << doc.toString();
 	QByteArray XmlBZList = Utilities::encodeBZList(doc.toByteArray());
 	emit progress(step++, totalSteps);
 	m_mutex.lock();

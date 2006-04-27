@@ -39,7 +39,8 @@ HEADERS += server.h \
            filelistbuilder.h \
 			  searchreturner.h \
 			  commands.h \
-			  xmllistparser.h
+			  xmllistparser.h \
+			  zcompress.h
 SOURCES += main.cpp \
            server.cpp \
            user.cpp \
@@ -63,7 +64,8 @@ SOURCES += main.cpp \
            configuration.cpp \
            filelistbuilder.cpp \
 			  searchreturner.cpp \
-			  xmllistparser.cpp
+			  xmllistparser.cpp \
+			  zcompress.cpp
 mainwindow.ui.commands = $$IDL_COMPILER
 hubwidget.ui.commands = $$IDL_COMPILER
 edithub.ui.commands = $$IDL_COMPILER

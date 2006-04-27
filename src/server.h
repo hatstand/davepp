@@ -68,11 +68,14 @@ public:
 		LookingUpHost,
 		Connecting,
 		LoggingIn,
-		Connected
+		Connected,
+		HubFull
 	};
 	
 	ConnectionState state();
 	
+	void getUserIP(QString nick); // void return as result is emitted
+
 private:
 	void parseCommand(QString command);
 	void sendInfo();
@@ -122,6 +125,7 @@ signals:
 	void error(QString message);
 	void fileListUpdated(User* user);
 	void uploadRequest(ClientConnector* connector);
+	void gotUserIP(QString nick, QString host);
 };
 
 #endif

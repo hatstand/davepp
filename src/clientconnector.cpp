@@ -57,7 +57,7 @@ ClientConnector::~ClientConnector()
 {
 }
 
-void ClientConnector::connectToClient(QString hostName, int port)
+void ClientConnector::connectToClient(QString hostName, quint16 port)
 {
 	if (state() != Idle)
 		return;
@@ -84,6 +84,17 @@ void ClientConnector::socketConnected()
 
 void ClientConnector::socketError(QAbstractSocket::SocketError err)
 {
+	if(err == QAbstractSocket::SocketTimeoutError && state() != TimedOut) // Timeout, might be NAT'ed, let's try the Hub's IP
+	{
+		qDebug() << "Socket connection timed out. Getting Remote IP";
+		
+		changeState(TimedOut);
+		connect(m_server, SIGNAL(gotUserIP(QString, QString)), SLOT(gotUserIP(QString, QString)));
+		m_server->getUserIP(m_nick);
+
+		return;
+	}
+
 	qDebug() << "Error" << err;
 	changeState(Idle);
 }
@@ -175,17 +186,22 @@ void ClientConnector::parseCommand(QString command)
 				m_stream.flush();
 				return;
 			}
-			else
-				m_stream << FILELENGTH << " " << m_fileLength << "|";
 			
 			if(words[0] == GET)
+			{
+				m_stream << FILELENGTH << " " << m_fileLength << "|";
 				m_numbytes = m_fileLength - m_offset + 1;
+			}
 			else
 			{
 				if(m_numbytes + m_offset > m_fileLength || m_numbytes < 0)
 					m_numbytes = m_fileLength - m_offset + 1;
 
-				m_stream << "$Sending " << "<" << m_offset + m_numbytes -1 << " - " << m_offset - 1 << ">|";
+				m_stream << "$Sending " << m_numbytes << "|";
+
+				changeState(Transferring);
+				m_sendPos = m_offset - 1;
+				sendSomeData();
 			}
 			
 			m_stream.flush();
@@ -196,7 +212,7 @@ void ClientConnector::parseCommand(QString command)
 		{
 			changeState(Transferring);
 			m_sendPos = m_offset - 1;
-			qDebug() << "**** Send" << m_offset << m_sendPos;
+//			qDebug() << "**** Send" << m_offset << m_sendPos;
 			sendSomeData();
 		}
 		else
@@ -206,7 +222,7 @@ void ClientConnector::parseCommand(QString command)
 
 void ClientConnector::sendSomeData()
 {
-	qDebug() << "SendSomeData()";
+	// qDebug() << "SendSomeData()";
 	if (m_socket->state() != QAbstractSocket::ConnectedState)
 	{
 		deleteLater();
@@ -244,12 +260,12 @@ void ClientConnector::sendSomeData()
 	m_sendTimer.start();
 	m_socket->flush();
 	
-	qDebug() << "Writing" << data.size() << "bytes";
+	// qDebug() << "Writing" << data.size() << "bytes";
 }
 
 void ClientConnector::socketBytesWritten(qint64 num)
 {
-	qDebug() << "Bytes written" << num;
+	// qDebug() << "Bytes written" << num;
 	if (state() != Transferring)
 		return;
 	
@@ -274,6 +290,12 @@ void ClientConnector::socketDisconnected()
 	qDebug() << "Disconnected";
 }
 
-
+void ClientConnector::gotUserIP(QString host, QString nick)
+{
+	if(TimedOut && nick == m_nick)
+	{
+		connectToClient(host, m_port);
+	}
+}
 
 

@@ -136,8 +136,6 @@ void Server::parseCommand(QString command)
 		if (words[0] == "$HubName")
 		{
 			m_hubName = command.mid(9);
-			qDebug() << "Logged in";
-			changeState(Connected);
 		}
 		else if(words[0] == "$Lock")
 		{
@@ -153,7 +151,11 @@ void Server::parseCommand(QString command)
 		{
 			if (words[1] == m_me->nick)
 			{
+				qDebug() << "Logged in";
+				changeState(Connected);
+
 				qDebug() << "Sending login info";
+				m_stream << "$Version 1,0091|";
 				m_stream.flush();
 				sendInfo();
 				getNickList();
@@ -255,12 +257,16 @@ void Server::parseCommand(QString command)
 		else if(words[0] == "$ConnectToMe")
 		{
 			QString host = words[2].section(':', 0, 0);
-			int port = words[2].section(':', 1).toInt();
+			quint16 port = words[2].section(':', 1).toUShort();
 			
 			qDebug() << "New connector" << (int)this;
 			ClientConnector* client = new ClientConnector(this);
 			client->connectToClient(host, port);
 			emit uploadRequest(client);
+		}
+		else if(words[0] == "$UserIP")
+		{
+			emit gotUserIP(words[1], words[2]);
 		}
 		else if(words[0] == "$Search")
 		{
@@ -292,6 +298,14 @@ void Server::parseCommand(QString command)
 				
 				new SearchReturner(this, *requestor, port, sizeRestricted, isMaxSize, size, datatype, pattern);
 			}
+		}
+		else if (words[0].startsWith("$HubIsFull"))
+		{
+			changeState(HubFull);
+		}
+		else if (words[0].startsWith("$UserIP"))
+		{
+			emit gotUserIP(words[1], words[2]);
 		}
 		else
 			qDebug() << "\"" << words[0] << "\" not understood";
@@ -355,7 +369,6 @@ void Server::userQuit(QString nick)
 
 void Server::sendInfo()
 {
-	m_stream << "$Version 1,0091|";
 	m_stream << "$MyINFO $ALL " << m_me->nick << " " << m_me->interest << "$ $" << m_me->speed << "$" << m_me->email << "$" << QString::number(m_me->shareSize) << "$|";
 	m_stream.flush();
 }
@@ -505,3 +518,10 @@ void Server::fileListUpdateFinished()
 	if (state() == Connected)
 		sendInfo();
 }
+
+void Server::getUserIP(QString nick)
+{
+	m_stream << "$UserIP " << nick << "|";
+	m_stream.flush();
+}
+

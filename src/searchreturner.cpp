@@ -9,7 +9,7 @@
 SearchReturner::SearchReturner(Server* server, QHostAddress client, quint16 port, bool sizeRestricted, bool isMaxSize, quint64 size, int datatype, QString pattern)
 		  : m_server(server), m_client(client), m_port(port), m_sizeRestricted(sizeRestricted), m_isMaxSize(isMaxSize), m_size(size), m_datatype(datatype), m_pattern(pattern), m_typeRegex(), m_regex()
 {
-	qDebug() << "Search started";
+//	qDebug() << "Search started";
 
 		  
 	audio = "\\.(mp3)|(mp2)|(wav)|(au)|(rm)|(mid)|(sm)$";
@@ -85,7 +85,7 @@ SearchReturner::~SearchReturner()
 
 void SearchReturner::run()
 {
-	qDebug() << "Thread started";
+//	qDebug() << "Thread started";
 	m_sock = new QUdpSocket();
   
 	list_mutex->lock();
@@ -138,7 +138,7 @@ void SearchReturner::SearchDescend(FileNode* current)
 
 void SearchReturner::SubmitResult(FileNode* node)
 {
-	qDebug() << "Found Result!";
+//	qDebug() << "Found Result!";
 //	QUdpSocket* m_sock = new QUdpSocket();
 
 	QString path = node->name();
@@ -151,9 +151,9 @@ void SearchReturner::SubmitResult(FileNode* node)
 
 	QString thingy = "$SR " + m_server->me()->nick + " " + path + "\05" + QString::number(node->size()) + " " + "1/1" + "\05" + m_server->hubName() + " (" + m_server->ip() + ":" + QString::number(m_server->port()) + ")|";
 	QByteArray bleh = thingy.toLatin1();
-	qDebug() << bleh;
-	qDebug() << m_sock->writeDatagram(bleh, bleh.size(), m_client, m_port);
-	qDebug() << "alive";
+//	qDebug() << bleh;
+//	qDebug() << m_sock->writeDatagram(bleh, bleh.size(), m_client, m_port);
+//	qDebug() << "alive";
 	m_sock->flush();
 }
 

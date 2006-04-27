@@ -34,7 +34,7 @@ public:
 	ClientConnector(Server* server);
 	~ClientConnector();
 	
-	void connectToClient(QString hostName, int port);
+	void connectToClient(QString hostName, quint16 port);
 	
 	QString nick() {return m_nick;}
 	QString fileName() {return m_fileName;}
@@ -46,6 +46,7 @@ private slots:
 	void socketBytesWritten(qint64 num);
 	void socketDisconnected();
 	void sendSomeData();
+	void gotUserIP(QString nick, QString host);
 	
 signals:
 	void infoChanged();
@@ -61,6 +62,7 @@ private:
 	quint64 m_fileLength;
 	qint64 m_numbytes;
 	QFile m_file;
+	quint16 m_port;
 
 	bool extendedClient;
 	bool supportsBZList;

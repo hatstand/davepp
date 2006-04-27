@@ -43,7 +43,8 @@ public:
 		LookingUpHost,
 		Connecting,
 		Handshaking,
-		Transferring
+		Transferring,
+		TimedOut
 	};
 	
 	enum TransferResult

@@ -147,6 +147,11 @@ void Server::parseCommand(QString command)
 			m_stream.flush();
 
 		}
+		else if (words[0] == "$ValidateDenide")
+		{
+			qWarning() << "Nick already requested or reserved";
+			m_socket->disconnectFromHost();
+		}
 		else if (words[0] == "$Hello")
 		{
 			if (words[1] == m_me->nick)

@@ -50,8 +50,7 @@ Server::Server(QObject *parent)
 	Configuration* config = Configuration::instance();
 	m_me = new User(this, config->nick());
 	m_me->setInterest(config->description());
-	//m_me->speed = config->connSpeedString();
-	m_me->speed = "LAN (T3).";
+	m_me->speed = config->connSpeedString();
 	m_me->email = config->email();
 	
 	FileListBuilder* builder = FileListBuilder::instance();

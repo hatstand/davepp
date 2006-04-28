@@ -571,7 +571,10 @@ void MainWindow::userJoined(User* user)
 			continue;
 		ResultsWidget* widget = (ResultsWidget*) resultsTabWidget->widget(i);
 		if ((widget->user() == NULL) && (resultsTabWidget->tabText(i) == user->nick + " (offline)"))
+		{
+			qDebug() << "Changing text of tab" << i << "To" << user->nick;
 			resultsTabWidget->setTabText(i, user->nick);
+		}
 		widget->setUser(user);
 	}
 	

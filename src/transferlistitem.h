@@ -99,6 +99,8 @@ private:
 	QString m_path;
 	DaveProgressBar* m_progress;
 	quint64 m_speed;
+	uint m_totalSize;
+	uint m_size;
 };
 
 #endif

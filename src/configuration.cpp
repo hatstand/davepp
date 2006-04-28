@@ -129,10 +129,11 @@ QString Configuration::connSpeedString()
 	switch (connSpeed())
 	{
 		case 0: return "Modem";
-		case 1: return "Cable";
-		case 2: return "Satellite";
-		case 3: return "LAN(T1)";
-		case 4: return "LAN(T3)";
+		case 1: return "DSL";
+		case 2: return "Cable";
+		case 3: return "Satellite";
+		case 4: return "LAN(T1)";
+		case 5: return "LAN(T3)";
 	}
 	return QString::null;
 }

@@ -254,12 +254,15 @@ void ClientListener::parseCommand(QString command)
 			changeState(Idle);
 			emit result(TransferFailed);
 			m_socket->close();
+			deleteLater();
 		}
 		else if (words[0] == MAXEDOUT)
 		{
 			changeState(Idle);
+			m_error = "No slots";
 			emit result(TransferFailed);
 			m_socket->close();
+			deleteLater();
 		}
 		else
 			qDebug() << "\"" << words[0] << "\" not understood";

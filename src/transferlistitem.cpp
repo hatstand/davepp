@@ -230,6 +230,9 @@ void TransferListItem::clientProgress(uint size, uint totalSize)
 {
 	m_progress->setRange(0, totalSize);
 	m_progress->setValue(size);
+	m_totalSize = totalSize;
+	m_size = size;
+	listView()->repaintItem(this);
 }
 
 void TransferListItem::clientDestroyed()
@@ -278,7 +281,7 @@ void TransferListItem::paintCell(QPainter* painter, const QColorGroup& cg, int c
 		if (m_type == DownloadFileList)
 			line2Text = "File list";
 		else
-			line2Text = m_path;
+			line2Text = m_path.section('\\', -1, -1);
 	}
 	else
 	{
@@ -291,7 +294,7 @@ void TransferListItem::paintCell(QPainter* painter, const QColorGroup& cg, int c
 		if (m_path == "MyList.DcLst")
 			line2Text = "File list";
 		else if ((connector != NULL) && (!connector->fileName().isEmpty()))
-			line2Text = m_path;
+			line2Text = m_path.section('\\', -1, -1);
 	}
 	
 	QString speedText;
@@ -305,13 +308,27 @@ void TransferListItem::paintCell(QPainter* painter, const QColorGroup& cg, int c
 		speed.setSize(QSize(fm.width(speedText), line1.height()));
 	}
 	
-	if (Q3ListViewItem::parent())
+	QString sizeText;
+	QRect size;
+	if (m_totalSize != 0)
 	{
-		line1Text = line2Text;
-		line2Text.clear();
+		sizeText = (m_size == 0 ? "0 bytes" : Utilities::niceSize(m_size));
+		sizeText += "/";
+		sizeText += (m_totalSize == 0 ? "0 bytes" : Utilities::niceSize(m_totalSize));
+		
+		line2.adjust(0, 0, - fm.width(sizeText) - 10, 0);
+		size.setTopLeft(QPoint(line2.x() + line2.width() + 10, line2.y()));
+		size.setSize(QSize(fm.width(sizeText), line2.height()));
 	}
 	
-	painter->setFont(fontBold);
+	if (Q3ListViewItem::parent())
+	{
+		line1Text = "Queued: " + line2Text;
+		line2Text.clear();
+	}
+	else
+		painter->setFont(fontBold);
+	
 	painter->drawText(line1, Qt::AlignLeft | Qt::AlignVCenter, line1Text);
 	
 	if (!line2Text.isEmpty())
@@ -324,6 +341,12 @@ void TransferListItem::paintCell(QPainter* painter, const QColorGroup& cg, int c
 	{
 		painter->setFont(font);
 		painter->drawText(speed, Qt::AlignLeft | Qt::AlignVCenter, speedText);
+	}
+	
+	if (m_totalSize != 0)
+	{
+		painter->setFont(font);
+		painter->drawText(size, Qt::AlignLeft | Qt::AlignVCenter, sizeText);
 	}
 }
 

@@ -117,7 +117,7 @@ void ResultsWidget::updateList(Q3ListViewItem* parentItem, FileNode* parentNode)
 		item->setText(0, node->name());
 		if (node->size() > 0)
 			item->setText(1, node->niceSize());
-		item->setOpen(true);
+		//item->setOpen(true);
 		
 		updateList(item, node);
 	}

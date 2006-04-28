@@ -259,7 +259,7 @@ void Server::parseCommand(QString command)
 			QString host = words[2].section(':', 0, 0);
 			quint16 port = words[2].section(':', 1).toUShort();
 			
-			qDebug() << "New connector" << (int)this;
+			qDebug() << "New connector" << (uintptr_t)this;
 			ClientConnector* client = new ClientConnector(this);
 			client->connectToClient(host, port);
 			emit uploadRequest(client);

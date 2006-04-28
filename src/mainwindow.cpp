@@ -519,7 +519,7 @@ void MainWindow::connectToHub(HubDetailsListItem* item)
 
 void MainWindow::hubListCurrentChanged(Q3ListViewItem* item)
 {
-	qDebug() << "Current changed" << (int)item;
+	qDebug() << "Current changed" << (uintptr_t)item;
 	deleteHubButton->setEnabled(item != NULL);
 	connectHubButton->setEnabled(item != NULL);
 	
@@ -829,7 +829,7 @@ Server* MainWindow::getServer(QString address, QString nick)
 {
 	QString host = address.section(':', 0, 0);
 	QRegExp re("[0-9\\.]*");
-	qDebug() << "MAINWINDOW" << (int)this;
+	qDebug() << "MAINWINDOW" << (uintptr_t)this;
 	
 	if (re.exactMatch(host) != -1)
 	{

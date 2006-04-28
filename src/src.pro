@@ -84,3 +84,9 @@ edithub.ui.target = edithub.ui
 mainwindow.ui.target = mainwindow.ui
 LIBS += -lbz2
 DEFINES += _GLIBCXX_CONCEPT_CHECKS
+
+# for weird cambridge people
+cambridge {
+	DEFINES += CAMBRIDGE
+}
+

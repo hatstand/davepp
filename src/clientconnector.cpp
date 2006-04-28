@@ -276,7 +276,7 @@ void ClientConnector::socketBytesWritten(qint64 num)
 	
 	emit progress(m_sendPos, m_fileLength);
 	
-	if ((Configuration::instance()->uploadSpeed() != 0) && (m_sendTimer.elapsed() < 100))
+	if ((Configuration::instance()->uploadSpeed() != 0) && (m_sendTimer.elapsed() < 1000))
 	{
 		m_timer->start(1000 - m_sendTimer.elapsed());
 //		QTimer::singleShot(1000 - m_sendTimer.elapsed(), this, SLOT(sendSomeData()));

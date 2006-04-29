@@ -52,11 +52,16 @@ TransferListItem::TransferListItem(Q3ListView* parent)
 	qDebug() << "Height before" << height();
 	setHeight(QApplication::fontMetrics().height()*3 + 1);
 	qDebug() << "Height after" << height();
+
+	m_timer = new QTimer();
+	m_timer->setSingleShot(true);
 }
 
 TransferListItem::TransferListItem(TransferListItem* parent)
  : Q3ListViewItem(parent), m_transfer(NULL), QObject(parent), m_speed(0), m_progress(NULL)
 {
+	m_timer = new QTimer();
+	m_timer->setSingleShot(true);
 }
 
 TransferListItem::~TransferListItem()
@@ -166,10 +171,16 @@ void TransferListItem::clientResult(int result)
 		if (firstChild())
 		{
 			disconnect(m_transfer);
-			QTimer::singleShot(1000, this, SLOT(doNextQueued()));
+			//QTimer::singleShot(1000, this, SLOT(doNextQueued()));
+			connect(m_timer, SIGNAL(timeout()), SLOT(doNextQueued()));
+			m_timer->start(1000);
 		}
 		else
-			QTimer::singleShot(5000, this, SLOT(deleteLater()));
+		{
+			//QTimer::singleShot(5000, this, SLOT(deleteLater()));
+			connect(m_timer, SIGNAL(timeout()), SLOT(deleteLater()));
+			m_timer->start(5000);
+		}
 	}
 }
 
@@ -240,7 +251,11 @@ void TransferListItem::clientDestroyed()
 	m_transfer = NULL;
 	
 	if (m_type == UploadFile)
-		QTimer::singleShot(5000, this, SLOT(deleteLater()));
+	{
+		//QTimer::singleShot(5000, this, SLOT(deleteLater()));
+		connect(m_timer, SIGNAL(timeout()), SLOT(deleteLater()));
+		m_timer->start(5000);
+	}
 }
 
 void TransferListItem::paintCell(QPainter* painter, const QColorGroup& cg, int column, int width, int align)

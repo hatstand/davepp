@@ -22,6 +22,7 @@
 
 #include <QProgressBar>
 #include <Q3ListView>
+#include <QTimer>
 
 class Client;
 class ClientConnector;
@@ -101,6 +102,7 @@ private:
 	quint64 m_speed;
 	uint m_totalSize;
 	uint m_size;
+	QTimer* m_timer;
 };
 
 #endif

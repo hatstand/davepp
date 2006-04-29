@@ -128,6 +128,9 @@ void Server::socketBytesWritten(qint64 num)
 
 void Server::parseCommand(QString command)
 {
+	if(command == "")
+		return;
+
 	qDebug() << "Command: " << command;
 	if (command.startsWith("$"))
 	{
@@ -274,7 +277,7 @@ void Server::parseCommand(QString command)
 		}
 		else if(words[0] == "$Search")
 		{
-			qDebug() << "Search!";
+			// qDebug() << "Search!";
 			if(words[1].startsWith("Hub")) // Passive Search - unimplemented
 			{
 			}

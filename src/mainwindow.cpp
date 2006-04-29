@@ -512,6 +512,8 @@ void MainWindow::connectToHub(HubDetailsListItem* item)
 	
 	connect(hubWidget, SIGNAL(newPrivateChat(ChatWidget*)), SLOT(newPrivateChat(ChatWidget*)));
 	
+	connect(this, SIGNAL(sortUserList()), SLOT(resortUserList()));
+	
 	server->open();
 	
 	m_hubs << server;
@@ -561,7 +563,8 @@ void MainWindow::userJoined(User* user)
 	
 	if (!m_sortingLater)
 	{
-		QTimer::singleShot(0, this, SLOT(resortUserList()));
+	//	QTimer::singleShot(0, this, SLOT(resortUserList()));
+		emit sortUserList();
 		m_sortingLater = true;
 	}
 	
@@ -589,7 +592,8 @@ void MainWindow::userInfoChanged(User* user)
 	
 	if (!m_sortingLater)
 	{
-		QTimer::singleShot(0, this, SLOT(resortUserList()));
+//		QTimer::singleShot(0, this, SLOT(resortUserList()));
+		emit sortUserList();
 		m_sortingLater = true;
 	}
 	
@@ -641,7 +645,8 @@ void MainWindow::userSortChanged(QAction* action)
 	
 	if (!m_sortingLater)
 	{
-		QTimer::singleShot(0, this, SLOT(resortUserList()));
+//		QTimer::singleShot(0, this, SLOT(resortUserList()));
+		emit sortUserList();
 		m_sortingLater = true;
 	}
 }

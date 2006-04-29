@@ -205,6 +205,10 @@ private:
 	
 	int m_tabIndex;
 	bool m_sortingLater;
+
+signals:
+	void sortUserList();
+
 };
 
 #endif

@@ -71,6 +71,8 @@ SearchReturner::SearchReturner(Server* server, QHostAddress client, quint16 port
 		case 8:
 			m_folders = true;
 			break;
+		case 9: // TTH: unimplemented
+			return; 
 		default:
 			break;
 	}
@@ -139,7 +141,6 @@ void SearchReturner::SearchDescend(FileNode* current)
 void SearchReturner::SubmitResult(FileNode* node)
 {
 //	qDebug() << "Found Result!";
-//	QUdpSocket* m_sock = new QUdpSocket();
 
 	QString path = node->name();
 	FileNode* parent = node->parent();
@@ -152,8 +153,7 @@ void SearchReturner::SubmitResult(FileNode* node)
 	QString thingy = "$SR " + m_server->me()->nick + " " + path + "\05" + QString::number(node->size()) + " " + "1/1" + "\05" + m_server->hubName() + " (" + m_server->ip() + ":" + QString::number(m_server->port()) + ")|";
 	QByteArray bleh = thingy.toLatin1();
 //	qDebug() << bleh;
-//	qDebug() << m_sock->writeDatagram(bleh, bleh.size(), m_client, m_port);
-//	qDebug() << "alive";
+	m_sock->writeDatagram(bleh, bleh.size(), m_client, m_port);
 	m_sock->flush();
 }
 

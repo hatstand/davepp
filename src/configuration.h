@@ -27,6 +27,8 @@
 
 class Configuration : public QObject
 {
+	Q_OBJECT
+		  
 public:
 	Configuration(QObject* parent);
 	~Configuration();
@@ -51,7 +53,7 @@ public:
 	void setNumSlots(int s) {m_numSlots = s;}
 	
 	QString nick() {return m_nick;}
-	void setNick(QString nick) {m_nick = nick;}
+	void setNick(QString nick);
 	
 	QString email() {return m_email;}
 	void setEmail(QString email) {m_email = email;}
@@ -85,6 +87,9 @@ private:
 	bool m_fileListDirty;
 	QMutex m_mutex;
 	QSettings* m_settings;
+
+signals:
+	void nickChanged(QString newnick);
 
 };
 

@@ -138,4 +138,11 @@ QString Configuration::connSpeedString()
 	return QString::null;
 }
 
-
+void Configuration::setNick(QString nick)
+{
+	if(nick != m_nick)
+	{
+		m_nick = nick;
+		emit nickChanged(nick);
+	}
+}

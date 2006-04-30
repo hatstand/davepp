@@ -27,6 +27,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QTemporaryFile>
+#include <QTimer>
 
 #include <QTreeWidget>
 
@@ -75,6 +76,8 @@ void ClientListener::listenForClients(int port)
 {
 	m_tcpServer->listen(QHostAddress::Any, port);
 	changeState(WaitingForConnection);
+
+	QTimer::singleShot(10000, this, SLOT(deleteLater()));
 }
 
 void ClientListener::newConnection()

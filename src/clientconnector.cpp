@@ -84,11 +84,11 @@ void ClientConnector::socketConnected()
 
 void ClientConnector::socketError(QAbstractSocket::SocketError err)
 {
-	if(err == QAbstractSocket::SocketTimeoutError && state() != TimedOut) // Timeout, might be NAT'ed, let's try the Hub's IP
+	if((err == QAbstractSocket::SocketTimeoutError || err == QAbstractSocket::ConnectionRefusedError) && state() != Failed) // Timeout, might be NAT'ed, let's try the Hub's IP
 	{
-		qDebug() << "Socket connection timed out. Getting Remote IP";
+		qDebug() << "Socket connection failed. Getting Remote IP";
 		
-		changeState(TimedOut);
+		changeState(Failed);
 		connect(m_server, SIGNAL(gotUserIP(QString, QString)), SLOT(gotUserIP(QString, QString)));
 		m_server->getUserIP(m_nick);
 
@@ -97,6 +97,10 @@ void ClientConnector::socketError(QAbstractSocket::SocketError err)
 
 	qDebug() << "Error" << err;
 	changeState(Idle);
+
+	m_timer->disconnect();
+	connect(m_timer, SIGNAL(timeout()), SLOT(deleteLater()));
+	m_timer->start(2000);
 }
 
 
@@ -131,7 +135,11 @@ void ClientConnector::parseCommand(QString command)
 		else if (words[0] == "$Key")
 		{
 			if(extendedClient)
+			{
+				// XmlBZList implies support for UGetBlock
 				m_stream << SUPPORTS << " BZList XmlBZList |";
+//				m_stream << SUPPORTS << " BZList |";
+			}
 			qDebug() << "Sending key:" << Utilities::lockToKey(m_lock);
 			m_stream << DIRECTION << " Upload 1234|";
 			m_stream << "$Key " << Utilities::lockToKey(m_lock) << "|";
@@ -197,7 +205,10 @@ void ClientConnector::parseCommand(QString command)
 				if(m_numbytes + m_offset > m_fileLength || m_numbytes < 0)
 					m_numbytes = m_fileLength - m_offset + 1;
 
-				m_stream << "$Sending " << m_numbytes << "|";
+				if(m_offset == 0)
+					m_stream << "$Sending|"; // Undocumented, unless you count the source as doc
+				else
+					m_stream << "$Sending " << m_numbytes << "|";
 
 				changeState(Transferring);
 				m_sendPos = m_offset - 1;
@@ -274,7 +285,7 @@ void ClientConnector::socketBytesWritten(qint64 num)
 	if (m_socket->bytesToWrite() > 0)
 		return;
 	
-	emit progress(m_sendPos, m_fileLength);
+	emit progress(m_sendPos - m_offset + 1, m_numbytes);
 	
 	if ((Configuration::instance()->uploadSpeed() != 0) && (m_sendTimer.elapsed() < 1000))
 	{
@@ -292,7 +303,7 @@ void ClientConnector::socketDisconnected()
 
 void ClientConnector::gotUserIP(QString host, QString nick)
 {
-	if(TimedOut && nick == m_nick)
+	if(state() == Failed && nick == m_nick)
 	{
 		connectToClient(host, m_port);
 	}

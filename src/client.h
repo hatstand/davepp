@@ -44,7 +44,7 @@ public:
 		Connecting,
 		Handshaking,
 		Transferring,
-		TimedOut
+		Failed
 	};
 	
 	enum TransferResult

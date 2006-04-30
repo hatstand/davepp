@@ -48,6 +48,7 @@ Server::Server(QObject *parent)
 	m_stream.setDevice(m_socket);
 	
 	Configuration* config = Configuration::instance();
+	connect(config, SIGNAL(nickChanged(QString)), SLOT(nickChanged(QString)));
 	m_me = new User(this, config->nick());
 	m_me->setInterest(config->description());
 	m_me->speed = config->connSpeedString();
@@ -532,3 +533,7 @@ void Server::getUserIP(QString nick)
 	m_stream.flush();
 }
 
+void Server::nickChanged(QString newnick)
+{
+	m_me->nick = newnick;
+}

@@ -262,6 +262,9 @@ void TransferListItem::paintCell(QPainter* painter, const QColorGroup& cg, int c
 {
 	if (column != 0)
 		return;
+	
+	if (listView()->verticalScrollBar()->isVisible())
+		width -= listView()->verticalScrollBar()->width();
 		
 	if (isSelected())
 		painter->fillRect(0, 0, width, height(), cg.highlight());

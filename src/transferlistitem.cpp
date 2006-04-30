@@ -273,7 +273,6 @@ void TransferListItem::paintCell(QPainter* painter, const QColorGroup& cg, int c
 	
 	if (m_progress)
 	{
-		qDebug() << "Item pos" <<itemPos();
 		m_progress->resize(width - 6, QApplication::fontMetrics().height());
 		
 		QPoint pos(3, itemPos() + QApplication::fontMetrics().height()*2);
@@ -353,18 +352,18 @@ void TransferListItem::paintCell(QPainter* painter, const QColorGroup& cg, int c
 	{
 		painter->setFont(font);
 		painter->drawText(line2, Qt::AlignLeft | Qt::AlignVCenter, line2Text);
+		
+		if (m_totalSize != 0)
+		{
+			painter->setFont(font);
+			painter->drawText(size, Qt::AlignLeft | Qt::AlignVCenter, sizeText);
+		}
 	}
 	
 	if (m_speed != 0)
 	{
 		painter->setFont(font);
 		painter->drawText(speed, Qt::AlignLeft | Qt::AlignVCenter, speedText);
-	}
-	
-	if (m_totalSize != 0)
-	{
-		painter->setFont(font);
-		painter->drawText(size, Qt::AlignLeft | Qt::AlignVCenter, sizeText);
 	}
 }
 

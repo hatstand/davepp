@@ -55,6 +55,7 @@ ClientConnector::ClientConnector(Server* server)
 
 ClientConnector::~ClientConnector()
 {
+	Configuration::instance()->setSlotsInUse(Configuration::instance()->numSlots() - 1);
 }
 
 void ClientConnector::connectToClient(QString hostName, quint16 port)

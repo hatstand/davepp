@@ -93,6 +93,10 @@ void ClientConnector::socketError(QAbstractSocket::SocketError err)
 		connect(m_server, SIGNAL(gotUserIP(QString, QString)), SLOT(gotUserIP(QString, QString)));
 		m_server->getUserIP(m_nick);
 
+		m_timer->start(5000);
+		m_timer->disconnect();
+		connect(m_timer, SIGNAL(timeout()), SLOT(deleteLater()));
+
 		return;
 	}
 
@@ -317,6 +321,9 @@ void ClientConnector::gotUserIP(QString host, QString nick)
 {
 	if(state() == Failed && nick == m_nick)
 	{
+		m_timer->stop();
+		m_timer->disconnect();
+		connect(m_timer, SIGNAL(timeout()), SLOT(sendSomeData()));
 		connectToClient(host, m_port);
 	}
 }

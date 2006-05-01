@@ -85,7 +85,6 @@ void ClientListener::listenForClients(int port)
 
 void ClientListener::newConnection()
 {
-	m_timer->stop();
 	m_socket = m_tcpServer->nextPendingConnection();
 	m_tcpServer->close();
 	
@@ -187,6 +186,7 @@ void ClientListener::parseCommand(QString command)
 		QStringList words = command.split(" ");
 		if (words[0] == MYNICK)
 		{
+			m_timer->stop();
 		}
 		else if (words[0] == "$Lock")
 		{

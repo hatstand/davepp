@@ -32,6 +32,7 @@ private:
 	QString m_buffer;
 
 	QTimer* timer;
+	int count;
 
 signals:
 	void resultArrived(QList<SearchResult*> results);

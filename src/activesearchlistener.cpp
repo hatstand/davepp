@@ -17,6 +17,7 @@ ActiveSearchListener::ActiveSearchListener(QObject* parent)
 
 	connect(m_socket, SIGNAL(readyRead()), SLOT(socketReadyRead()));
 
+	count = 0;
 	timer = new QTimer(this);
 	timer->start(1000);
 	connect(timer, SIGNAL(timeout()), SLOT(timeout()));
@@ -92,9 +93,14 @@ QList<SearchResult*> ActiveSearchListener::getList()
 
 void ActiveSearchListener::timeout()
 {
+	count++;
+	
 	if(!results.empty())
 	{
 		emit resultArrived(results);
 		results.clear();
 	}
+
+	if(count >= 10)
+		deleteLater();
 }

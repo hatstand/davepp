@@ -53,14 +53,14 @@ TransferListItem::TransferListItem(Q3ListView* parent)
 	setHeight(QApplication::fontMetrics().height()*3 + 1);
 	qDebug() << "Height after" << height();
 
-	m_timer = new QTimer();
+	m_timer = new QTimer(this);
 	m_timer->setSingleShot(true);
 }
 
 TransferListItem::TransferListItem(TransferListItem* parent)
  : Q3ListViewItem(parent), m_transfer(NULL), QObject(parent), m_speed(0), m_progress(NULL), m_totalSize(0)
 {
-	m_timer = new QTimer();
+	m_timer = new QTimer(this);
 	m_timer->setSingleShot(true);
 }
 

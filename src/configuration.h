@@ -73,6 +73,10 @@ public:
 	
 	void save();
 	
+	// Stuff that isn't saved
+	int slotsInUse() {return m_slotsInUse;}
+	void setSlotsInUse(int s) {m_slotsInUse = s;}
+	
 private:
 	QString m_downloadDir;
 	QMap<QString, QString> m_sharedDirs;
@@ -87,6 +91,9 @@ private:
 	bool m_fileListDirty;
 	QMutex m_mutex;
 	QSettings* m_settings;
+	
+	// Stuff that isn't saved
+	int m_slotsInUse;
 
 signals:
 	void nickChanged(QString newnick);

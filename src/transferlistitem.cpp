@@ -45,7 +45,7 @@ void DaveProgressBar::setText(QString text)
 
 
 TransferListItem::TransferListItem(Q3ListView* parent)
- : Q3ListViewItem(parent), m_transfer(NULL), QObject(parent), m_speed(0)
+ : Q3ListViewItem(parent), m_transfer(NULL), QObject(parent), m_speed(0), m_totalSize(0)
 {
 	m_progress = new DaveProgressBar(listView());
 	
@@ -58,7 +58,7 @@ TransferListItem::TransferListItem(Q3ListView* parent)
 }
 
 TransferListItem::TransferListItem(TransferListItem* parent)
- : Q3ListViewItem(parent), m_transfer(NULL), QObject(parent), m_speed(0), m_progress(NULL)
+ : Q3ListViewItem(parent), m_transfer(NULL), QObject(parent), m_speed(0), m_progress(NULL), m_totalSize(0)
 {
 	m_timer = new QTimer();
 	m_timer->setSingleShot(true);
@@ -313,7 +313,8 @@ void TransferListItem::paintCell(QPainter* painter, const QColorGroup& cg, int c
 		
 		if (m_path == "MyList.DcLst")
 			line2Text = "File list";
-		else if ((connector != NULL) && (!connector->fileName().isEmpty()))
+		//else if ((connector != NULL) && (!connector->fileName().isEmpty()))
+		else
 			line2Text = m_path.section('\\', -1, -1);
 	}
 	

@@ -48,6 +48,8 @@ Configuration::Configuration(QObject* parent)
 	m_description = m_settings->value("Description", "Dave++").toString();
 	m_connSpeed = m_settings->value("ConnSpeed", 2).toInt();
 	m_settings->endGroup();
+	
+	m_slotsInUse = 0;
 }
 
 

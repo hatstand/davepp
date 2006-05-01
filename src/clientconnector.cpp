@@ -162,6 +162,15 @@ void ClientConnector::parseCommand(QString command)
 			
 			emit infoChanged();
 			
+			if (Configuration::instance()->slotsInUse() >= Configuration::instance()->numSlots())
+			{
+				m_stream << "$MaxedOut|";
+				m_stream.flush();
+				m_error = "No slots";
+				emit result(TransferFailed);
+				return;
+			}
+			
 			FileListBuilder* builder = FileListBuilder::instance();
 			if (m_fileName == "MyList.DcLst")
 				m_fileLength = builder->huffmanList().length();
@@ -214,6 +223,8 @@ void ClientConnector::parseCommand(QString command)
 				m_sendPos = m_offset - 1;
 				sendSomeData();
 			}
+			
+			Configuration::instance()->setSlotsInUse(Configuration::instance()->numSlots() + 1);
 			
 			m_stream.flush();
 

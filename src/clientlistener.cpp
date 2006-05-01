@@ -64,6 +64,7 @@ ClientListener::ClientListener(Server* server, User* user)
 	m_tcpServer = new QTcpServer(this);
 	
 	connect(m_tcpServer, SIGNAL(newConnection()), SLOT(newConnection()));
+	connect(m_timer, SIGNAL(timeout()), SLOT(deleteLater()));
 }
 
 
@@ -76,12 +77,12 @@ void ClientListener::listenForClients(int port)
 {
 	m_tcpServer->listen(QHostAddress::Any, port);
 	changeState(WaitingForConnection);
-
-	QTimer::singleShot(10000, this, SLOT(deleteLater()));
+	m_timer->start(10000);
 }
 
 void ClientListener::newConnection()
 {
+	m_timer->stop();
 	m_socket = m_tcpServer->nextPendingConnection();
 	m_tcpServer->close();
 	

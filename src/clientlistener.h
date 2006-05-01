@@ -23,6 +23,7 @@
 #include <QObject>
 #include <QTcpServer>
 #include <QFile>
+#include <QTimer>
 
 #include "client.h"
 
@@ -53,6 +54,7 @@ private slots:
 	
 private:
 	void parseCommand(QString command);
+	QTimer* m_timer;
 
 private:
 	QTcpServer* m_tcpServer;

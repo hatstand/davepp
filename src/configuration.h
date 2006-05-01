@@ -25,6 +25,8 @@
 #include <QMap>
 #include <QSettings>
 
+#define VERSION 0.01
+
 class Configuration : public QObject
 {
 	Q_OBJECT
@@ -65,6 +67,8 @@ public:
 	QString connSpeedString();
 	void setConnSpeed(int connSpeed) {m_connSpeed = connSpeed;}
 	
+	QString tag() {return m_tag;}
+	
 	// Private?
 	void lock() {m_mutex.lock();}
 	void unlock() {m_mutex.unlock();}
@@ -87,6 +91,8 @@ private:
 	QString m_email;
 	QString m_description;
 	int m_connSpeed;
+
+	QString m_tag;
 	
 	bool m_fileListDirty;
 	QMutex m_mutex;

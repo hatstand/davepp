@@ -484,12 +484,12 @@ ClientListener* Server::downloadFile(QString nick, QString filename)
 	qDebug() << "Attempting to download" << filename;
 	
 	ClientListener* listener = new ClientListener(this, getUser(nick), filename, Configuration::instance()->downloadDir());
-	listener->listenForClients(1234);
+	quint16 realPort = listener->listenForClients(1234);
 	
 	connect(listener, SIGNAL(stateChanged(int)), SLOT(listenerStateChanged(int)));
 	connect(listener, SIGNAL(result(int)), SLOT(listenerResult(int)));
 	
-	m_stream << "$ConnectToMe " << nick << " " << m_socket->localAddress().toString() << ":1234|";
+	m_stream << "$ConnectToMe " << nick << " " << m_socket->localAddress().toString() << ":" << realPort << "|";
 	m_stream.flush();
 	
 	return listener;

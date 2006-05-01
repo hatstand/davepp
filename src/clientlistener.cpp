@@ -76,11 +76,14 @@ ClientListener::~ClientListener()
 	delete m_outFile;
 }
 
-void ClientListener::listenForClients(int port)
+quint16 ClientListener::listenForClients(int port)
 {
-	m_tcpServer->listen(QHostAddress::Any, port);
+	// Currently ignore port so we can definitely get a port
+	while(!m_tcpServer->listen(QHostAddress::Any, 0));
 	changeState(WaitingForConnection);
 	m_timer->start(10000);
+
+	return m_tcpServer->serverPort();
 }
 
 void ClientListener::newConnection()

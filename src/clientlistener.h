@@ -38,7 +38,7 @@ public:
 	ClientListener(Server* server, User* user);
 	~ClientListener();
 	
-	void listenForClients(int port);
+	quint16 listenForClients(int port);
 	
 	bool isFileList() {return m_dclst;}
 	User* user() {return m_user;}

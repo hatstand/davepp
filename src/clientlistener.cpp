@@ -44,8 +44,10 @@ ClientListener::ClientListener(Server* server, User* user, QString filename, QSt
    m_outFile(NULL)
 {
 	m_tcpServer = new QTcpServer(this);
+	m_timer = new QTimer(this);
 	
 	connect(m_tcpServer, SIGNAL(newConnection()), SLOT(newConnection()));
+	connect(m_timer, SIGNAL(timeout()), SLOT(deleteLater()));
 }
 
 ClientListener::ClientListener(Server* server, User* user)
@@ -62,6 +64,7 @@ ClientListener::ClientListener(Server* server, User* user)
 	supportsXmlBZList(false)
 {
 	m_tcpServer = new QTcpServer(this);
+	m_timer = new QTimer(this);
 	
 	connect(m_tcpServer, SIGNAL(newConnection()), SLOT(newConnection()));
 	connect(m_timer, SIGNAL(timeout()), SLOT(deleteLater()));

@@ -101,6 +101,4 @@ void ActiveSearchListener::timeout()
 		results.clear();
 	}
 
-	if(count >= 10)
-		deleteLater();
 }

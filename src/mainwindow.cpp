@@ -815,6 +815,7 @@ void MainWindow::userFileListUpdated(User* user)
 
 void MainWindow::startSearch(QString search, bool sizeRestricted, bool isMin, int size, int dataType)
 {
+	Q_ASSERT(m_activeSearchListener != NULL);
 	disconnect(m_activeSearchListener, SIGNAL(resultArrived(QList<SearchResult*>)), 0, 0);
 	connect(m_activeSearchListener, SIGNAL(resultArrived(QList<SearchResult*>)), sender(), SLOT(resultArrived(QList<SearchResult*>)));
 	foreach(Server* server, m_hubs)

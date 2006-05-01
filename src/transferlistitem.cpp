@@ -55,6 +55,7 @@ TransferListItem::TransferListItem(Q3ListView* parent)
 
 	m_timer = new QTimer(this);
 	m_timer->setSingleShot(true);
+	connect(m_timer, SIGNAL(timeout()), SLOT(doNextQueued()));
 }
 
 TransferListItem::TransferListItem(TransferListItem* parent)
@@ -62,6 +63,7 @@ TransferListItem::TransferListItem(TransferListItem* parent)
 {
 	m_timer = new QTimer(this);
 	m_timer->setSingleShot(true);
+	connect(m_timer, SIGNAL(timeout()), SLOT(doNextQueued()));
 }
 
 TransferListItem::~TransferListItem()
@@ -153,10 +155,14 @@ void TransferListItem::stop()
 
 void TransferListItem::remove()
 {
-	if (firstChild() != NULL)
-		doNextQueued();
-	else
+	delete m_transfer;
+	if (firstChild() == NULL)
 		deleteLater();
+	else
+	{
+		m_progress->setText("Cancelling...");
+		m_timer->start(1000);
+	}
 }
 
 void TransferListItem::clientResult(int result)
@@ -168,25 +174,20 @@ void TransferListItem::clientResult(int result)
 		m_progress->setText("Error: " + m_transfer->error());
 	else
 	{
-		if (firstChild())
-		{
-			disconnect(m_transfer);
-			//QTimer::singleShot(1000, this, SLOT(doNextQueued()));
-			connect(m_timer, SIGNAL(timeout()), SLOT(doNextQueued()));
-			m_timer->start(1000);
-		}
-		else
-		{
-			//QTimer::singleShot(5000, this, SLOT(deleteLater()));
-			connect(m_timer, SIGNAL(timeout()), SLOT(deleteLater()));
-			m_timer->start(5000);
-		}
+		disconnect(m_transfer);
+		m_timer->start(1000);
 	}
 }
 
 void TransferListItem::doNextQueued()
 {
 	TransferListItem* child = (TransferListItem*) firstChild();
+	
+	if (child == NULL)
+	{
+		deleteLater();
+		return;
+	}
 	swapWith(child);
 	start();
 	delete child;
@@ -252,8 +253,6 @@ void TransferListItem::clientDestroyed()
 	
 	if (m_type == UploadFile)
 	{
-		//QTimer::singleShot(5000, this, SLOT(deleteLater()));
-		connect(m_timer, SIGNAL(timeout()), SLOT(deleteLater()));
 		m_timer->start(5000);
 	}
 }

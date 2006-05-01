@@ -191,7 +191,6 @@ qint64 Configuration::getFreeSpace()
 #elif defined Q_OS_LINUX
 	struct statvfs results;
 	statvfs("/", &results); // Just / for the moment
-	qDebug() << "fsblkcnt_t:" << sizeof(fsblkcnt_t);
 	return (qint64)(results.f_bavail * results.f_bsize);
 #else
 	return -1; // No idea. BSD at some point? Solaris?

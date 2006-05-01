@@ -21,6 +21,18 @@
 
 #include <QDebug>
 
+
+#ifdef Q_OS_WIN32
+	#include <windows.h>
+	#include <stdio.h>
+
+	typedef BOOL (WINAPI *PGETDISKFREESPACEEX)(LPCSTR,
+						    PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER);
+
+#elif defined Q_OS_LINUX
+	#include <sys/statvfs.h>
+#endif
+
 Configuration* configurationInstance = NULL;
 
 Configuration::Configuration(QObject* parent)
@@ -50,6 +62,8 @@ Configuration::Configuration(QObject* parent)
 	m_settings->endGroup();
 	
 	m_slotsInUse = 0;
+
+	qDebug() << getFreeSpace();
 }
 
 
@@ -147,4 +161,39 @@ void Configuration::setNick(QString nick)
 		m_nick = nick;
 		emit nickChanged(nick);
 	}
+}
+
+qint64 Configuration::getFreeSpace()
+{
+#ifdef Q_OS_WIN32
+	LPCSTR pszDrive;
+	PGETDISKFREESPACEEX pGetDiskFreeSpaceEx;
+	qint64 i64FreeBytesToCaller, i64TotalBytes, i64FreeBytes;
+
+	DWORD dwSectPerClust,
+			dwBytesPerSect,
+			dwFreeClusters,
+			dwTotalClusters;
+
+	BOOL fResult;
+
+	fResult = pGetDiskFreeSpaceEx(pszDrive,
+							(PULARGE_INTEGER) & i64FreeBytesToCaller,
+							(PULARGE_INTEGER) & i64TotalBytes,
+							(PULARGE_INTEGER) & i64FreeBytes);
+	
+	if(fResult)
+	{
+		return i64FreeBytesToCaller;
+	}
+	else
+		return -1;
+#elif defined Q_OS_LINUX
+	struct statvfs results;
+	statvfs("/", &results); // Just / for the moment
+	qDebug() << "fsblkcnt_t:" << sizeof(fsblkcnt_t);
+	return (qint64)(results.f_bavail * results.f_bsize);
+#else
+	return -1; // No idea. BSD at some point? Solaris?
+#endif
 }

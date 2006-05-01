@@ -80,6 +80,8 @@ public:
 	// Stuff that isn't saved
 	int slotsInUse() {return m_slotsInUse;}
 	void setSlotsInUse(int s) {m_slotsInUse = s;}
+
+	qint64 getFreeSpace();
 	
 private:
 	QString m_downloadDir;

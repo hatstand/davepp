@@ -62,7 +62,7 @@ Server::Server(QObject *parent)
 
 Server::~Server()
 {
-	m_socket->close();
+	disconnectFromHub(); // Gracefully disconnect
 }
 
 void Server::setHost(QString host, int port)
@@ -410,10 +410,13 @@ void Server::sendMessage(QString message, QString othernick)
 
 void Server::disconnectFromHub()
 {
-	m_stream << "$Quit " << m_me->nick << "|";
-	m_stream.flush();
+	if(m_socket->isValid())
+	{
+		m_stream << "$Quit " << m_me->nick << "|";
+		m_stream.flush();
 	
-	m_socket->close();
+		m_socket->close();
+	}
 }
 
 void Server::searchHub(quint16 port, QString search, bool sizerestricted, bool isminimumsize, quint64 size, int datatype)

@@ -22,6 +22,8 @@
 #include "mainwindow.h"
 #include "chatwidget.h"
 
+#include <QTime>
+
 HubWidget::HubWidget(HubDetailsListItem* details, Server* server, Q3ListView* userList)
  : QWidget(NULL),
    Ui::UIHubWidget(),
@@ -58,10 +60,11 @@ void HubWidget::chatMessage(QString from, QString message, bool priv)
 	decoded.replace("<", "&lt;");
 	decoded.replace(">", "&gt;");
 	decoded.replace("\n", "<br>");
+	QString time = "[" + QTime::currentTime().toString(Qt::TextDate) + "]";
 	
 	if ((!priv) || (!message.trimmed().startsWith('<')))
 	{
-		chatBox->append("<b>&lt;" + from + "&gt;</b> " + decoded);
+		chatBox->append(time + "<b>&lt;" + from + "&gt;</b> " + decoded);
 		return;
 	}
 	

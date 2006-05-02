@@ -82,8 +82,12 @@ public:
 	void setSlotsInUse(int s) {m_slotsInUse = s;}
 	bool slotsLeft();
 	bool getSlot();
-	void revokeSlot() {lock(); --m_slotsInUse; unlock();}
+	void revokeSlot();
+	int slotsFree() { return m_numSlots - m_slotsInUse; }
 
+	int connectedHubs() { return m_connectedHubs; };
+	void hubConnected();
+	void hubDisconnected();
 	qint64 getFreeSpace();
 	
 private:
@@ -105,9 +109,12 @@ private:
 	
 	// Stuff that isn't saved
 	int m_slotsInUse;
+	int m_connectedHubs;
 
 signals:
 	void nickChanged(QString newnick);
+	void numSlotsChanged();
+	void numHubsChanged();
 
 };
 

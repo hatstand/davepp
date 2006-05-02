@@ -78,7 +78,6 @@ public:
 
 private:
 	void parseCommand(QString command);
-	void sendInfo();
 	void searchResponse(QString othernick, QHostAddress ip, int port, bool sizerestricted, bool isminimumsize, int size, int datatype);
 	void changeState(ConnectionState newState);
 	QString decodeChatMessage(QString message);
@@ -117,6 +116,7 @@ private slots:
 	void fileListUpdateFinished();
 	void nickChanged(QString newnick);
 	void passiveSearchResult(QString result);
+	void sendInfo();
 	
 signals:
 	void stateChanged(int newState);

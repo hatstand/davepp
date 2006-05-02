@@ -62,6 +62,7 @@ Configuration::Configuration(QObject* parent)
 	m_settings->endGroup();
 	
 	m_slotsInUse = 0;
+	m_connectedHubs = 0;
 
 	qDebug() << getFreeSpace();
 }
@@ -219,4 +220,24 @@ bool Configuration::getSlot()
 		unlock();
 		return false;
 	}
+}
+
+void Configuration::revokeSlot()
+{
+	lock();
+	--m_slotsInUse;
+	unlock();
+	emit numSlotsChanged();
+}
+
+void Configuration::hubConnected()
+{
+	++m_connectedHubs;
+	emit numHubsChanged();
+}
+
+void Configuration::hubDisconnected()
+{
+	--m_connectedHubs;
+	emit numHubsChanged();
 }

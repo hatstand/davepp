@@ -25,8 +25,6 @@
 #include <QMutex>
 #include <QDomElement>
 
-#include "searchreturner.h"
-
 class Configuration;
 class FileList;
 class FileNode;
@@ -43,6 +41,9 @@ public:
 	QByteArray bzList();
 	QByteArray xmlBZList();
 	quint64 totalSize();
+	
+	void lock() { m_mutex.lock(); }
+	void unlock() { m_mutex.unlock(); }
 	
 	static FileListBuilder* instance();
 
@@ -61,8 +62,6 @@ private:
 	QByteArray m_XmlBZList;
 	QMutex m_mutex;
 	QDomDocument doc;
-
-	friend SearchReturner::SearchReturner(Server* server, QHostAddress client, quint16 port, bool sizeRestricted, bool isMaxSize, quint64 size, int datatype, QString pattern);
 };
 
 #endif

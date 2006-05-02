@@ -116,6 +116,7 @@ private slots:
 	void listenerStateChanged(int state);
 	void fileListUpdateFinished();
 	void nickChanged(QString newnick);
+	void passiveSearchResult(QString result);
 	
 signals:
 	void stateChanged(int newState);

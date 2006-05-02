@@ -26,6 +26,7 @@
 #include "client.h"
 #include "configuration.h"
 #include "filelistbuilder.h"
+#include "searchreturner.h"
 
 #include <QStringList>
 #include <QUdpSocket>
@@ -278,32 +279,34 @@ void Server::parseCommand(QString command)
 		}
 		else if(words[0] == "$Search")
 		{
-			// qDebug() << "Search!";
-			if(words[1].startsWith("Hub")) // Passive Search - unimplemented
+			QStringList temp = words[1].split(":");
+
+			QString searchstring = words[2];
+			bool sizeRestricted;
+			bool isMaxSize;
+			if(searchstring.startsWith("F"))
 			{
+				sizeRestricted = false;
+				isMaxSize = false;
 			}
-			else // Active Search
+			else
+				sizeRestricted = true;
+
+			temp = searchstring.split("?");
+			quint64 size = temp[2].toULongLong();
+			int datatype = temp[3].toInt();
+			QString pattern = temp[4];
+			
+			if(words[1].startsWith("Hub")) // Passive request
 			{
-				QStringList temp = words[1].split(":");
+				SearchReturner* x = new SearchReturner(this, temp[0], sizeRestricted, isMaxSize, size, datatype, pattern);
+				// Cross thread signal/slot
+				connect(x, SIGNAL(passiveSearchResult(QString)), this, SLOT(passiveSearchResult(QString)), Qt::QueuedConnection);
+			}
+			else
+			{
 				QHostAddress* requestor = new QHostAddress(temp[0]);
 				quint16 port = temp[1].toUShort();
-
-				QString searchstring = words[2];
-				bool sizeRestricted;
-				bool isMaxSize;
-				if(searchstring.startsWith("F"))
-				{
-					sizeRestricted = false;
-					isMaxSize = false;
-				}
-				else
-					sizeRestricted = true;
-
-				temp = searchstring.split("?");
-				quint64 size = temp[2].toULongLong();
-				int datatype = temp[3].toInt();
-				QString pattern = temp[4];
-				
 				new SearchReturner(this, *requestor, port, sizeRestricted, isMaxSize, size, datatype, pattern);
 			}
 		}
@@ -539,4 +542,11 @@ void Server::getUserIP(QString nick)
 void Server::nickChanged(QString newnick)
 {
 	m_me->nick = newnick;
+}
+
+void Server::passiveSearchResult(QString result)
+{
+//	qDebug() << "Sending passive search result";
+	m_stream << result; 
+	m_stream.flush();
 }

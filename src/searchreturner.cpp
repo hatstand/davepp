@@ -6,21 +6,30 @@
 #include <QDebug>
 #include <QUdpSocket>
 
-SearchReturner::SearchReturner(Server* server, QHostAddress client, quint16 port, bool sizeRestricted, bool isMaxSize, quint64 size, int datatype, QString pattern)
-		  : m_server(server), m_client(client), m_port(port), m_sizeRestricted(sizeRestricted), m_isMaxSize(isMaxSize), m_size(size), m_datatype(datatype), m_pattern(pattern), m_typeRegex(), m_regex()
-{
-//	qDebug() << "Search started";
+const QString SearchReturner::audio = "\\.(mp3)|(mp2)|(wav)|(au)|(rm)|(mid)|(sm)$";
+const QString SearchReturner::compressed = "\\.(zip)|(arj)|(rar)|(lzh)|(gz)|(z)|(arc)|(pak)|(tar)|(bz2)$";
+const QString SearchReturner::docs = "\\.(doc)|(txt)|(wri)|(pdf)|(ps)|(tex)|(dvi)$";
+const QString SearchReturner::execs = "\\.(pm)|(exe)|(bat)|(com)$";
+const QString SearchReturner::pictures = "\\.(gif)|(jpg)|(jpeg)|(bmp)|(pcx)|(png)|(wmf)|(psd)|(svg)$";
+const QString SearchReturner::videos = "\\.(mpg)|(mpeg)|(avi)|(asf)|(mov)$";
 
-		  
-	audio = "\\.(mp3)|(mp2)|(wav)|(au)|(rm)|(mid)|(sm)$";
-	compressed = "\\.(zip)|(arj)|(rar)|(lzh)|(gz)|(z)|(arc)|(pak)|(tar)|(bz2)$";
-	docs = "\\.(doc)|(txt)|(wri)|(pdf)|(ps)|(tex)|(dvi)$";
-	execs = "\\.(pm)|(exe)|(bat)|(com)$";
-	pictures = "\\.(gif)|(jpg)|(jpeg)|(bmp)|(pcx)|(png)|(wmf)|(psd)|(svg)$";
-	videos = "\\.(mpg)|(mpeg)|(avi)|(asf)|(mov)$";
-		  
-	FileListBuilder* bob = FileListBuilder::instance();
-	m_list = bob->m_list;
+SearchReturner::SearchReturner(Server* server, QHostAddress client, quint16 port, bool sizeRestricted, bool isMaxSize, quint64 size, int datatype, QString pattern)
+		  : m_server(server), m_client(client), m_port(port), m_sizeRestricted(sizeRestricted), m_isMaxSize(isMaxSize), m_size(size), m_datatype(datatype), m_pattern(pattern), m_typeRegex(), m_regex(), isPassive(false)
+{
+	begin();
+}
+
+SearchReturner::SearchReturner(Server* server, QString client, bool sizeRestricted, bool isMaxSize, quint64 size, int datatype, QString pattern)
+		  : m_server(server), m_passiveClient(client), m_sizeRestricted(sizeRestricted), m_isMaxSize(isMaxSize), m_size(size), m_datatype(datatype), m_pattern(pattern), m_typeRegex(), m_regex(), isPassive(true)
+{
+//	qDebug() << "Passive Search";
+	begin();
+}
+
+void SearchReturner::begin()
+{
+	m_builder = FileListBuilder::instance();
+	m_list = m_builder->list();
 
 	if(m_list == NULL)
 	{
@@ -28,8 +37,6 @@ SearchReturner::SearchReturner(Server* server, QHostAddress client, quint16 port
 		return;
 	}
 	
-	list_mutex = &(bob->m_mutex);
-
 	m_folders = false;
 
 	//Construct regular expression from pattern string
@@ -72,14 +79,16 @@ SearchReturner::SearchReturner(Server* server, QHostAddress client, quint16 port
 			m_folders = true;
 			break;
 		case 9: // TTH: unimplemented
+//			deleteLater(); // Really bad idea it seems
 			return; 
 		default:
+//			deleteLater();
 			break;
 	}
 
 	start();
-}
 
+}
 
 SearchReturner::~SearchReturner()
 {
@@ -88,15 +97,16 @@ SearchReturner::~SearchReturner()
 void SearchReturner::run()
 {
 //	qDebug() << "Thread started";
-	m_sock = new QUdpSocket();
+	if(!isPassive)
+		m_sock = new QUdpSocket();
   
-	list_mutex->lock();
+	m_builder->lock();
 
 	FileNode* root = m_list->root();
 
 	SearchDescend(root);
 
-	list_mutex->unlock();
+	m_builder->unlock();
 }
 
 void SearchReturner::SearchDescend(FileNode* current)
@@ -140,8 +150,6 @@ void SearchReturner::SearchDescend(FileNode* current)
 
 void SearchReturner::SubmitResult(FileNode* node)
 {
-//	qDebug() << "Found Result!";
-
 	QString path = node->name();
 	FileNode* parent = node->parent();
 	while ((parent) && (parent->name() != "<root>"))
@@ -150,10 +158,20 @@ void SearchReturner::SubmitResult(FileNode* node)
 		parent = parent->parent();
 	}
 
-	QString thingy = "$SR " + m_server->me()->nick + " " + path + "\05" + QString::number(node->size()) + " " + "1/1" + "\05" + m_server->hubName() + " (" + m_server->ip() + ":" + QString::number(m_server->port()) + ")|";
-	QByteArray bleh = thingy.toLatin1();
+	QString thingy = "$SR " + m_server->me()->nick + " " + path + "\05" + QString::number(node->size()) + " " + "1/1" + "\05" + m_server->hubName() + " (" + m_server->ip() + ":" + QString::number(m_server->port()) + ")";
 //	qDebug() << bleh;
-	m_sock->writeDatagram(bleh, bleh.size(), m_client, m_port);
-	m_sock->flush();
+	if(isPassive)
+	{
+		thingy += "\05" + m_passiveClient + "|";
+		emit passiveSearchResult(thingy);
+//		qDebug() << "Passive result emitted";
+	}
+	else
+	{
+		thingy += "|";
+		QByteArray bleh = thingy.toLatin1();
+		m_sock->writeDatagram(bleh, bleh.size(), m_client, m_port);
+		m_sock->flush();
+	}
 }
 

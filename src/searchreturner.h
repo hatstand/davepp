@@ -6,6 +6,7 @@
 #include <QThread>
 #include <QMutex>
 #include "filelist.h"
+#include "filelistbuilder.h"
 #include "server.h"
 
 class SearchReturner: public QThread
@@ -14,17 +15,21 @@ class SearchReturner: public QThread
 		 
 	public:
 	SearchReturner(Server* server, QHostAddress client, quint16 port, bool sizeRestricted, bool isMaxSize, quint64 size, int datatype, QString pattern);
+	SearchReturner(Server* server, QString client, bool sizeRestricted, bool isMaxSize, quint64 size, int datatype, QString pattern);
 	~SearchReturner();
 
 	private:
+	void begin();
 	void run();
 	void SearchDescend(FileNode* current);
 	void SubmitResult(FileNode* node);
 	
 	FileList* m_list;
+	FileListBuilder* m_builder;
 	QUdpSocket* m_sock;
 	QMutex* list_mutex;
 	QHostAddress m_client;
+	QString m_passiveClient;
 	quint16 m_port;
 	bool m_sizeRestricted;
 	bool m_isMaxSize;
@@ -36,14 +41,18 @@ class SearchReturner: public QThread
 	QRegExp m_typeRegex;
 	QRegExp m_regex;
 	bool m_folders;
+	bool isPassive;
 
 	// RegEx for file types
-	QString audio;
-	QString compressed;
-	QString docs; // TODO: Add OOo + Mac fileformats
-	QString execs;
-	QString pictures;
-	QString videos;
+	static const QString audio;
+	static const QString compressed;
+	static const QString docs; // TODO: Add OOo + Mac fileformats
+	static const QString execs;
+	static const QString pictures;
+	static const QString videos;
+
+signals:
+	void passiveSearchResult(QString result);
 	
 };
 

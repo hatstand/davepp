@@ -35,7 +35,6 @@ ClientConnector::ClientConnector(Server* server)
 	supportsXmlBZList(false),
 	gotSlot(false)
 {
-	qDebug() << "Spawned upload";
 	m_socket = new QTcpSocket(this);
 	m_timer = new QTimer(this);
 	
@@ -57,7 +56,6 @@ ClientConnector::ClientConnector(Server* server)
 
 ClientConnector::~ClientConnector()
 {
-	qDebug() << "Lost upload";
 	if(gotSlot)
 		Configuration::instance()->revokeSlot();
 }
@@ -354,8 +352,6 @@ void ClientConnector::gotUserIP(QString host, QString nick)
 
 void ClientConnector::endTransfer()
 {
-	qDebug() << "Ending transfer";
-
 	if(state() == Success)
 		emit result(TransferSucceeded);
 	else

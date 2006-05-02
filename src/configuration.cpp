@@ -165,7 +165,7 @@ void Configuration::setNick(QString nick)
 
 qint64 Configuration::getFreeSpace()
 {
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN32buggered
 	LPCSTR pszDrive;
 	PGETDISKFREESPACEEX pGetDiskFreeSpaceEx;
 	qint64 i64FreeBytesToCaller, i64TotalBytes, i64FreeBytes;

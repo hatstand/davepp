@@ -44,7 +44,9 @@ public:
 		Connecting,
 		Handshaking,
 		Transferring,
-		Failed
+		NoSlots,
+		Failed,
+		Success
 	};
 	
 	enum TransferResult

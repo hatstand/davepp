@@ -316,7 +316,7 @@ void Server::parseCommand(QString command)
 			emit gotUserIP(words[1], words[2]);
 		}
 		else
-			qDebug() << "\"" << words[0] << "\" not understood";
+			qDebug() << words[0] << "not understood";
 		
 		m_lastCommand = words;
 	}

@@ -47,6 +47,7 @@ private slots:
 	void socketDisconnected();
 	void sendSomeData();
 	void gotUserIP(QString nick, QString host);
+	void endTransfer();
 	
 signals:
 	void infoChanged();
@@ -71,6 +72,8 @@ private:
 	QTime m_sendTimer;
 	QTimer* m_timer;
 	qint64 m_sendPos;
+
+	bool gotSlot;
 };
 
 #endif

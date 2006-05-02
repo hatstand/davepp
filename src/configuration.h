@@ -80,6 +80,9 @@ public:
 	// Stuff that isn't saved
 	int slotsInUse() {return m_slotsInUse;}
 	void setSlotsInUse(int s) {m_slotsInUse = s;}
+	bool slotsLeft();
+	bool getSlot();
+	void revokeSlot() {lock(); --m_slotsInUse; unlock();}
 
 	qint64 getFreeSpace();
 	

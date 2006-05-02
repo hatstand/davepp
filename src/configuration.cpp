@@ -196,3 +196,27 @@ qint64 Configuration::getFreeSpace()
 	return -1; // No idea. BSD at some point? Solaris?
 #endif
 }
+
+bool Configuration::slotsLeft()
+{
+	if(m_slotsInUse < m_numSlots)
+		return true;
+	else
+		return false;
+}
+
+bool Configuration::getSlot()
+{
+	lock();
+	if(m_slotsInUse < m_numSlots)
+	{
+		++m_slotsInUse;
+		unlock();
+		return true;
+	}
+	else
+	{
+		unlock();
+		return false;
+	}
+}

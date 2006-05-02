@@ -32,8 +32,10 @@ ClientConnector::ClientConnector(Server* server)
  : Client(server),
  	extendedClient(false),
 	supportsBZList(false),
-	supportsXmlBZList(false)
+	supportsXmlBZList(false),
+	gotSlot(false)
 {
+	qDebug() << "Spawned upload";
 	m_socket = new QTcpSocket(this);
 	m_timer = new QTimer(this);
 	
@@ -55,14 +57,16 @@ ClientConnector::ClientConnector(Server* server)
 
 ClientConnector::~ClientConnector()
 {
-	Configuration::instance()->setSlotsInUse(Configuration::instance()->numSlots() - 1);
+	qDebug() << "Lost upload";
+	if(gotSlot)
+		Configuration::instance()->revokeSlot();
 }
 
 void ClientConnector::connectToClient(QString hostName, quint16 port)
 {
 	if (state() != Idle)
 		return;
-	
+
 	changeState(LookingUpHost);
 	m_socket->connectToHost(hostName, port);
 }
@@ -93,19 +97,16 @@ void ClientConnector::socketError(QAbstractSocket::SocketError err)
 		connect(m_server, SIGNAL(gotUserIP(QString, QString)), SLOT(gotUserIP(QString, QString)));
 		m_server->getUserIP(m_nick);
 
-		m_timer->start(5000);
 		m_timer->disconnect();
-		connect(m_timer, SIGNAL(timeout()), SLOT(deleteLater()));
+		connect(m_timer, SIGNAL(timeout()), SLOT(endTransfer()));
+		m_timer->start(3000);
 
 		return;
 	}
 
 	qDebug() << "Error" << err;
-	changeState(Idle);
-
-	m_timer->disconnect();
-	connect(m_timer, SIGNAL(timeout()), SLOT(deleteLater()));
-	m_timer->start(2000);
+	changeState(Failed);
+	endTransfer();
 }
 
 
@@ -167,14 +168,19 @@ void ClientConnector::parseCommand(QString command)
 			
 			emit infoChanged();
 			
-			if (Configuration::instance()->slotsInUse() >= Configuration::instance()->numSlots())
+			if (!Configuration::instance()->getSlot())
 			{
 				m_stream << "$MaxedOut|";
 				m_stream.flush();
 				m_error = "No slots";
+				
 				emit result(TransferFailed);
+				changeState(NoSlots);
+				endTransfer();
 				return;
 			}
+			else
+				gotSlot = true;
 			
 			FileListBuilder* builder = FileListBuilder::instance();
 			if (m_fileName == "MyList.DcLst")
@@ -201,11 +207,13 @@ void ClientConnector::parseCommand(QString command)
 					m_stream << "$Error File Not Available|";
 				else
 					m_stream << "$Failed File Not Available|";
-				deleteLater();
+
 				m_error = "File not found";
 				emit result(TransferFailed);
 				qDebug() << "File not found";
 				m_stream.flush();
+				changeState(Failed);
+				endTransfer();
 				return;
 			}
 			
@@ -229,8 +237,6 @@ void ClientConnector::parseCommand(QString command)
 				sendSomeData();
 			}
 			
-			Configuration::instance()->setSlotsInUse(Configuration::instance()->numSlots() + 1);
-			
 			m_stream.flush();
 
 			qDebug() << "Uploading" << m_fileName << "from position" << m_offset << "(length" << m_numbytes << ")";
@@ -243,7 +249,11 @@ void ClientConnector::parseCommand(QString command)
 			sendSomeData();
 		}
 		else
-			qDebug() << "\"" << words[0] << "\" not understood";
+		{
+			qDebug() << words[0] << "not understood";
+			changeState(Failed);
+			endTransfer();
+		}
 	}
 }
 
@@ -252,24 +262,35 @@ void ClientConnector::sendSomeData()
 	// qDebug() << "SendSomeData()";
 	if (m_socket->state() != QAbstractSocket::ConnectedState)
 	{
-		deleteLater();
 		qDebug() << "Sending failed (connection closed)";
+		changeState(Failed);
+		endTransfer();
 		return;
 	}
 	
 	if (m_sendPos >= m_numbytes + m_offset - 1)
 	{
-		m_socket->close();
-		deleteLater();
-		qDebug() << "Sending finished (" << m_sendPos << m_fileLength;
+		qDebug() << "Sending finished (" << m_sendPos << m_fileLength << ")";
+		changeState(Idle);
+		endTransfer();
 		return;
 	}
 	
 	QByteArray data;
-	int uploadSpeed = Configuration::instance()->uploadSpeed();
-	if (uploadSpeed <= 0)
-		uploadSpeed = 50;
+	int uploadSpeed;
+	
+	int slotsInUse = Configuration::instance()->slotsInUse(); 
+	if(slotsInUse > 0)
+		uploadSpeed = Configuration::instance()->uploadSpeed() / slotsInUse;
+	else
+		uploadSpeed = Configuration::instance()->uploadSpeed();
 
+	if (uploadSpeed <= 0)
+		uploadSpeed = 102400;
+
+//	qDebug() << "Slots in use:" << slotsInUse;
+//	qDebug() << "Upload Speed:" << uploadSpeed;
+	
 	int uploadBytes = uploadSpeed * 1024;
 	if(uploadBytes > m_numbytes)
 		uploadBytes = m_numbytes;
@@ -315,6 +336,9 @@ void ClientConnector::socketBytesWritten(qint64 num)
 void ClientConnector::socketDisconnected()
 {
 	qDebug() << "Disconnected";
+
+	changeState(Failed);
+	endTransfer();
 }
 
 void ClientConnector::gotUserIP(QString host, QString nick)
@@ -328,4 +352,15 @@ void ClientConnector::gotUserIP(QString host, QString nick)
 	}
 }
 
+void ClientConnector::endTransfer()
+{
+	qDebug() << "Ending transfer";
 
+	if(state() == Success)
+		emit result(TransferSucceeded);
+	else
+		emit result(TransferFailed);
+	
+	m_socket->abort();
+	deleteLater();
+}

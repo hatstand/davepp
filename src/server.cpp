@@ -484,12 +484,12 @@ ClientListener* Server::browseFiles(QString nick)
 	qDebug() << "Browse" << nick;
 	
 	ClientListener* listener = new ClientListener(this, getUser(nick));
-	listener->listenForClients(1234);
+	quint64 port = listener->listenForClients(1234);
 	
 	connect(listener, SIGNAL(stateChanged(int)), SLOT(listenerStateChanged(int)));
 	connect(listener, SIGNAL(result(int)), SLOT(listenerResult(int)));
 	
-	m_stream << "$ConnectToMe " << nick << " " << m_socket->localAddress().toString() << ":1234|";
+	m_stream << "$ConnectToMe " << nick << " " << m_socket->localAddress().toString() << ":" << port << "|";
 	m_stream.flush();
 	
 	return listener;

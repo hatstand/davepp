@@ -110,6 +110,7 @@ void ConfigureDialog::accept()
 	m_config->setDescription(descriptionBox->text());
 	m_config->setConnSpeed(connSpeedBox->currentIndex());
 	m_config->setDownloadDir(downloadDirBox->text());
+	m_config->setDownloadSpeed(downloadSpeedBox->value());
 	m_config->save();
 	
 	QDialog::accept();
@@ -128,6 +129,7 @@ void ConfigureDialog::show()
 	}
 	
 	uploadSpeedBox->setValue(m_config->uploadSpeed());
+	downloadSpeedBox->setValue(m_config->downloadSpeed());
 	slotsBox->setValue(m_config->numSlots());
 	
 	nickBox->setText(m_config->nick());

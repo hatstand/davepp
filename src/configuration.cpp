@@ -55,6 +55,7 @@ Configuration::Configuration(QObject* parent)
 	
 	m_settings->beginGroup("General");
 	m_uploadSpeed = m_settings->value("UploadSpeed", 0).toInt();
+	m_downloadSpeed = m_settings->value("DownloadSpeed", 0).toInt();
 	m_numSlots = m_settings->value("Slots", 6).toInt();
 	m_nick = m_settings->value("Nick", "Nick").toString();
 	m_email = m_settings->value("Email", "enoon@erewhon.com").toString();
@@ -62,11 +63,10 @@ Configuration::Configuration(QObject* parent)
 	m_connSpeed = m_settings->value("ConnSpeed", 2).toInt();
 	m_downloadDir = m_settings->value("DownloadDir", QDir::homePath()).toString();
 	m_settings->endGroup();
+
 	
 	m_slotsInUse = 0;
 	m_connectedHubs = 0;
-
-	m_downloadSpeed = 0;
 
 	qDebug() << getFreeSpace();
 }
@@ -135,6 +135,7 @@ void Configuration::save()
 	
 	m_settings->beginGroup("General");
 	m_settings->setValue("UploadSpeed", m_uploadSpeed);
+	m_settings->setValue("DownloadSpeed", m_downloadSpeed);
 	m_settings->setValue("Slots", m_numSlots);
 	m_settings->setValue("Nick", m_nick);
 	m_settings->setValue("Email", m_email);
@@ -267,6 +268,8 @@ QString Configuration::niceSpeed(int x)
 		return QString::number(x) + "M";
 	else if(x < 1024*1024*1024) // GB!
 		return QString::number(x) + "G";
+
+	return "Really Fast";
 }
 
 QString Configuration::niceDownloadSpeed()

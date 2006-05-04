@@ -68,7 +68,7 @@ void HubWidget::chatMessage(QString from, QString message, bool priv)
 	decoded.replace(">", "&gt;");
 	decoded.replace("\n", "<br>");
 	
-	if ((!priv) || (!message.trimmed().startsWith('<')))
+	if (!priv)
 	{
 		chatBox->append("<b>&lt;" + from + "&gt;</b> " + decoded);
 		return;
@@ -92,7 +92,7 @@ void HubWidget::chatMessage(QString from, QString message, bool priv)
 		m_privateChats << widget;
 	}
 	
-	widget->chatBox->append(decoded);
+	widget->chatBox->append("<b>&lt;" + from + "&gt;</b> " + decoded);
 }
 
 void HubWidget::stateChanged(int state)

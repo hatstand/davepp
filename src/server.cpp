@@ -32,6 +32,26 @@
 #include <QUdpSocket>
 #include <QDebug>
 
+namespace ServerDetails {
+
+QString decodeChatMessage(QString message)
+{
+	QString ret = message;
+	ret.replace("&#124;", "|");
+	ret.replace("&#36;", "$");
+	return ret;
+}
+
+QString encodeChatMessage(QString message)
+{
+	QString ret = message;
+	ret.replace("|", "&#124;");
+	ret.replace("$", "&#36;");
+	return ret;
+}
+
+}
+
 Server::Server(QObject *parent)
 	: QObject(parent), m_state(NotConnected)
 {
@@ -126,12 +146,29 @@ void Server::socketBytesWritten(qint64 num)
 	qDebug() << num << " bytes written";
 }
 
+void Server::processChatCommand(QString command, bool priv)
+{
+	using namespace ServerDetails;
+	QRegExp regExp("<([^>]*)>( ?)(.*)");
+	if (!regExp.exactMatch(command))
+		return;
+	
+	QString nick = regExp.cap(1);
+	QString message = decodeChatMessage(regExp.cap(3));
+
+	qDebug() << "Got" << (priv ? "private" : "") << "message from" << nick << ":" << message;
+	
+	emit chatMessage(nick, message, priv);
+}
+
 void Server::parseCommand(QString command)
 {
+	using namespace ServerDetails;
+
 	if(command == "")
 		return;
 
-	qDebug() << "Command: " << command;
+	qDebug() << "Hub says: " << command;
 	if (command.startsWith("$"))
 	{
 		QStringList words = command.split(" ");
@@ -258,8 +295,8 @@ void Server::parseCommand(QString command)
 		{
 			QString othernick = words[3];
 			QString message = decodeChatMessage(command.section('$',2));
-
-			emit chatMessage(othernick, message, true);
+			// see protocol reference; message already contains other nick
+			processChatCommand(message, true);
 		}
 		else if(words[0] == "$ConnectToMe")
 		{
@@ -327,14 +364,7 @@ void Server::parseCommand(QString command)
 	}
 	else if (command.startsWith("<"))
 	{
-		QRegExp regExp("<([^>]*)>( ?)(.*)");
-		if (!regExp.exactMatch(command))
-			return;
-		
-		QString nick = regExp.cap(1);
-		QString message = decodeChatMessage(regExp.cap(3));
-		
-		emit chatMessage(nick, message, false);
+		processChatCommand(command, false);
 	}
 }
 
@@ -413,6 +443,7 @@ void Server::socketDisconnected()
 
 void Server::sendMessage(QString message, QString othernick)
 {
+	using namespace ServerDetails;
 	if (othernick.isNull())
 	{
 		m_stream << "<" << m_me->nick << "> " << encodeChatMessage(message) << "|";
@@ -466,22 +497,6 @@ void Server::changeState(ConnectionState newState)
 Server::ConnectionState Server::state()
 {
 	return m_state;
-}
-
-QString Server::decodeChatMessage(QString message)
-{
-	QString ret = message;
-	ret.replace("&#124;", "|");
-	ret.replace("&#36;", "$");
-	return ret;
-}
-
-QString Server::encodeChatMessage(QString message)
-{
-	QString ret = message;
-	ret.replace("|", "&#124;");
-	ret.replace("$", "&#36;");
-	return ret;
 }
 
 ClientListener* Server::browseFiles(QString nick)

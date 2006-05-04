@@ -39,6 +39,8 @@ ChatWidget::ChatWidget(HubWidget* hub, QString nick)
 	printTime();
 
 	connect(sendButton, SIGNAL(pressed()), SLOT(sendPressed()));
+	connect(inputBox, SIGNAL(returnPressed()), SLOT(sendPressed()));
+	inputBox->setFocus();
 }
 
 
@@ -65,7 +67,8 @@ void ChatWidget::sendPressed()
 		message.replace("<", "&lt;");
 		message.replace(">", "&gt;");
 		message.replace("\n", "<br>");
-		chatBox->append("<" + Configuration::instance()->nick() + "> " + message);
+		QString from = Configuration::instance()->nick();
+		chatBox->append("<b>&lt;" + from + "&gt;</b> " + message);
 	}
 	else
 	{

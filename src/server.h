@@ -77,11 +77,10 @@ public:
 	void getUserIP(QString nick); // void return as result is emitted
 
 private:
+	void processChatCommand(QString command, bool priv);
 	void parseCommand(QString command);
 	void searchResponse(QString othernick, QHostAddress ip, int port, bool sizerestricted, bool isminimumsize, int size, int datatype);
 	void changeState(ConnectionState newState);
-	QString decodeChatMessage(QString message);
-	QString encodeChatMessage(QString message);
 	void userQuit(QString nick);
 	void getInfo(QString othernick);
 	void getInfoAll();

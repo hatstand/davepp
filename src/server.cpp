@@ -276,6 +276,10 @@ void Server::parseCommand(QString command)
 			client->connectToClient(host, port);
 			emit uploadRequest(client);
 		}
+/*		else if(words[0] == "$RevConnectToMe")
+		{
+			m_stream << "$ConnectToMe" << words[2];
+		} */
 		else if(words[0] == "$UserIP")
 		{
 			emit gotUserIP(words[1], words[2]);
@@ -386,7 +390,7 @@ void Server::sendInfo()
 	// Tag assumes active mode for now
 	QString tag = "<++ V:0.0.1,M:A,H:" + 
 			  QString::number(Configuration::instance()->connectedHubs()) + "/0/0,S:" +
-			  QString::number(Configuration::instance()->slotsFree()) + ">";
+			  QString::number(Configuration::instance()->numSlots()) + ">";
 	
 	m_stream << "$MyINFO $ALL " << m_me->nick << " " << tag << "$ $" << m_me->speed << "$" << m_me->email << "$" << QString::number(m_me->shareSize) << "$|";
 	m_stream.flush();

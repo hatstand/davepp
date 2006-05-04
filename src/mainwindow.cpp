@@ -34,7 +34,6 @@
 #include <QDebug>
 #include <QPainter>
 #include <QActionGroup>
-#include <QTimer>
 #include <QDir>
 
 

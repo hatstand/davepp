@@ -227,7 +227,6 @@ void Configuration::revokeSlot()
 	lock();
 	--m_slotsInUse;
 	unlock();
-	emit numSlotsChanged();
 }
 
 void Configuration::hubConnected()
@@ -240,4 +239,13 @@ void Configuration::hubDisconnected()
 {
 	--m_connectedHubs;
 	emit numHubsChanged();
+}
+
+void Configuration::setNumSlots(int s)
+{
+	if(s != m_numSlots)
+	{
+		m_numSlots = s;
+		emit numSlotsChanged();
+	}
 }

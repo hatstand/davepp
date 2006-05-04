@@ -52,7 +52,7 @@ public:
 	void setUploadSpeed(int speed) {m_uploadSpeed = speed;}
 	
 	int numSlots() {return m_numSlots;}
-	void setNumSlots(int s) {m_numSlots = s;}
+	void setNumSlots(int s);
 	
 	QString nick() {return m_nick;}
 	void setNick(QString nick);

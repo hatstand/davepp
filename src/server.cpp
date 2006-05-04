@@ -109,20 +109,16 @@ void Server::socketReadyRead()
 {
 	QString data = m_socket->readAll();
 //	qDebug() << "RAW:#" << data << "#";
-	data = m_buffer + data;
-	if(data.endsWith("|"))
+	// TODO: fix this so it processes the commands as they come
+	m_buffer += data;
+	if(m_buffer.endsWith("|"))
 	{
-		QStringList commands = data.split("|");
-		for ( QStringList::iterator it = commands.begin(); it != commands.end(); ++it )
+		QStringList commands = m_buffer.split("|");
+		foreach(QString command, commands)
 		{
-			QString command = (*it);
 			parseCommand(command);
 		}
 		m_buffer = "";
-	}
-	else
-	{
-		m_buffer += data;
 	}
 }
 

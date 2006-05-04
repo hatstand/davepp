@@ -431,7 +431,8 @@ void Server::sendInfo()
 
 	QString tag = "<++ V:0.0.1,M:A,H:" + 
 			QString::number(Configuration::instance()->connectedHubs()) + "/0/0,S:" +
-			QString::number(Configuration::instance()->numSlots()) + ">";
+			QString::number(Configuration::instance()->numSlots()) + ",B:" +
+			QString::number(Configuration::instance()->uploadSpeed()) + ">";
 	
 	m_stream << "$MyINFO $ALL " << m_me->nick << " " << extras << " " << tag << "$ $" << m_me->speed << "$" << m_me->email << "$" << QString::number(m_me->shareSize) << "$|";
 	m_stream.flush();

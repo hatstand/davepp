@@ -492,12 +492,6 @@ void Server::searchHub(quint16 port, QString search, bool sizerestricted, bool i
 	m_stream.flush();
 }
 
-
-void Server::udpsocketReadyRead()
-{
-	//Do Nothing
-}
-
 void Server::changeState(ConnectionState newState)
 {
 	m_state = newState;

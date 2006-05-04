@@ -23,6 +23,7 @@
 #include "ui_hubwidget.h"
 
 #include <Q3ListView>
+#include <QTime>
 
 class Server;
 class MainWindow;
@@ -67,7 +68,7 @@ private:
 	Q3ListView* m_userList;
 	UserHeaderListItem* m_userHeader;
 	QList<ChatWidget*> m_privateChats;
-	QTimer* m_timer;
+	QTime m_lastOutput;
 
 };
 

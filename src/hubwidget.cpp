@@ -22,7 +22,6 @@
 #include "mainwindow.h"
 #include "chatwidget.h"
 
-#include <QTimer>
 #include <QTime>
 #include <QColor>
 
@@ -49,10 +48,8 @@ HubWidget::HubWidget(HubDetailsListItem* details, Server* server, Q3ListView* us
 	details->setConnection(server);
 	inputBox->setFocus();
 
-	m_timer = new QTimer(this);
-	m_timer->start(60000 * 5);
-	connect(m_timer, SIGNAL(timeout()), SLOT(printTime()));
 	printTime();
+	m_lastOutput = QTime::currentTime();
 }
 
 
@@ -67,9 +64,17 @@ void HubWidget::chatMessage(QString from, QString message, bool priv)
 	decoded.replace("<", "&lt;");
 	decoded.replace(">", "&gt;");
 	decoded.replace("\n", "<br>");
-	
+	bool time = false;
+	if(m_lastOutput.secsTo(QTime::currentTime()) > 60 * 5)
+	{
+		time = true;
+		m_lastOutput = QTime::currentTime();
+	}
+
 	if (!priv)
 	{
+		if(time)
+			printTime();
 		chatBox->append("<b>&lt;" + from + "&gt;</b> " + decoded);
 		return;
 	}
@@ -92,6 +97,10 @@ void HubWidget::chatMessage(QString from, QString message, bool priv)
 		m_privateChats << widget;
 	}
 	
+
+	if(time)
+		widget->printTime();
+
 	widget->chatBox->append("<b>&lt;" + from + "&gt;</b> " + decoded);
 }
 

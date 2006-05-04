@@ -109,7 +109,6 @@ private slots:
 	void socketReadyRead();
 	void socketBytesWritten(qint64 num);
 	void socketDisconnected();
-	void udpsocketReadyRead();
 	void listenerResult(int result);
 	void listenerStateChanged(int state);
 	void fileListUpdateFinished();

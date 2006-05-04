@@ -34,6 +34,7 @@ public:
 	
 	HubWidget* hub() {return m_hub;}
 	QString nick() {return m_nick;}
+	void printTime();
 
 private:
 	HubWidget* m_hub;
@@ -41,7 +42,6 @@ private:
 	QTimer* m_timer;
 
 private slots:
-	void printTime();
 	void sendPressed();
 };
 

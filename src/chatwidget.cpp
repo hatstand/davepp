@@ -20,6 +20,7 @@
 #include "chatwidget.h"
 #include "hubwidget.h"
 #include "server.h"
+#include "configuration.h"
 
 #include <QTime>
 #include <QDebug>
@@ -36,6 +37,8 @@ ChatWidget::ChatWidget(HubWidget* hub, QString nick)
 	m_timer->start(60000*5);
 	connect(m_timer, SIGNAL(timeout()), SLOT(printTime()));
 	printTime();
+
+	connect(sendButton, SIGNAL(pressed()), SLOT(sendPressed()));
 }
 
 
@@ -48,3 +51,25 @@ void ChatWidget::printTime()
 	chatBox->append("<font color=\"gray\"><small>" + QTime::currentTime().toString("h:mm") + "</small></font>");
 }
 
+void ChatWidget::sendPressed()
+{
+	if (inputBox->text().length() <= 0)
+		return;
+	
+	if (m_hub->isConnected())
+	{
+		QString message = inputBox->text();
+		m_hub->server()->sendMessage(message, m_nick);
+		inputBox->clear();
+		// TODO: properly escape this
+		message.replace("<", "&lt;");
+		message.replace(">", "&gt;");
+		message.replace("\n", "<br>");
+		chatBox->append("<" + Configuration::instance()->nick() + "> " + message);
+	}
+	else
+	{
+		chatBox->append("(You are not connected to the hub)");
+	}
+	inputBox->setFocus();
+}

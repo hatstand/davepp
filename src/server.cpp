@@ -419,7 +419,7 @@ void Server::sendMessage(QString message, QString othernick)
 	}
 	else
 	{
-		m_stream << "$To:" << othernick << " From:" << m_me->nick << " $<" << m_me->nick << "> ;" << encodeChatMessage(message) << "|";
+		m_stream << "$To: " << othernick << " From: " << m_me->nick << " $<" << m_me->nick << "> " << encodeChatMessage(message) << "|";
 	}
 	m_stream.flush();
 }

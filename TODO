@@ -1,0 +1,7 @@
+Cosmetic/UI changes:
+- display slots info in the userlist; actually, better would be a 
+  simple colour change to indicate free slots vs. no free slots
+- ETA download finish; in general clean up the current download 
+  widget, it's got too many things displayed at the same time: 
+  Prioritize.
+

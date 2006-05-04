@@ -45,6 +45,6 @@ ChatWidget::~ChatWidget()
 
 void ChatWidget::printTime()
 {
-	chatBox->append("<font color=\"gray\"><small>" + QTime::currentTime().toString(Qt::TextDate) + "</small></font>");
+	chatBox->append("<font color=\"gray\"><small>" + QTime::currentTime().toString("h:mm") + "</small></font>");
 }
 

@@ -49,7 +49,12 @@ public:
 	void setFileListDirty(bool dirty) { m_fileListDirty = dirty; }
 	
 	int uploadSpeed() {return m_uploadSpeed;}
+	QString niceUploadSpeed();
 	void setUploadSpeed(int speed) {m_uploadSpeed = speed;}
+
+	int downloadSpeed() {return m_downloadSpeed;}
+	QString niceDownloadSpeed();
+	void setDownloadSpeed(int speed) {m_downloadSpeed = speed;}
 	
 	int numSlots() {return m_numSlots;}
 	void setNumSlots(int s);
@@ -91,9 +96,12 @@ public:
 	qint64 getFreeSpace();
 	
 private:
+	QString niceSpeed(int x);
+
 	QString m_downloadDir;
 	QMap<QString, QString> m_sharedDirs;
 	int m_uploadSpeed;
+	int m_downloadSpeed;
 	int m_numSlots;
 	
 	QString m_nick;
@@ -113,8 +121,7 @@ private:
 
 signals:
 	void nickChanged(QString newnick);
-	void numSlotsChanged();
-	void numHubsChanged();
+	void infoChanged();
 
 };
 

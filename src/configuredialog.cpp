@@ -109,6 +109,7 @@ void ConfigureDialog::accept()
 	m_config->setEmail(emailBox->text());
 	m_config->setDescription(descriptionBox->text());
 	m_config->setConnSpeed(connSpeedBox->currentIndex());
+	m_config->setDownloadDir(downloadDirBox->text());
 	m_config->save();
 	
 	QDialog::accept();
@@ -133,6 +134,7 @@ void ConfigureDialog::show()
 	emailBox->setText(m_config->email());
 	descriptionBox->setText(m_config->description());
 	connSpeedBox->setCurrentIndex(m_config->connSpeed());
+	downloadDirBox->setText(m_config->downloadDir());
 	
 	QDialog::show();
 }

@@ -51,8 +51,7 @@ Server::Server(QObject *parent)
 	Configuration* config = Configuration::instance();
 	config->hubConnected();
 	connect(config, SIGNAL(nickChanged(QString)), SLOT(nickChanged(QString)));
-	connect(config, SIGNAL(numSlotsChanged()), SLOT(sendInfo()));
-	connect(config, SIGNAL(numHubsChanged()), SLOT(sendInfo()));
+	connect(config, SIGNAL(infoChanged()), SLOT(sendInfo()));
 	m_me = new User(this, config->nick());
 	m_me->setInterest(config->description());
 	m_me->speed = config->connSpeedString();
@@ -384,11 +383,17 @@ void Server::userQuit(QString nick)
 void Server::sendInfo()
 {
 	// Tag assumes active mode for now
+	QString extras = "{" + 
+			QString::number(Configuration::instance()->slotsLeft()) + "/" +
+			QString::number(Configuration::instance()->numSlots()) + "} [" +
+			Configuration::instance()->niceUploadSpeed() + "/" + 
+			Configuration::instance()->niceDownloadSpeed() + "]";
+
 	QString tag = "<++ V:0.0.1,M:A,H:" + 
-			  QString::number(Configuration::instance()->connectedHubs()) + "/0/0,S:" +
-			  QString::number(Configuration::instance()->numSlots()) + ">";
+			QString::number(Configuration::instance()->connectedHubs()) + "/0/0,S:" +
+			QString::number(Configuration::instance()->numSlots()) + ">";
 	
-	m_stream << "$MyINFO $ALL " << m_me->nick << " " << tag << "$ $" << m_me->speed << "$" << m_me->email << "$" << QString::number(m_me->shareSize) << "$|";
+	m_stream << "$MyINFO $ALL " << m_me->nick << " " << extras << " " << tag << "$ $" << m_me->speed << "$" << m_me->email << "$" << QString::number(m_me->shareSize) << "$|";
 	m_stream.flush();
 }
 

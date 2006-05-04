@@ -20,6 +20,7 @@
 #include "configuration.h"
 
 #include <QDebug>
+#include <QDir>
 
 
 #ifdef Q_OS_WIN32
@@ -59,10 +60,13 @@ Configuration::Configuration(QObject* parent)
 	m_email = m_settings->value("Email", "enoon@erewhon.com").toString();
 	m_description = m_settings->value("Description", "Dave++").toString();
 	m_connSpeed = m_settings->value("ConnSpeed", 2).toInt();
+	m_downloadDir = m_settings->value("DownloadDir", QDir::homePath()).toString();
 	m_settings->endGroup();
 	
 	m_slotsInUse = 0;
 	m_connectedHubs = 0;
+
+	m_downloadSpeed = 0;
 
 	qDebug() << getFreeSpace();
 }
@@ -136,6 +140,7 @@ void Configuration::save()
 	m_settings->setValue("Email", m_email);
 	m_settings->setValue("Description", m_description);
 	m_settings->setValue("ConnSpeed", m_connSpeed);
+	m_settings->setValue("DownloadDir", m_downloadDir);
 	m_settings->endGroup();
 	
 	m_settings->sync();
@@ -213,6 +218,7 @@ bool Configuration::getSlot()
 	{
 		++m_slotsInUse;
 		unlock();
+		emit infoChanged();
 		return true;
 	}
 	else
@@ -227,18 +233,19 @@ void Configuration::revokeSlot()
 	lock();
 	--m_slotsInUse;
 	unlock();
+	emit infoChanged();
 }
 
 void Configuration::hubConnected()
 {
 	++m_connectedHubs;
-	emit numHubsChanged();
+	emit infoChanged();
 }
 
 void Configuration::hubDisconnected()
 {
 	--m_connectedHubs;
-	emit numHubsChanged();
+	emit infoChanged();
 }
 
 void Configuration::setNumSlots(int s)
@@ -246,6 +253,28 @@ void Configuration::setNumSlots(int s)
 	if(s != m_numSlots)
 	{
 		m_numSlots = s;
-		emit numSlotsChanged();
+		emit infoChanged();
 	}
+}
+
+QString Configuration::niceSpeed(int x)
+{
+	if(x < 0)
+		return QString::number(0);
+	else if(x < 1024)
+		return QString::number(x) + "K";
+	else if(x < 1024*1024)
+		return QString::number(x) + "M";
+	else if(x < 1024*1024*1024) // GB!
+		return QString::number(x) + "G";
+}
+
+QString Configuration::niceDownloadSpeed()
+{
+	return niceSpeed(m_downloadSpeed);
+}
+
+QString Configuration::niceUploadSpeed()
+{
+	return niceSpeed(m_uploadSpeed);
 }

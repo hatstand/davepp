@@ -266,7 +266,7 @@ MainWindow::MainWindow()
 	showMaximized();
 	
 	m_config = new Configuration(this);
-	m_config->setDownloadDir(QDir::homeDirPath() + "/testdump");
+//	m_config->setDownloadDir(QDir::homeDirPath() + "/testdump");
 	m_fileListBuilder = new FileListBuilder(m_config);
 	connect(m_fileListBuilder, SIGNAL(finished()), SLOT(updateStatusText()));
 	connect(m_fileListBuilder, SIGNAL(progress(uint, uint)), SLOT(builderProgress(uint, uint)), Qt::QueuedConnection);

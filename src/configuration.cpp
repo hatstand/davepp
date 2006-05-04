@@ -107,7 +107,7 @@ QMap<QString, QString> Configuration::sharedDirs()
 	return ret;
 }
 
-QString Configuration::sharedFilename(QString name)
+QString Configuration::sharedFilename(QString name) const
 {
 	QString share = name.section('\\', 0, 0);
 	if (!m_sharedDirs.contains(share))
@@ -147,7 +147,7 @@ void Configuration::save()
 	m_settings->sync();
 }
 
-QString Configuration::connSpeedString()
+QString Configuration::connSpeedString() const
 {
 	switch (connSpeed())
 	{
@@ -170,7 +170,7 @@ void Configuration::setNick(QString nick)
 	}
 }
 
-qint64 Configuration::getFreeSpace()
+qint64 Configuration::getFreeSpace() const
 {
 #ifdef Q_OS_WIN32buggered
 	LPCSTR pszDrive;
@@ -204,7 +204,7 @@ qint64 Configuration::getFreeSpace()
 #endif
 }
 
-bool Configuration::slotsLeft()
+bool Configuration::slotsLeft() const
 {
 	if(m_slotsInUse < m_numSlots)
 		return true;
@@ -258,26 +258,26 @@ void Configuration::setNumSlots(int s)
 	}
 }
 
-QString Configuration::niceSpeed(int x)
+QString Configuration::niceSpeed(int x) const
 {
 	if(x < 0)
 		return QString::number(0);
 	else if(x < 1024)
 		return QString::number(x) + "K";
 	else if(x < 1024*1024)
-		return QString::number(x) + "M";
+		return QString::number(x/1024) + "M";
 	else if(x < 1024*1024*1024) // GB!
-		return QString::number(x) + "G";
+		return QString::number(x/(1024*1024)) + "G";
 
 	return "Really Fast";
 }
 
-QString Configuration::niceDownloadSpeed()
+QString Configuration::niceDownloadSpeed() const
 {
 	return niceSpeed(m_downloadSpeed);
 }
 
-QString Configuration::niceUploadSpeed()
+QString Configuration::niceUploadSpeed() const
 {
 	return niceSpeed(m_uploadSpeed);
 }

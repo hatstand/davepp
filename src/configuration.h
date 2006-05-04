@@ -37,42 +37,42 @@ public:
 	
 	static Configuration* instance();
 	
-	QString downloadDir() {return m_downloadDir;}
+	QString downloadDir() const {return m_downloadDir;}
 	void setDownloadDir(QString downloadDir) {m_downloadDir = downloadDir;}
 	
 	void shareAdd(QString name, QString dir);
 	void sharesClear();
 	QMap<QString, QString> sharedDirs();
-	QString sharedFilename(QString name);
+	QString sharedFilename(QString name) const;
 	
-	bool isFileListDirty() { return m_fileListDirty; }
+	bool isFileListDirty() const { return m_fileListDirty; }
 	void setFileListDirty(bool dirty) { m_fileListDirty = dirty; }
 	
-	int uploadSpeed() {return m_uploadSpeed;}
-	QString niceUploadSpeed();
+	int uploadSpeed() const {return m_uploadSpeed;}
+	QString niceUploadSpeed() const ;
 	void setUploadSpeed(int speed) {m_uploadSpeed = speed;}
 
-	int downloadSpeed() {return m_downloadSpeed;}
-	QString niceDownloadSpeed();
+	int downloadSpeed() const {return m_downloadSpeed;}
+	QString niceDownloadSpeed() const;
 	void setDownloadSpeed(int speed) {m_downloadSpeed = speed;}
 	
-	int numSlots() {return m_numSlots;}
+	int numSlots() const {return m_numSlots;}
 	void setNumSlots(int s);
 	
-	QString nick() {return m_nick;}
+	QString nick() const {return m_nick;}
 	void setNick(QString nick);
 	
-	QString email() {return m_email;}
+	QString email() const {return m_email;}
 	void setEmail(QString email) {m_email = email;}
 	
-	QString description() {return m_description;}
+	QString description() const {return m_description;}
 	void setDescription(QString description) {m_description = description;}
 	
-	int connSpeed() {return m_connSpeed;}
-	QString connSpeedString();
+	int connSpeed() const {return m_connSpeed;}
+	QString connSpeedString() const;
 	void setConnSpeed(int connSpeed) {m_connSpeed = connSpeed;}
 	
-	QString tag() {return m_tag;}
+	QString tag() const {return m_tag;}
 	
 	// Private?
 	void lock() {m_mutex.lock();}
@@ -83,20 +83,20 @@ public:
 	void save();
 	
 	// Stuff that isn't saved
-	int slotsInUse() {return m_slotsInUse;}
+	int slotsInUse() const {return m_slotsInUse;}
 	void setSlotsInUse(int s) {m_slotsInUse = s;}
-	bool slotsLeft();
+	bool slotsLeft() const;
 	bool getSlot();
 	void revokeSlot();
-	int slotsFree() { return m_numSlots - m_slotsInUse; }
+	int slotsFree() const { return m_numSlots - m_slotsInUse; }
 
-	int connectedHubs() { return m_connectedHubs; };
+	int connectedHubs() const { return m_connectedHubs; };
 	void hubConnected();
 	void hubDisconnected();
-	qint64 getFreeSpace();
+	qint64 getFreeSpace() const;
 	
 private:
-	QString niceSpeed(int x);
+	QString niceSpeed(int x) const;
 
 	QString m_downloadDir;
 	QMap<QString, QString> m_sharedDirs;

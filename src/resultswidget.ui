@@ -176,17 +176,17 @@
            </item>
            <item>
             <property name="text" >
-             <string>Kb</string>
+             <string>KiB</string>
             </property>
            </item>
            <item>
             <property name="text" >
-             <string>Mb</string>
+             <string>MiB</string>
             </property>
            </item>
            <item>
             <property name="text" >
-             <string>Gb</string>
+             <string>GiB</string>
             </property>
            </item>
           </widget>

@@ -430,11 +430,11 @@ QString Utilities::niceSize(quint64 size)
 	else if (size < 1024)
 		return QString::number(size) + " bytes";
 	else if (size < 1024 * 1024)
-		return QString::number(size/1024) + " Kb";
+		return QString::number(size/1024) + " KiB";
 	else if (size < 1024 * 1024 * 1024)
-		return QString::number(size/(1024*1024)) + " Mb";
+		return QString::number(size/(1024*1024)) + " MiB";
 	
-	return QString::number(size/(1024*1024*1024)) + " Gb";
+	return QString::number(size/(1024*1024*1024)) + " GiB";
 }
 
 BitArray::BitArray()

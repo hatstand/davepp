@@ -183,7 +183,7 @@
            <item>
             <widget class="QSpinBox" name="downloadSpeedBox" >
              <property name="suffix" >
-              <string> Kb/s</string>
+              <string> KiB/s</string>
              </property>
              <property name="maximum" >
               <number>60000</number>
@@ -300,7 +300,7 @@
            <item>
             <widget class="QSpinBox" name="uploadSpeedBox" >
              <property name="suffix" >
-              <string> Kb/s</string>
+              <string> KiB/s</string>
              </property>
              <property name="maximum" >
               <number>60000</number>

@@ -423,18 +423,36 @@ QByteArray Utilities::encodeList(QByteArray inputData)
 	return data;
 }
 
+
+namespace niceSizeDetails {
+
+// we make single digits to have a little more precision
+QString numerify(quint64 size, quint64 quotient)
+{
+	quint64 scaled = size / quotient;
+	if(scaled >= 10)
+		return QString::number(scaled);
+	else
+	{
+		double scaled2 = double(size) / double(quotient);
+		return QString::number(scaled2, 'f', 1);
+	}
+}
+}
+
 QString Utilities::niceSize(quint64 size)
 {
+	using namespace niceSizeDetails;
 	if (size == 0)
 		return "(no files)";
 	else if (size < 1024)
 		return QString::number(size) + " bytes";
-	else if (size < 1024 * 1024)
-		return QString::number(size/1024) + " KiB";
-	else if (size < 1024 * 1024 * 1024)
-		return QString::number(size/(1024*1024)) + " MiB";
+	else if (size < 1024*1024)
+		return numerify(size, 1024) + " KiB";
+	else if (size < 1024*1024*1024)
+		return numerify(size, 1024*1024) + " MiB";
 	
-	return QString::number(size/(1024*1024*1024)) + " GiB";
+	return numerify(size, 1024*1024*1024) + " GiB";
 }
 
 BitArray::BitArray()

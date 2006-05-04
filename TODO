@@ -1,7 +1,11 @@
+This file is for *low* priority things; things that would
+otherwise fall through the cracks and get forgotten about
+
 Cosmetic/UI changes:
 - display slots info in the userlist; actually, better would be a 
   simple colour change to indicate free slots vs. no free slots
 - ETA download finish; in general clean up the current download 
   widget, it's got too many things displayed at the same time: 
   Prioritize.
-
+- Implement /me stuff; should refactor out the message display code
+- Refactor out the escape code for outputting chat messages; see above

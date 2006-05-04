@@ -21,6 +21,9 @@
 #include "hubwidget.h"
 #include "server.h"
 
+#include <QTime>
+#include <QDebug>
+
 ChatWidget::ChatWidget(HubWidget* hub, QString nick)
  : Ui::UIHubWidget(), QWidget(NULL), m_hub(hub), m_nick(nick)
 {
@@ -28,6 +31,11 @@ ChatWidget::ChatWidget(HubWidget* hub, QString nick)
 	
 	disconnectButton->hide();
 	statusLabel->setText("Chat with <b>" + nick + "</b> on <b>" + hub->server()->hubName() + "</b>");
+
+	m_timer = new QTimer(this);
+	m_timer->start(60000*5);
+	connect(m_timer, SIGNAL(timeout()), SLOT(printTime()));
+	printTime();
 }
 
 
@@ -35,4 +43,8 @@ ChatWidget::~ChatWidget()
 {
 }
 
+void ChatWidget::printTime()
+{
+	chatBox->append("<font color=\"gray\"><small>" + QTime::currentTime().toString(Qt::TextDate) + "</small></font>");
+}
 

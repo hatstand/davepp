@@ -59,12 +59,16 @@ private slots:
 	
 	void sendPressed();
 
+	void printTime();
+
 private:
 	HubDetailsListItem* m_details;
 	Server* m_server;
 	Q3ListView* m_userList;
 	UserHeaderListItem* m_userHeader;
 	QList<ChatWidget*> m_privateChats;
+	QTimer* m_timer;
+
 };
 
 #endif

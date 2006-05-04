@@ -22,7 +22,9 @@
 #include "mainwindow.h"
 #include "chatwidget.h"
 
+#include <QTimer>
 #include <QTime>
+#include <QColor>
 
 HubWidget::HubWidget(HubDetailsListItem* details, Server* server, Q3ListView* userList)
  : QWidget(NULL),
@@ -46,6 +48,11 @@ HubWidget::HubWidget(HubDetailsListItem* details, Server* server, Q3ListView* us
 	
 	details->setConnection(server);
 	inputBox->setFocus();
+
+	m_timer = new QTimer(this);
+	m_timer->start(60000 * 5);
+	connect(m_timer, SIGNAL(timeout()), SLOT(printTime()));
+	printTime();
 }
 
 
@@ -60,11 +67,10 @@ void HubWidget::chatMessage(QString from, QString message, bool priv)
 	decoded.replace("<", "&lt;");
 	decoded.replace(">", "&gt;");
 	decoded.replace("\n", "<br>");
-	QString time = "[" + QTime::currentTime().toString(Qt::TextDate) + "]";
 	
 	if ((!priv) || (!message.trimmed().startsWith('<')))
 	{
-		chatBox->append(time + "<b>&lt;" + from + "&gt;</b> " + decoded);
+		chatBox->append("<b>&lt;" + from + "&gt;</b> " + decoded);
 		return;
 	}
 	
@@ -173,4 +179,7 @@ void HubWidget::privateChatClosed(ChatWidget* widget)
 	m_privateChats.removeAll(widget);
 }
 
-
+void HubWidget::printTime()
+{
+	chatBox->append("<font color=\"gray\"><small>" + QTime::currentTime().toString(Qt::TextDate) + "</small></font>");
+}

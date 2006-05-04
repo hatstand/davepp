@@ -20,6 +20,8 @@
 #ifndef CHATWIDGET_H
 #define CHATWIDGET_H
 
+#include <QTimer>
+
 class HubWidget;
 #include <ui_hubwidget.h>
 
@@ -36,6 +38,10 @@ public:
 private:
 	HubWidget* m_hub;
 	QString m_nick;
+	QTimer* m_timer;
+
+private slots:
+	void printTime();
 };
 
 #endif

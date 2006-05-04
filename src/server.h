@@ -77,7 +77,7 @@ public:
 	void getUserIP(QString nick); // void return as result is emitted
 
 private:
-	void processChatCommand(QString command, bool priv);
+	void processChatCommand(QString nick, QString command, bool priv);
 	void parseCommand(QString command);
 	void searchResponse(QString othernick, QHostAddress ip, int port, bool sizerestricted, bool isminimumsize, int size, int datatype);
 	void changeState(ConnectionState newState);

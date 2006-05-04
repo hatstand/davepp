@@ -146,16 +146,26 @@ void Server::socketBytesWritten(qint64 num)
 	qDebug() << num << " bytes written";
 }
 
-void Server::processChatCommand(QString command, bool priv)
+// we expect "<nick> message"
+void Server::processChatCommand(QString nick, QString command, bool priv)
 {
 	using namespace ServerDetails;
-	QRegExp regExp("<([^>]*)>( ?)(.*)");
-	if (!regExp.exactMatch(command))
-		return;
-	
-	QString nick = regExp.cap(1);
-	QString message = decodeChatMessage(regExp.cap(3));
 
+	QString message;
+
+	QRegExp regExp("<([^>]*)>( ?)(.*)");
+	if (regExp.exactMatch(command))
+	{
+		nick = regExp.cap(1);
+		message = decodeChatMessage(regExp.cap(3));
+	}
+	else
+	{
+		// probably from the Hub
+		message = command;
+		priv = false;
+	}
+	
 	qDebug() << "Got" << (priv ? "private" : "") << "message from" << nick << ":" << message;
 	
 	emit chatMessage(nick, message, priv);
@@ -296,7 +306,7 @@ void Server::parseCommand(QString command)
 			QString othernick = words[3];
 			QString message = decodeChatMessage(command.section('$',2));
 			// see protocol reference; message already contains other nick
-			processChatCommand(message, true);
+			processChatCommand(othernick, message, true);
 		}
 		else if(words[0] == "$ConnectToMe")
 		{
@@ -364,7 +374,7 @@ void Server::parseCommand(QString command)
 	}
 	else if (command.startsWith("<"))
 	{
-		processChatCommand(command, false);
+		processChatCommand("", command, false);
 	}
 }
 

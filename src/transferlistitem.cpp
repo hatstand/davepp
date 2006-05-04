@@ -45,7 +45,7 @@ void DaveProgressBar::setText(QString text)
 
 
 TransferListItem::TransferListItem(Q3ListView* parent)
- : Q3ListViewItem(parent), m_transfer(NULL), QObject(parent), m_speed(0), m_totalSize(0)
+ : Q3ListViewItem(parent), m_transfer(NULL), QObject(parent), m_speed(0), m_totalSize(0), m_update_time()
 {
 	m_progress = new DaveProgressBar(listView());
 	
@@ -56,14 +56,18 @@ TransferListItem::TransferListItem(Q3ListView* parent)
 	m_timer = new QTimer(this);
 	m_timer->setSingleShot(true);
 	connect(m_timer, SIGNAL(timeout()), SLOT(doNextQueued()));
+
+	m_update_time.start();
 }
 
 TransferListItem::TransferListItem(TransferListItem* parent)
- : Q3ListViewItem(parent), m_transfer(NULL), QObject(parent), m_speed(0), m_progress(NULL), m_totalSize(0)
+ : Q3ListViewItem(parent), m_transfer(NULL), QObject(parent), m_speed(0), m_progress(NULL), m_totalSize(0), m_update_time()
 {
 	m_timer = new QTimer(this);
 	m_timer->setSingleShot(true);
 	connect(m_timer, SIGNAL(timeout()), SLOT(doNextQueued()));
+
+	m_update_time.start();
 }
 
 TransferListItem::~TransferListItem()
@@ -244,7 +248,8 @@ void TransferListItem::clientProgress(uint size, uint totalSize)
 	m_progress->setValue(size);
 	m_totalSize = totalSize;
 	m_size = size;
-	listView()->repaintItem(this);
+	if(m_update_time.restart() > 100) // 10 fps
+		listView()->repaintItem(this);
 }
 
 void TransferListItem::clientDestroyed()

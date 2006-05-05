@@ -26,7 +26,7 @@
 #include <Q3StyleSheet>
 
 ChatWidget::ChatWidget(Server* server, QString nick)
- : Ui::UIHubWidget(), QWidget(NULL), m_server(server), m_nick(nick), m_lastOutput(QTime::currentTime())
+ : Ui::UIHubWidget(), QWidget(NULL), m_server(server), m_nick(nick), m_lastOutput()
 {
 	setupUi(this);
 	
@@ -39,8 +39,8 @@ ChatWidget::ChatWidget(Server* server, QString nick)
 
 	inputBox->setFocus();
 
+	m_lastOutput.start();
 	printTime();
-	m_lastOutput = QTime::currentTime();
 }
 
 ChatWidget::~ChatWidget()
@@ -51,21 +51,23 @@ void ChatWidget::chatMessage(QString from, QString message)
 {
 	message = Q3StyleSheet::escape(message); // Breaks the layout
 	message.replace("\n", "<br />");
-	bool time = false;
-	if(m_lastOutput.secsTo(QTime::currentTime()) > 60 * 5)
-		time = true;
 
-	if(time)
-	{
-		printTime();
-		m_lastOutput = QTime::currentTime();
-	}
-	chatBox->append("<b>&lt;" + from + "&gt;</b> " + message);
+	printTimeIfNeeded();
+	chatBox->append("<b>" + from + ":</b> " + message);
 }
 
 void ChatWidget::printTime()
 {
 	chatBox->append("<font color=\"gray\"><small>" + QTime::currentTime().toString("h:mm") + "</small></font>");
+}
+
+void ChatWidget::printTimeIfNeeded()
+{
+	if(m_lastOutput.elapsed() > 60 * 5 * 1000)
+	{
+		printTime();
+		m_lastOutput.restart();
+	}
 }
 
 void ChatWidget::sendPressed()
@@ -82,7 +84,7 @@ void ChatWidget::sendPressed()
 
 		message = Q3StyleSheet::escape(message);
 		QString from = Configuration::instance()->nick();
-		chatBox->append("<b>&lt;" + from + "&gt;</b> " + message);
+		chatMessage(from, message);
 	}
 	else
 	{

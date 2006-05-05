@@ -45,6 +45,7 @@ protected:
 	Server* m_server;
 	QString m_nick;
 	void printTime();
+	void printTimeIfNeeded();
 
 protected slots:
 	void sendPressed();

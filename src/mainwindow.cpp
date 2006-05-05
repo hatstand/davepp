@@ -263,6 +263,7 @@ MainWindow::MainWindow()
 	connect(hubTabWidget, SIGNAL(tabRightClicked(int, const QPoint&)), SLOT(hubTabRightClick(int, const QPoint&)));
 	connect(transferList, SIGNAL(contextMenuRequested(Q3ListViewItem*, const QPoint&, int)), SLOT(transferRightClick(Q3ListViewItem*, const QPoint&)));
 	connect(resultsTabWidget, SIGNAL(tabRightClicked(int, const QPoint&)), SLOT(resultsTabRightClick(int, const QPoint&)));
+	connect(hubTabWidget, SIGNAL(currentChanged(int)), SLOT(hubTabCurrentChanged()));
 	
 	
 	// Need to store some of this in a config file
@@ -696,6 +697,7 @@ void MainWindow::requestNewPrivateChat()
 	{
 		User* user = item->user();
 		PrivateChatWidget* w = new PrivateChatWidget(user->server, user->nick);
+		getHubTabWidget()->setCurrentWidget(w);
 	}
 }
 
@@ -1051,5 +1053,14 @@ void MainWindow::builderProgress(uint value, uint totalSteps)
 {
 	statusProgress->setRange(0, totalSteps);
 	statusProgress->setValue(value);
+}
+
+void MainWindow::hubTabCurrentChanged()
+{
+	QWidget* w = hubTabWidget->currentWidget();
+	if (!w->inherits("ChatWidget"))
+		return;
+	
+	((ChatWidget*)w)->setInputBoxFocus();
 }
 

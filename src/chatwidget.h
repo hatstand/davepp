@@ -35,6 +35,7 @@ public:
 
 	bool isConnected();
 	QString nick() {return m_nick;}
+	void setInputBoxFocus();
 	
 public slots:
 	void chatMessage(QString from, QString message);

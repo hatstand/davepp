@@ -37,7 +37,7 @@ ChatWidget::ChatWidget(Server* server, QString nick)
 	connect(sendButton, SIGNAL(pressed()), SLOT(sendPressed()));
 	connect(inputBox, SIGNAL(returnPressed()), SLOT(sendPressed()));
 
-	inputBox->setFocus();
+	setInputBoxFocus();
 
 	m_lastOutput.start();
 	printTime();
@@ -45,6 +45,11 @@ ChatWidget::ChatWidget(Server* server, QString nick)
 
 ChatWidget::~ChatWidget()
 {
+}
+
+void ChatWidget::setInputBoxFocus()
+{
+	inputBox->setFocus();
 }
 
 void ChatWidget::chatMessage(QString from, QString message)

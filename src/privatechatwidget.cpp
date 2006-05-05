@@ -30,6 +30,7 @@ PrivateChatWidget::PrivateChatWidget(Server* server, QString nick) : ChatWidget(
 	userConnected(true)
 {
 	statusLabel->setText("Chat with <b>" + nick + "</b> on <b>" + server->hubName() + "</b>");
+	disconnectButton->setText("Close");
 
 	connect(server, SIGNAL(privateChatMessage(QString, QString)), SLOT(chatMessage(QString, QString)));
 	connect((PrivateChatWidget*)this, SIGNAL(newPrivateChat(PrivateChatWidget*)), MainWindow::getInstance(), SLOT(newPrivateChat(PrivateChatWidget*)));

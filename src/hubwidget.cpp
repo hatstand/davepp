@@ -71,6 +71,7 @@ void HubWidget::privateChatMessage(QString from, QString message)
 	emit newPrivateChat(widget);
 	m_privateChats << widget;
 	connect(widget, SIGNAL(privateChatClosed(PrivateChatWidget*)), SLOT(privateChatClosed(PrivateChatWidget*)));
+	MainWindow::getInstance()->getHubTabWidget()->setCurrentWidget(widget);
 }
 
 void HubWidget::stateChanged(int state)

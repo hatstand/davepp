@@ -151,6 +151,7 @@ private slots:
 	void resultsNewSearch();
 	void resultsClose();
 	void resultsCloseAll();
+	void hubTabCurrentChanged();
 	
 	void transferRightClick(Q3ListViewItem*, const QPoint& point);
 	void transferResume();

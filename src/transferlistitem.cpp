@@ -47,7 +47,7 @@ void DaveProgressBar::setText(QString text)
 TransferListItem::TransferListItem(Q3ListView* parent)
  : Q3ListViewItem(parent), m_transfer(NULL), QObject(parent), m_speed(0), m_totalSize(0), m_update_time()
 {
-	m_progress = new DaveProgressBar(listView());
+	m_progress = new DaveProgressBar(listView()->viewport());
 	
 	qDebug() << "Height before" << height();
 	setHeight(QApplication::fontMetrics().height()*3 + 1);
@@ -285,8 +285,7 @@ void TransferListItem::paintCell(QPainter* painter, const QColorGroup& cg, int c
 	{
 		m_progress->resize(width - 6, QApplication::fontMetrics().height());
 		
-		QPoint pos(3, itemPos() + QApplication::fontMetrics().height()*2);
-		m_progress->move(listView()->contentsToViewport(pos));
+		listView()->moveChild(m_progress, 3, itemPos() + QApplication::fontMetrics().height()*2);
 	}
 	
 	QFont font = painter->font();

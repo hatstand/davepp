@@ -94,6 +94,8 @@ public:
 	void hubConnected();
 	void hubDisconnected();
 	qint64 getFreeSpace() const;
+
+	QByteArray getSavedXmlList();
 	
 private:
 	QString niceSpeed(int x) const;

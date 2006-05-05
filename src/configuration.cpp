@@ -21,6 +21,7 @@
 
 #include <QDebug>
 #include <QDir>
+#include "filelistbuilder.h"
 
 
 #ifdef Q_OS_WIN32
@@ -30,7 +31,7 @@
 	typedef BOOL (WINAPI *PGETDISKFREESPACEEX)(LPCSTR,
 						    PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER);
 
-#elif defined Q_OS_LINUX
+#elif defined Q_OS_UNIX
 	#include <sys/statvfs.h>
 #endif
 
@@ -68,12 +69,14 @@ Configuration::Configuration(QObject* parent)
 	m_slotsInUse = 0;
 	m_connectedHubs = 0;
 
-	qDebug() << getFreeSpace();
+	qint64 free = getFreeSpace();
+	qDebug() << free << "MB:" << free/1024/1024;
 }
 
 
 Configuration::~Configuration()
 {
+	save();
 }
 
 Configuration* Configuration::instance()
@@ -143,6 +146,10 @@ void Configuration::save()
 	m_settings->setValue("ConnSpeed", m_connSpeed);
 	m_settings->setValue("DownloadDir", m_downloadDir);
 	m_settings->endGroup();
+
+	m_settings->beginGroup("FilelistInfo");
+	m_settings->setValue("XmlFileList", FileListBuilder::instance()->xmlBZList());
+	m_settings->endGroup();
 	
 	m_settings->sync();
 }
@@ -195,12 +202,12 @@ qint64 Configuration::getFreeSpace() const
 	}
 	else
 		return -1;
-#elif defined Q_OS_LINUX
+#elif defined Q_OS_UNIX // statvfs should be available on most unices
 	struct statvfs results;
-	statvfs("/", &results); // Just / for the moment
+	statvfs(m_downloadDir, &results);
 	return (qint64)(results.f_bavail * results.f_bsize);
 #else
-	return -1; // No idea. BSD at some point? Solaris?
+	return -1; // No idea. Must be weird not to be POSIX or Win32
 #endif
 }
 
@@ -280,4 +287,13 @@ QString Configuration::niceDownloadSpeed() const
 QString Configuration::niceUploadSpeed() const
 {
 	return niceSpeed(m_uploadSpeed);
+}
+
+QByteArray Configuration::getSavedXmlList()
+{
+	m_settings->beginGroup("FilelistInfo");
+	QByteArray list = m_settings->value("XmlFileList").toByteArray();
+	m_settings->endGroup();
+
+	return list;
 }

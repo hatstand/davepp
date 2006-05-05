@@ -86,3 +86,76 @@ void FileList::setTotalSize(quint64 size)
 {
 	m_totalSize = size;
 }
+
+QString FileList::toString()
+{
+	QString ret;
+
+	foreach(FileNode* child, m_root->children())
+	{
+		ret += writeNodeToDcList(child, "");
+	}
+	
+	return ret;
+} 
+
+QByteArray FileList::toAscii()
+{
+	return(toString().toAscii());
+}
+
+QString FileList::writeNodeToDcList(FileNode* node, QString indent)
+{
+	if(!node->isDir())
+	{
+		return indent + node->name() + "|" + QString::number(node->size()) + "\r\n";
+	}
+	else
+	{
+		QString ret = indent + node->name() + "\r\n";
+		foreach(FileNode* child, node->children())
+		{
+			ret += writeNodeToDcList(child, indent + "\t");
+		}
+		return ret;
+	}
+}
+
+QDomDocument FileList::toXml()
+{
+	// Create root stuff
+	QDomDocument doc;
+	QDomElement begin = doc.createElement("FileListing");
+	begin.setAttribute("Version", "1");
+	begin.setAttribute("Generator", "Dave++");
+	doc.appendChild(begin);
+
+	foreach(FileNode* child, m_root->children())
+	{
+		writeNodeToXmlList(child, &begin, doc);
+	}
+
+	return doc;
+}
+
+void FileList::writeNodeToXmlList(FileNode* node, QDomElement* root, QDomDocument doc)
+{
+   if(!node->isDir())
+   {
+      QDomElement el = doc.createElement("File");
+      el.setAttribute("Size", node->size());
+      el.setAttribute("Name", node->name());
+      root->appendChild(el);
+   }
+   else
+   {
+      QDomElement el = doc.createElement("Directory");
+      el.setAttribute("Name", node->name());
+      root->appendChild(el);
+
+      foreach (FileNode* child, node->children())
+      {
+         writeNodeToXmlList(child, &el, doc);
+      }
+   }
+}

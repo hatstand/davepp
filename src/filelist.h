@@ -3,6 +3,7 @@
 
 #include "filenode.h"
 #include <QIODevice>
+#include <QDomDocument>
 
 class FileNode;
 
@@ -20,10 +21,15 @@ public:
 	void calculateTotalSize();
 	quint64 totalSize();
 	void setTotalSize(quint64 size);
+	QString toString();
+	QByteArray toAscii();
+	QDomDocument toXml();
 
 private:
 	FileNode* m_root;
 	quint64 m_totalSize;
+	QString writeNodeToDcList(FileNode* node, QString indent);
+	void writeNodeToXmlList(FileNode* node, QDomElement* root, QDomDocument doc);
 };
 
 #endif

@@ -45,17 +45,31 @@ FileListBuilder* FileListBuilder::instance()
 
 void FileListBuilder::run()
 {
+	// TODO: Add hash of byteArray to settings
+	QByteArray savedBZXml = m_config->getSavedXmlList();
+	if(!savedBZXml.isEmpty()) // Yay! We found a saved file list
+	{
+		qDebug() << "Using saved XML";
+		m_list = new FileList(Utilities::decodeBZList(savedBZXml));
+		m_list->calculateTotalSize();
+
+		m_XmlBZList = savedBZXml;
+	
+		m_huffmanList = Utilities::encodeList(m_list->toAscii());
+		m_BZList = Utilities::encodeBZList(m_list->toAscii());
+
+		return;
+	}
+
+	qDebug() << "Creating new filelist";
+
 	QMap<QString, QString> sharedDirs(m_config->sharedDirs());
 	FileNode* root = new FileNode(NULL, "<root>");
 
-	QDomElement begin = doc.createElement("FileListing");
-	begin.setAttribute("Version", "1");
-	begin.setAttribute("Generator", "Dave++");
-	doc.appendChild(begin);
-	
 	uint totalSteps = 4 + sharedDirs.count();
 	uint step = 0;
 	emit progress(step, totalSteps);
+
 	
 	QMapIterator<QString, QString> it(sharedDirs);
 	while (it.hasNext())
@@ -63,40 +77,20 @@ void FileListBuilder::run()
 		it.next();
 		new FileNode(root, QDir(it.value()), it.key());
 
-//		QDomElement el = doc.createElement("Directory");
-//		el.setAttribute("Name", it.value());
-//		begin.appendChild(el);
-
 		emit progress(step++, totalSteps);
 	}
 	
 	m_mutex.lock();
-	delete m_list;
+	delete m_list; // Remove old filelist
+
+	// Generate File List in memory
 	m_list = new FileList(root);
 	m_list->calculateTotalSize();
 	emit progress(step++, totalSteps);
 	m_mutex.unlock();
-	
-	QString dcList;
-	
-	foreach (FileNode* child, root->children())
-	{
-		dcList += writeNodeToDcList(child, "");
-		writeNodeToXmlList(child, &begin);
-	}
-	
-	QByteArray huffmanList = Utilities::encodeList(dcList.toAscii());
-	emit progress(step++, totalSteps);
-	QByteArray BZList = Utilities::encodeBZList(dcList.toAscii());
-	emit progress(step++, totalSteps);
-//	qDebug() << doc.toString();
-	QByteArray XmlBZList = Utilities::encodeBZList(doc.toByteArray());
-	emit progress(step++, totalSteps);
-	m_mutex.lock();
-	m_huffmanList = huffmanList;
-	m_BZList = BZList;
-	m_XmlBZList = XmlBZList;
-	m_mutex.unlock();
+
+	// Don't bother creating useful lists until they're requested
+	// BZList is rarely request for example, so why bother?
 	
 	Configuration::instance()->setFileListDirty(false);
 }
@@ -112,6 +106,10 @@ FileList* FileListBuilder::list()
 QByteArray FileListBuilder::huffmanList()
 {
 	m_mutex.lock();
+
+	if(m_huffmanList.isEmpty())
+		m_huffmanList = Utilities::encodeList(m_list->toAscii());
+
 	QByteArray ret = m_huffmanList;
 	m_mutex.unlock();
 	return ret;
@@ -120,6 +118,10 @@ QByteArray FileListBuilder::huffmanList()
 QByteArray FileListBuilder::bzList()
 {
 	m_mutex.lock();
+
+	if(m_BZList.isEmpty())
+		m_BZList = Utilities::encodeBZList(m_list->toAscii());
+
 	QByteArray ret = m_BZList;
 	m_mutex.unlock();
 	return ret;
@@ -128,48 +130,13 @@ QByteArray FileListBuilder::bzList()
 QByteArray FileListBuilder::xmlBZList()
 {
 	m_mutex.lock();
+
+	if(m_XmlBZList.isEmpty())
+		m_XmlBZList = Utilities::encodeBZList(m_list->toXml().toByteArray());
+
 	QByteArray ret = m_XmlBZList;
 	m_mutex.unlock();
 	return ret;
-}
-
-QString FileListBuilder::writeNodeToDcList(FileNode* node, QString indent)
-{
-	if (!node->isDir())
-	{
-		return indent + node->name() + "|" + QString::number(node->size()) + "\r\n";
-	}
-	else
-	{
-		QString ret = indent + node->name() + "\r\n";
-		foreach (FileNode* child, node->children())
-		{
-			ret += writeNodeToDcList(child, indent + "\t");
-		}
-		return ret;
-	}
-}
-
-void FileListBuilder::writeNodeToXmlList(FileNode* node, QDomElement* root)
-{
-	if(!node->isDir())
-	{
-		QDomElement el = doc.createElement("File");
-		el.setAttribute("Size", node->size());
-		el.setAttribute("Name", node->name());
-		root->appendChild(el);
-	}
-	else
-	{
-		QDomElement el = doc.createElement("Directory");
-		el.setAttribute("Name", node->name());
-		root->appendChild(el);
-
-		foreach (FileNode* child, node->children())
-		{
-			writeNodeToXmlList(child, &el);
-		}
-	}
 }
 
 quint64 FileListBuilder::totalSize()

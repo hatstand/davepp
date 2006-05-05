@@ -26,6 +26,20 @@
 #include <QColor>
 #include <QDebug>
 
+HubWidget::HubWidget(HubDetailsListItem* details, Server* server, Q3ListView* userList)
+ : ChatWidget(server, QString::null),
+   m_details(details),
+   m_userList(userList),
+   m_userHeader(NULL),
+   m_privateChats()
+{
+	details->setConnection(m_server);
+	connect(server, SIGNAL(chatMessage(QString, QString)), SLOT(chatMessage(QString, QString)));
+	connect(server, SIGNAL(privateChatMessage(QString, QString)), SLOT(privateChatMessage(QString, QString)));
+	connect(server, SIGNAL(stateChanged(int)), SLOT(stateChanged(int)));
+	connect(server, SIGNAL(error(QString)), SLOT(error(QString)));
+}
+
 HubWidget::~HubWidget()
 {
 	delete m_server;
@@ -38,25 +52,25 @@ void HubWidget::chatMessage(QString from, QString message)
 
 void HubWidget::privateChatMessage(QString from, QString message)
 {
-	if(from != "")
+	if(from.isEmpty())
+		return;
+	
+	DaveTabWidget* widg = MainWindow::getInstance()->getHubTabWidget();
+	for(int i = 1; i < widg->count(); ++i)
 	{
-		DaveTabWidget* widg = MainWindow::getInstance()->getHubTabWidget();
-		for(int i = 0; i < widg->count(); ++i)
-		{
-			ChatWidget* w = (ChatWidget*)widg->widget(i);
+		ChatWidget* w = (ChatWidget*)widg->widget(i);
+		
+		qDebug() << w->nick() << from;
 
-			if(w->nick() == from)
-				return;
-			else
-			{
-				PrivateChatWidget* widget = new PrivateChatWidget(m_server, from);
-				widget->chatMessage(from, message);
-				emit newPrivateChat(widget);
-				m_privateChats << widget;
-				connect(widget, SIGNAL(privateChatClosed(PrivateChatWidget*)), SLOT(privateChatClosed(PrivateChatWidget*)));
-			}
-		}
+		if(w->nick() == from)
+			return;
 	}
+	
+	PrivateChatWidget* widget = new PrivateChatWidget(m_server, from);
+	widget->chatMessage(from, message);
+	emit newPrivateChat(widget);
+	m_privateChats << widget;
+	connect(widget, SIGNAL(privateChatClosed(PrivateChatWidget*)), SLOT(privateChatClosed(PrivateChatWidget*)));
 }
 
 void HubWidget::stateChanged(int state)

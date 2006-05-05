@@ -36,20 +36,7 @@ class HubWidget : public ChatWidget
 {
 	Q_OBJECT
 public:
-	HubWidget(HubDetailsListItem* details, Server* server, Q3ListView* userList) :ChatWidget(server, ""),
-	m_details(details),
-	m_userList(userList),
-	m_userHeader(NULL),
-	m_privateChats()
-	{
-		details->setConnection(m_server);
-		connect(server, SIGNAL(chatMessage(QString, QString)), SLOT(chatMessage(QString, QString)));
-		connect(server, SIGNAL(privateChatMessage(QString, QString)), SLOT(privateChatMessage(QString, QString)));
-		connect(server, SIGNAL(stateChanged(int)), SLOT(stateChanged(int)));
-		connect(server, SIGNAL(error(QString)), SLOT(error(QString)));
-
-		qDebug() << "Created HubWidget";
-	}
+	HubWidget(HubDetailsListItem* details, Server* server, Q3ListView* userList);
 	~HubWidget();
 	
 	HubDetailsListItem* detailsListItem() {return m_details;}

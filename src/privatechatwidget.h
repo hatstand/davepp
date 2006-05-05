@@ -30,17 +30,13 @@ class HubWidget;
 class PrivateChatWidget : public ChatWidget
 {
 	Q_OBJECT
+
+signals:
+	void privateChatClosed(PrivateChatWidget* widget);
+	void newPrivateChat(PrivateChatWidget* widget);
+
 public:
-	PrivateChatWidget(Server* server, QString nick) : ChatWidget(server, nick),
-	userConnected(true)
-	{
-		statusLabel->setText("Chat with <b>" + nick + "</b> on <b>" + server->hubName() + "</b>");
-		connect(server, SIGNAL(privateChatMessage()), SLOT(chatMessage()));
-		connect(this, SIGNAL(newPrivateChat(PrivateChatWidget* widget)), MainWindow::getInstance(), SLOT(newPrivateChat(PrivateChatWidget* widget)));
-		connect(this, SIGNAL(privateChatClosed(PrivateChatWidget* widget)), MainWindow::getInstance(), SLOT(privateChatClosed(PrivateChatWidget* widget)));
-		emit newPrivateChat(this);
-	}
-	
+	PrivateChatWidget(Server* server, QString nick);
 	QString nick() {return m_nick;}
 
 private:
@@ -52,9 +48,6 @@ private slots:
 	void userQuit(User* user);
 	void privateChatMessage(QString from, QString message);
 
-signals:
-	void privateChatClosed(PrivateChatWidget* widget);
-	void newPrivateChat(PrivateChatWidget* widget);
 };
 
 #endif

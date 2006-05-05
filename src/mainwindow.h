@@ -120,6 +120,7 @@ public:
 	
 	Server* getServer(QString address, QString nick);
 	static MainWindow* getInstance();
+	DaveTabWidget* getHubTabWidget() {return hubTabWidget;}
 	
 private slots:
 	void newHubClicked();

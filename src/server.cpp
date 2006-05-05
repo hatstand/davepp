@@ -429,7 +429,7 @@ void Server::sendInfo()
 {
 	// Tag assumes active mode for now
 	QString extras = "{" + 
-			QString::number(Configuration::instance()->slotsLeft()) + "/" +
+			QString::number(Configuration::instance()->slotsFree()) + "/" +
 			QString::number(Configuration::instance()->numSlots()) + "} [" +
 			Configuration::instance()->niceUploadSpeed() + "/" + 
 			Configuration::instance()->niceDownloadSpeed() + "]";

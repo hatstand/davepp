@@ -40,8 +40,11 @@ void HubWidget::privateChatMessage(QString from, QString message)
 {
 	if(from != "")
 	{
-		foreach(PrivateChatWidget* w, m_privateChats)
+		DaveTabWidget* widg = MainWindow::getInstance()->getHubTabWidget();
+		for(int i = 0; i < widg->count(); ++i)
 		{
+			ChatWidget* w = (ChatWidget*)widg->widget(i);
+
 			if(w->nick() == from)
 				return;
 			else

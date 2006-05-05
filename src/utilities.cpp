@@ -631,21 +631,6 @@ QByteArray Utilities::encodeBZList(QByteArray inputData)
 		free(dest);
 		return NULL;
 
-		case BZ_DATA_ERROR:
-		qWarning() << "BZ2: Data integrity error";
-		free(dest);
-		return NULL;
-
-		case BZ_DATA_ERROR_MAGIC:
-		qWarning() << "BZ2: No magic here";
-		free(dest);
-		return NULL;
-
-		case BZ_UNEXPECTED_EOF:
-		qWarning() << "BZ2: Unexpected EOF";
-		free(dest);
-		return NULL;
-
 		case BZ_OK:
 		list = new QByteArray(dest, destLen);
 		free(dest);

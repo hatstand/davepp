@@ -25,6 +25,16 @@
 #include <QTime>
 #include <QDebug>
 
+PrivateChatWidget::PrivateChatWidget(Server* server, QString nick) : ChatWidget(server, nick),
+	userConnected(true)
+{
+	statusLabel->setText("Chat with <b>" + nick + "</b> on <b>" + server->hubName() + "</b>");
+	connect(server, SIGNAL(privateChatMessage(QString from, QString message)), SLOT(chatMessage(QString from, QString message)));
+	connect(this, SIGNAL(newPrivateChat(PrivateChatWidget* widget)), MainWindow::getInstance(), SLOT(newPrivateChat(PrivateChatWidget* widget)));
+	connect(this, SIGNAL(privateChatClosed(PrivateChatWidget* widget)), MainWindow::getInstance(), SLOT(privateChatClosed(PrivateChatWidget* widget)));
+	emit newPrivateChat(this);
+}
+
 void PrivateChatWidget::disconnectPressed()
 {
 	emit(privateChatClosed(this));

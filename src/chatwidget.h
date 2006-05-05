@@ -34,6 +34,7 @@ public:
 	 ~ChatWidget();
 
 	bool isConnected();
+	QString nick() {return m_nick;}
 	
 public slots:
 	void chatMessage(QString from, QString message);

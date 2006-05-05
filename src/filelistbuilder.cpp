@@ -97,6 +97,8 @@ void FileListBuilder::run()
 	m_BZList = BZList;
 	m_XmlBZList = XmlBZList;
 	m_mutex.unlock();
+	
+	Configuration::instance()->setFileListDirty(false);
 }
 
 FileList* FileListBuilder::list()

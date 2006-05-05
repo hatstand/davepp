@@ -248,8 +248,11 @@ void TransferListItem::clientProgress(uint size, uint totalSize)
 	m_progress->setValue(size);
 	m_totalSize = totalSize;
 	m_size = size;
-	if(m_update_time.restart() > 100) // 10 fps
+	if(m_update_time.elapsed() > 100) // 10 fps
+	{
 		listView()->repaintItem(this);
+		m_update_time.restart();
+	}
 }
 
 void TransferListItem::clientDestroyed()

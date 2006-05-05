@@ -7,5 +7,4 @@ Cosmetic/UI changes:
 - ETA download finish; in general clean up the current download 
   widget, it's got too many things displayed at the same time: 
   Prioritize.
-- Implement /me stuff; should refactor out the message display code
-- Refactor out the escape code for outputting chat messages; see above
+- Implement /me stuff

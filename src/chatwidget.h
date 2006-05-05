@@ -17,32 +17,40 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef CHATWIDGET_H
-#define CHATWIDGET_H
+#ifndef GENCHATWIDGET_H
+#define GENCHATWIDGET_H
 
-#include <QTimer>
+#include <QTime>
 
-class HubWidget;
 #include <ui_hubwidget.h>
+#include "server.h"
+#include "user.h"
 
 class ChatWidget : public QWidget, public Ui::UIHubWidget
 {
 	Q_OBJECT
 public:
-	ChatWidget(HubWidget* hub, QString nick);
-	~ChatWidget();
+ 	ChatWidget(Server* server, QString nick);
+	 ~ChatWidget();
+
+	bool isConnected();
 	
-	HubWidget* hub() {return m_hub;}
-	QString nick() {return m_nick;}
+public slots:
+	void chatMessage(QString from, QString message);
+
+
+protected:
+	QTime m_lastOutput;
+	Server* m_server;
+	QString m_nick;
 	void printTime();
 
-private:
-	HubWidget* m_hub;
-	QString m_nick;
-	QTimer* m_timer;
-
-private slots:
+protected slots:
 	void sendPressed();
+	virtual void disconnectPressed() = 0;
+	virtual void userJoined(User* user) =0;
+	virtual void userQuit(User* user) = 0;
+	virtual void privateChatMessage(QString from, QString message) = 0;
 };
 
 #endif

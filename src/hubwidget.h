@@ -21,54 +21,61 @@
 #define HUBWIDGET_H
 
 #include "ui_hubwidget.h"
+#include "chatwidget.h"
+#include "mainwindow.h"
 
 #include <Q3ListView>
 #include <QTime>
+#include <QDebug>
 
 class Server;
-class MainWindow;
-class HubDetailsListItem;
-class ChatWidget;
+class PrivateChatWidget;
 class User;
-class UserHeaderListItem;
 
-class HubWidget : public QWidget, public Ui::UIHubWidget
+class HubWidget : public ChatWidget
 {
 	Q_OBJECT
 public:
-	HubWidget(HubDetailsListItem* details, Server* server, Q3ListView* userList);
+	HubWidget(HubDetailsListItem* details, Server* server, Q3ListView* userList) :ChatWidget(server, ""),
+	m_details(details),
+	m_userList(userList),
+	m_userHeader(NULL),
+	m_privateChats()
+	{
+		details->setConnection(m_server);
+		connect(server, SIGNAL(chatMessage(QString, QString)), SLOT(chatMessage(QString, QString)));
+		connect(server, SIGNAL(privateChatMessage(QString, QString)), SLOT(privateChatMessage(QString, QString)));
+		connect(server, SIGNAL(stateChanged(int)), SLOT(stateChanged(int)));
+		connect(server, SIGNAL(error(QString)), SLOT(error(QString)));
+
+		qDebug() << "Created HubWidget";
+	}
 	~HubWidget();
 	
-	bool isConnected();
 	HubDetailsListItem* detailsListItem() {return m_details;}
 	Server* server() {return m_server;}
 	bool privateChatsOpen() {return m_privateChats.count() > 0;}
 	
 public slots:
 	void disconnectPressed();
-	void privateChatClosed(ChatWidget* widget);
+	void privateChatClosed(PrivateChatWidget* widget);
 	
 signals:
-	void newPrivateChat(ChatWidget* widget);
+	void newPrivateChat(PrivateChatWidget* widget);
 	
 private slots:
-	void chatMessage(QString from, QString message, bool priv);
 	void stateChanged(int state);
 	void error(QString message);
-	void userJoined(User*);
-	void userQuit(User*);
-	
-	void sendPressed();
-
-	void printTime();
+	void userJoined(User* user);
+	void userQuit(User* user);
+	void privateChatMessage(QString from, QString message);
+	void chatMessage(QString from, QString message);
 
 private:
 	HubDetailsListItem* m_details;
-	Server* m_server;
 	Q3ListView* m_userList;
 	UserHeaderListItem* m_userHeader;
-	QList<ChatWidget*> m_privateChats;
-	QTime m_lastOutput;
+	QList<PrivateChatWidget*> m_privateChats;
 
 };
 

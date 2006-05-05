@@ -121,7 +121,8 @@ signals:
 	void userJoined(User* user);
 	void userInfoChanged(User* user);
 	void userQuit(User* user);
-	void chatMessage(QString from, QString message, bool priv);
+	void chatMessage(QString from, QString message);
+	void privateChatMessage(QString from, QString message);
 	void error(QString message);
 	void fileListUpdated(User* user);
 	void uploadRequest(ClientConnector* connector);

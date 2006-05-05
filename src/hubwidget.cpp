@@ -20,88 +20,40 @@
 #include "hubwidget.h"
 #include "server.h"
 #include "mainwindow.h"
-#include "chatwidget.h"
+#include "privatechatwidget.h"
 
 #include <QTime>
 #include <QColor>
-
-HubWidget::HubWidget(HubDetailsListItem* details, Server* server, Q3ListView* userList)
- : QWidget(NULL),
-   Ui::UIHubWidget(),
-   m_details(details),
-   m_server(server),
-   m_userList(userList),
-   m_userHeader(NULL)
-{
-	setupUi(this);
-	
-	connect(server, SIGNAL(chatMessage(QString, QString, bool)), SLOT(chatMessage(QString, QString, bool)));
-	connect(server, SIGNAL(stateChanged(int)), SLOT(stateChanged(int)));
-	connect(server, SIGNAL(error(QString)), SLOT(error(QString)));
-	connect(server, SIGNAL(userJoined(User*)), SLOT(userJoined(User*)));
-	connect(server, SIGNAL(userQuit(User*)), SLOT(userQuit(User*)));
-	
-	connect(disconnectButton, SIGNAL(pressed()), SLOT(disconnectPressed()));
-	connect(sendButton, SIGNAL(pressed()), SLOT(sendPressed()));
-	connect(inputBox, SIGNAL(returnPressed()), SLOT(sendPressed()));
-	
-	details->setConnection(server);
-	inputBox->setFocus();
-
-	printTime();
-	m_lastOutput = QTime::currentTime();
-}
-
+#include <QDebug>
 
 HubWidget::~HubWidget()
 {
 	delete m_server;
 }
 
-void HubWidget::chatMessage(QString from, QString message, bool priv)
+void HubWidget::chatMessage(QString from, QString message)
 {
-	QString decoded = message;
-	decoded.replace("<", "&lt;");
-	decoded.replace(">", "&gt;");
-	decoded.replace("\n", "<br>");
-	bool time = false;
-	if(m_lastOutput.secsTo(QTime::currentTime()) > 60 * 5)
-	{
-		time = true;
-		m_lastOutput = QTime::currentTime();
-	}
+	ChatWidget::chatMessage(from, message);
+}
 
-	if (!priv)
+void HubWidget::privateChatMessage(QString from, QString message)
+{
+	if(from != "")
 	{
-		if(time)
-			printTime();
-		chatBox->append("<b>&lt;" + from + "&gt;</b> " + decoded);
-		return;
-	}
-	
-	ChatWidget* widget = NULL;
-	
-	foreach(ChatWidget* w, m_privateChats)
-	{
-		if (from == w->nick())
+		foreach(PrivateChatWidget* w, m_privateChats)
 		{
-			widget = w;
-			break;
+			if(w->nick() == from)
+				return;
+			else
+			{
+				PrivateChatWidget* widget = new PrivateChatWidget(this, m_server, from);
+				widget->chatMessage(from, message);
+				emit newPrivateChat(widget);
+				m_privateChats << widget;
+				connect(widget, SIGNAL(privateChatClosed(PrivateChatWidget*)), SLOT(privateChatClosed(PrivateChatWidget*)));
+			}
 		}
 	}
-	
-	if (widget == NULL)
-	{
-		widget = new ChatWidget(this, from);
-		emit newPrivateChat(widget);
-		m_privateChats << widget;
-	}
-	
-
-	if(time)
-		widget->printTime();
-
-	widget->chatBox->append("<b>&lt;" + from + "&gt;</b> " + decoded);
 }
 
 void HubWidget::stateChanged(int state)
@@ -124,10 +76,6 @@ void HubWidget::stateChanged(int state)
 	statusLabel->setText("<b>" + label + "</b>");
 }
 
-bool HubWidget::isConnected()
-{
-	return (m_server->state() != Server::NotConnected);
-}
 
 void HubWidget::error(QString message)
 {
@@ -166,29 +114,7 @@ void HubWidget::userQuit(User* user)
 	}
 }
 
-void HubWidget::sendPressed()
-{
-	if (inputBox->text().length() <= 0)
-		return;
-	
-	if (isConnected())
-	{
-		m_server->sendMessage(inputBox->text());
-		inputBox->clear();
-	}
-	else
-	{
-		chatBox->append("(You are not connected to the hub)");
-	}
-	inputBox->setFocus();
-}
-
-void HubWidget::privateChatClosed(ChatWidget* widget)
+void HubWidget::privateChatClosed(PrivateChatWidget* widget)
 {
 	m_privateChats.removeAll(widget);
-}
-
-void HubWidget::printTime()
-{
-	chatBox->append("<font color=\"gray\"><small>" + QTime::currentTime().toString("h:mm") + "</small></font>");
 }

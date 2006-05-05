@@ -20,7 +20,7 @@
 #include "mainwindow.h"
 #include "edithub.h"
 #include "hubwidget.h"
-#include "chatwidget.h"
+#include "privatechatwidget.h"
 #include "user.h"
 #include "resultswidget.h"
 #include "server.h"
@@ -509,7 +509,7 @@ void MainWindow::connectToHub(HubDetailsListItem* item)
 	hubTabWidget->addTab(hubWidget, item->name());
 	hubTabWidget->setCurrentWidget(hubWidget);
 	
-	connect(hubWidget, SIGNAL(newPrivateChat(ChatWidget*)), SLOT(newPrivateChat(ChatWidget*)));
+	connect(hubWidget, SIGNAL(newPrivateChat(PrivateChatWidget*)), SLOT(newPrivateChat(PrivateChatWidget*)));
 	
 	connect(this, SIGNAL(sortUserList()), SLOT(resortUserList()));
 	
@@ -754,7 +754,7 @@ void MainWindow::hubTabClose()
 			qDebug() << "Seen class" << w->metaObject()->className();
 			if (w->inherits("ChatWidget"))
 			{
-				ChatWidget* cW = (ChatWidget*) w;
+				PrivateChatWidget* cW = (PrivateChatWidget*) w;
 				if (cW->hub() == widget)
 				{
 					qDebug() << "Removing chat tab with" << cW->nick();
@@ -773,7 +773,7 @@ void MainWindow::hubTabClose()
 
 void MainWindow::chatTabClose()
 {
-	ChatWidget* widget = (ChatWidget*) hubTabWidget->widget(m_tabIndex);
+	PrivateChatWidget* widget = (PrivateChatWidget*) hubTabWidget->widget(m_tabIndex);
 	
 	hubTabWidget->removeTab(m_tabIndex);
 	widget->hub()->privateChatClosed(widget);
@@ -786,7 +786,7 @@ void MainWindow::resortUserList()
 	m_sortingLater = false;
 }
 
-void MainWindow::newPrivateChat(ChatWidget* widget)
+void MainWindow::newPrivateChat(PrivateChatWidget* widget)
 {
 	hubTabWidget->addTab(widget, widget->nick() + " (chat)");
 }

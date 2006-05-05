@@ -18,34 +18,49 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "chatwidget.h"
-#include "hubwidget.h"
 #include "server.h"
 #include "configuration.h"
 
 #include <QTime>
 #include <QDebug>
+#include <Q3StyleSheet>
 
-ChatWidget::ChatWidget(HubWidget* hub, QString nick)
- : Ui::UIHubWidget(), QWidget(NULL), m_hub(hub), m_nick(nick)
+ChatWidget::ChatWidget(Server* server, QString nick)
+ : Ui::UIHubWidget(), QWidget(NULL), m_server(server), m_nick(nick), m_lastOutput(QTime::currentTime())
 {
 	setupUi(this);
 	
-	disconnectButton->hide();
-	statusLabel->setText("Chat with <b>" + nick + "</b> on <b>" + hub->server()->hubName() + "</b>");
-
-	m_timer = new QTimer(this);
-	m_timer->start(60000*5);
-	connect(m_timer, SIGNAL(timeout()), SLOT(printTime()));
-	printTime();
+	connect(m_server, SIGNAL(userJoined(User*)), SLOT(userJoined(User*)));
+	connect(m_server, SIGNAL(userQuit(User*)), SLOT(userQuit(User*)));
+	connect(disconnectButton, SIGNAL(pressed()), SLOT(disconnectPressed()));
 
 	connect(sendButton, SIGNAL(pressed()), SLOT(sendPressed()));
 	connect(inputBox, SIGNAL(returnPressed()), SLOT(sendPressed()));
-	inputBox->setFocus();
-}
 
+	inputBox->setFocus();
+
+	printTime();
+	m_lastOutput = QTime::currentTime();
+}
 
 ChatWidget::~ChatWidget()
 {
+}
+
+void ChatWidget::chatMessage(QString from, QString message)
+{
+	message = Q3StyleSheet::escape(message); // Breaks the layout
+	message.replace("\n", "<br />");
+	bool time = false;
+	if(m_lastOutput.secsTo(QTime::currentTime()) > 60 * 5)
+		time = true;
+
+	if(time)
+	{
+		printTime();
+		m_lastOutput = QTime::currentTime();
+	}
+	chatBox->append("<b>&lt;" + from + "&gt;</b> " + message);
 }
 
 void ChatWidget::printTime()
@@ -58,15 +73,14 @@ void ChatWidget::sendPressed()
 	if (inputBox->text().length() <= 0)
 		return;
 	
-	if (m_hub->isConnected())
+	QString message = inputBox->text();
+
+	if (isConnected())
 	{
-		QString message = inputBox->text();
-		m_hub->server()->sendMessage(message, m_nick);
+		m_server->sendMessage(message, m_nick);
 		inputBox->clear();
-		// TODO: properly escape this
-		message.replace("<", "&lt;");
-		message.replace(">", "&gt;");
-		message.replace("\n", "<br>");
+
+		message = Q3StyleSheet::escape(message);
 		QString from = Configuration::instance()->nick();
 		chatBox->append("<b>&lt;" + from + "&gt;</b> " + message);
 	}
@@ -75,4 +89,9 @@ void ChatWidget::sendPressed()
 		chatBox->append("(You are not connected to the hub)");
 	}
 	inputBox->setFocus();
+}
+
+bool ChatWidget::isConnected()
+{
+	return (m_server->state() != Server::NotConnected);
 }

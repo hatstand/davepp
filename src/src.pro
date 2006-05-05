@@ -29,6 +29,7 @@ HEADERS += server.h \
            filelist.h \
            filenode.h \
            chatwidget.h \
+			  privatechatwidget.h \
            resultswidget.h \
            transferlistitem.h \
            searchresult.h \
@@ -55,6 +56,7 @@ SOURCES += main.cpp \
            filelist.cpp \
            filenode.cpp \
            chatwidget.cpp \
+			  privatechatwidget.cpp \
            resultswidget.cpp \
            transferlistitem.cpp \
            searchresult.cpp \

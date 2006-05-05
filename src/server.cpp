@@ -157,6 +157,8 @@ void Server::processChatCommand(QString nick, QString command, bool priv)
 	if (regExp.exactMatch(command))
 	{
 		nick = regExp.cap(1);
+		if(nick == me()->nick)
+			return;
 		message = decodeChatMessage(regExp.cap(3));
 	}
 	else
@@ -167,8 +169,11 @@ void Server::processChatCommand(QString nick, QString command, bool priv)
 	}
 	
 	qDebug() << "Got" << (priv ? "private" : "") << "message from" << nick << ":" << message;
-	
-	emit chatMessage(nick, message, priv);
+
+	if(priv)
+		emit privateChatMessage(nick, message);
+	else
+		emit chatMessage(nick, message);
 }
 
 void Server::parseCommand(QString command)

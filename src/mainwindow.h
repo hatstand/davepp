@@ -31,7 +31,7 @@
 
 class Server;
 class User;
-class ChatWidget;
+class PrivateChatWidget;
 class ActiveSearchListener;
 class SearchResult;
 class ResultsWidget;
@@ -139,7 +139,7 @@ private slots:
 	void hubTabClose();
 	void chatTabClose();
 	void resortUserList();
-	void newPrivateChat(ChatWidget* widget);
+	void newPrivateChat(PrivateChatWidget* widget);
 	void startSearch(QString search, bool sizeRestricted, bool isMin, int size, int dataType);
 	void configure();
 	void configureAccept();

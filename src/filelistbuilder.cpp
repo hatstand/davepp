@@ -46,18 +46,21 @@ FileListBuilder* FileListBuilder::instance()
 void FileListBuilder::run()
 {
 	// TODO: Add hash of byteArray to settings
+	uint totalSteps = 3;
+	uint step = 0;
+
 	QByteArray savedBZXml = m_config->getSavedXmlList();
 	if(!savedBZXml.isEmpty()) // Yay! We found a saved file list
 	{
+		emit progress(++step, totalSteps);
 		qDebug() << "Using saved XML";
 		m_list = new FileList(Utilities::decodeBZList(savedBZXml));
+		emit progress(++step, totalSteps);
 		m_list->calculateTotalSize();
+		emit progress(++step, totalSteps);
 
 		m_XmlBZList = savedBZXml;
 	
-		m_huffmanList = Utilities::encodeList(m_list->toAscii());
-		m_BZList = Utilities::encodeBZList(m_list->toAscii());
-
 		return;
 	}
 
@@ -66,9 +69,8 @@ void FileListBuilder::run()
 	QMap<QString, QString> sharedDirs(m_config->sharedDirs());
 	FileNode* root = new FileNode(NULL, "<root>");
 
-	uint totalSteps = 4 + sharedDirs.count();
-	uint step = 0;
-	emit progress(step, totalSteps);
+	totalSteps = 4 + sharedDirs.count();
+	emit progress(step++, totalSteps);
 
 	
 	QMapIterator<QString, QString> it(sharedDirs);
@@ -82,9 +84,11 @@ void FileListBuilder::run()
 	
 	m_mutex.lock();
 	delete m_list; // Remove old filelist
+	emit progress(step++, totalSteps);
 
 	// Generate File List in memory
 	m_list = new FileList(root);
+	emit progress(step++, totalSteps);
 	m_list->calculateTotalSize();
 	emit progress(step++, totalSteps);
 	m_mutex.unlock();

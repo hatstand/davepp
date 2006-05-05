@@ -535,11 +535,11 @@ QByteArray Utilities::decodeBZList(QByteArray inputData)
 	unsigned int sourceLen = inputData.size();
 
 	char* dest = NULL;
-	unsigned int destLen = sourceLen;
+	unsigned int destLen = sourceLen * 2;
 
 	while(true)
 	{
-
+	// BZ2 seems to decompress to ~2-4 times the size, from observations
 	destLen = destLen * 2;
 	dest = (char*)realloc(dest, sizeof(char) * destLen);
 
@@ -555,7 +555,7 @@ QByteArray Utilities::decodeBZList(QByteArray inputData)
 			return *list;
 
 			case BZ_OUTBUFF_FULL:
-			qDebug() << "BZ2: Output buffer too small";
+			qDebug() << "BZ2: Output buffer too small" << "- Resizing";
 			break;
 		
 			case BZ_UNEXPECTED_EOF:
@@ -602,6 +602,7 @@ QByteArray Utilities::encodeBZList(QByteArray inputData)
 	char* source = inputData.data();
 	unsigned int sourceLen = inputData.size();
 
+	// Largest neccessary buffer is 101% + 600 bytes according to docs
 	unsigned int destLen = ((double)sourceLen * 1.01) + 600;
 	char* dest = (char*)malloc(sizeof(char) * destLen);
 

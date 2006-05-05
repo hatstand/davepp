@@ -1022,16 +1022,16 @@ void MainWindow::updateStatusText()
 	}
 	
 	if (hubCount == 0)
-		statusText1->setText("Not connected to any hubs");
+		statusText1->setText(" Not connected to any hubs");
 	else
 	{
 		QString niceSize = sizeCount == 0 ? "0 bytes" : Utilities::niceSize(sizeCount);
-		statusText1->setText("Connected to " + QString::number(hubCount) + " hub" + (hubCount != 1 ? "s" : "") + " with " + QString::number(userCount) + " user" + (userCount != 1 ? "s" : "") + " sharing " + niceSize);
+		statusText1->setText(" Connected to " + QString::number(hubCount) + " hub" + (hubCount != 1 ? "s" : "") + " with " + QString::number(userCount) + " user" + (userCount != 1 ? "s" : "") + " sharing " + niceSize);
 	}
 	
 	if (m_fileListBuilder->isRunning())
 	{
-		statusText2->setText("Building filelist...");
+		statusText2->setText(" Building filelist...");
 		statusProgress->show();
 	}
 	else
@@ -1042,9 +1042,9 @@ void MainWindow::updateStatusText()
 			shareSize = list->totalSize();
 		
 		if (shareSize == 0)
-			statusText2->setText("You are not sharing any files");
+			statusText2->setText(" You are not sharing any files");
 		else
-			statusText2->setText("You are sharing " + Utilities::niceSize(shareSize));
+			statusText2->setText(" You are sharing " + Utilities::niceSize(shareSize));
 		statusProgress->hide();
 	}
 }

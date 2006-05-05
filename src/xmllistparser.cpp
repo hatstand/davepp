@@ -11,7 +11,6 @@ XmlListParser::XmlListParser(FileNode* root) :
 
 bool XmlListParser::startDocument()
 {
-	qDebug() << "Beginning of XML";
 	parent = m_root;
 
 	return true;

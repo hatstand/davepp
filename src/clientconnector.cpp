@@ -155,11 +155,11 @@ void ClientConnector::parseCommand(QString command)
 			{
 				QString temp = command.section(" ", 1);
 				m_fileName = temp.section("$", 0, 0);
-				m_offset = temp.section("$", 1).toLongLong();
+				m_offset = temp.section("$", 1).toLongLong() - 1;
 			}
 			else
 			{
-				m_offset = words[1].toULongLong() + 1;
+				m_offset = words[1].toULongLong();
 				m_fileName = command.section(" ", 3);
 				m_numbytes = words[2].toLongLong();;
 			}
@@ -218,20 +218,20 @@ void ClientConnector::parseCommand(QString command)
 			if(words[0] == GET)
 			{
 				m_stream << FILELENGTH << " " << m_fileLength << "|";
-				m_numbytes = m_fileLength - m_offset + 1;
+				m_numbytes = m_fileLength - m_offset;
 			}
 			else
 			{
 				if(m_numbytes + m_offset > m_fileLength || m_numbytes < 0)
-					m_numbytes = m_fileLength - m_offset + 1;
+					m_numbytes = m_fileLength - m_offset;
 
-				if(m_offset == 0)
+				if(m_offset < 0)
 					m_stream << "$Sending|"; // Undocumented, unless you count the source as doc
 				else
 					m_stream << "$Sending " << m_numbytes << "|";
 
 				changeState(Transferring);
-				m_sendPos = m_offset - 1;
+				m_sendPos = m_offset;
 				sendSomeData();
 			}
 			
@@ -242,7 +242,7 @@ void ClientConnector::parseCommand(QString command)
 		else if (words[0] == SEND)
 		{
 			changeState(Transferring);
-			m_sendPos = m_offset - 1;
+			m_sendPos = m_offset;
 //			qDebug() << "**** Send" << m_offset << m_sendPos;
 			sendSomeData();
 		}

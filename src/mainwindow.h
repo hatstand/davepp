@@ -119,6 +119,7 @@ public:
 	~MainWindow();
 	
 	Server* getServer(QString address, QString nick);
+	static MainWindow* getInstance();
 	
 private slots:
 	void newHubClicked();
@@ -140,6 +141,8 @@ private slots:
 	void chatTabClose();
 	void resortUserList();
 	void newPrivateChat(PrivateChatWidget* widget);
+	void requestNewPrivateChat();
+	void privateChatClosed(PrivateChatWidget* widget);
 	void startSearch(QString search, bool sizeRestricted, bool isMin, int size, int dataType);
 	void configure();
 	void configureAccept();
@@ -170,8 +173,10 @@ private:
 	void updateHiddenUsers();
 	void updateHiddenUser(UserListItem* item);
 	void saveHubList();
+	UserListItem* getUserListItem();
 	
 private:
+	static MainWindow* instance;
 	QList<Server*> m_hubs;
 	QMenu* m_userListMenu;
 	QMenu* m_userContextMenu;

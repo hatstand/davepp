@@ -46,7 +46,7 @@ void HubWidget::privateChatMessage(QString from, QString message)
 				return;
 			else
 			{
-				PrivateChatWidget* widget = new PrivateChatWidget(this, m_server, from);
+				PrivateChatWidget* widget = new PrivateChatWidget(m_server, from);
 				widget->chatMessage(from, message);
 				emit newPrivateChat(widget);
 				m_privateChats << widget;

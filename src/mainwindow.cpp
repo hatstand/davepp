@@ -36,6 +36,7 @@
 #include <QActionGroup>
 #include <QDir>
 
+MainWindow* MainWindow::instance = NULL;
 
 HubDetailsListItem::HubDetailsListItem(Q3ListView* parent)
  : Q3ListViewItem(parent), m_port(4977), m_autoConnect(false), m_connection(NULL)
@@ -243,6 +244,8 @@ int UserHeaderListItem::compare( Q3ListViewItem* i, int col, bool ascending ) co
 MainWindow::MainWindow()
  : Ui::MainWindow(), m_sortingLater(false)
 {
+	instance = this;
+
 	setupUi(this);
 	
 	connect(actionQuit, SIGNAL(triggered()), qApp, SLOT(quit()));
@@ -314,6 +317,7 @@ MainWindow::MainWindow()
 	
 	m_userContextMenu = new QMenu(this);
 	m_userContextMenu->addAction("Browse files", this, SLOT(browseUserFiles()));
+	m_userContextMenu->addAction("Chat", this, SLOT(requestNewPrivateChat()));
 	
 	m_hubTabDisconnect = new QAction("Disconnect", this);
 	connect(m_hubTabDisconnect, SIGNAL(activated()), SLOT(hubTabDisconnect()));
@@ -382,6 +386,14 @@ MainWindow::MainWindow()
 MainWindow::~MainWindow()
 {
 	delete m_config;
+}
+
+MainWindow* MainWindow::getInstance()
+{
+	if(instance == NULL)
+		instance = new MainWindow();
+
+	return instance;
 }
 
 void MainWindow::autoConnect()
@@ -656,15 +668,35 @@ void MainWindow::userRightClick(Q3ListViewItem* item, const QPoint& point)
 	m_userContextMenu->popup(point);
 }
 
+UserListItem* MainWindow::getUserListItem()
+{
+	if(userList->currentItem()->rtti() != 1002)
+		return NULL;
+	else
+		return (UserListItem*)userList->currentItem();
+}
+
 void MainWindow::browseUserFiles()
 {
-	if (userList->currentItem()->rtti() != 1002)
-		return;
-	UserListItem* item = (UserListItem*) userList->currentItem();
+	UserListItem* item = getUserListItem();
 	
-	TransferListItem* transfer = new TransferListItem(transferList);
-	transfer->setFilelistDownload(item->user());
-	transfer->start();
+	if(item != NULL)
+	{
+		TransferListItem* transfer = new TransferListItem(transferList);
+		transfer->setFilelistDownload(item->user());
+		transfer->start();
+	}
+}
+
+void MainWindow::requestNewPrivateChat()
+{
+	UserListItem* item = getUserListItem();
+
+	if(item != NULL)
+	{
+		User* user = item->user();
+		PrivateChatWidget* w = new PrivateChatWidget(user->server, user->nick);
+	}
 }
 
 void MainWindow::hubDoubleClick(Q3ListViewItem* item)
@@ -746,25 +778,6 @@ void MainWindow::hubTabClose()
 {
 	HubWidget* widget = (HubWidget*) hubTabWidget->widget(m_tabIndex);
 	
-	if (widget->privateChatsOpen())
-	{
-		for (int i=1 ; i<hubTabWidget->count() ; ++i)
-		{
-			QWidget* w = hubTabWidget->widget(i);
-			qDebug() << "Seen class" << w->metaObject()->className();
-			if (w->inherits("ChatWidget"))
-			{
-				PrivateChatWidget* cW = (PrivateChatWidget*) w;
-				if (cW->hub() == widget)
-				{
-					qDebug() << "Removing chat tab with" << cW->nick();
-					hubTabWidget->removeTab(i--);
-					delete cW;
-				}
-			}
-		}
-	}
-	
 	m_hubs.removeAll(widget->server());
 	
 	hubTabWidget->removeTab(hubTabWidget->indexOf(widget));
@@ -776,7 +789,6 @@ void MainWindow::chatTabClose()
 	PrivateChatWidget* widget = (PrivateChatWidget*) hubTabWidget->widget(m_tabIndex);
 	
 	hubTabWidget->removeTab(m_tabIndex);
-	widget->hub()->privateChatClosed(widget);
 	delete widget;
 }
 
@@ -789,6 +801,11 @@ void MainWindow::resortUserList()
 void MainWindow::newPrivateChat(PrivateChatWidget* widget)
 {
 	hubTabWidget->addTab(widget, widget->nick() + " (chat)");
+}
+
+void MainWindow::privateChatClosed(PrivateChatWidget* widget)
+{
+	hubTabWidget->removeTab(hubTabWidget->indexOf(widget));
 }
 
 void MainWindow::userFileListUpdated(User* user)

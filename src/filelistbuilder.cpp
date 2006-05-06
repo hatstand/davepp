@@ -31,6 +31,7 @@ FileListBuilder::FileListBuilder(Configuration* config)
  : m_config(config), m_list(NULL), doc()
 {
 	fileListBuilderInstance = this;
+	m_ready = false;
 }
 
 
@@ -45,6 +46,7 @@ FileListBuilder* FileListBuilder::instance()
 
 void FileListBuilder::run()
 {
+	m_ready = false;
 	// TODO: Add hash of byteArray to settings
 	uint totalSteps = 3;
 	uint step = 0;
@@ -60,7 +62,9 @@ void FileListBuilder::run()
 		emit progress(++step, totalSteps);
 
 		m_XmlBZList = savedBZXml;
-	
+		
+		m_ready = true;
+		emit finished();
 		return;
 	}
 
@@ -94,9 +98,12 @@ void FileListBuilder::run()
 	m_mutex.unlock();
 
 	// Don't bother creating useful lists until they're requested
-	// BZList is rarely request for example, so why bother?
+	// BZList is rarely requested for example, so why bother?
 	
 	Configuration::instance()->setFileListDirty(false);
+	
+	m_ready = true;
+	emit finished();
 }
 
 FileList* FileListBuilder::list()
@@ -149,6 +156,4 @@ quint64 FileListBuilder::totalSize()
 		return 0;
 	return m_list->totalSize();
 }
-
-
 

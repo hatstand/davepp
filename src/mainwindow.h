@@ -169,6 +169,8 @@ private slots:
 	
 	void updateStatusText();
 	void builderProgress(uint value, uint totalSteps);
+
+	void restartTransfers();
 	
 private:
 	void autoConnect();
@@ -177,6 +179,7 @@ private:
 	void updateHiddenUser(UserListItem* item);
 	void saveHubList();
 	UserListItem* getUserListItem();
+	Server* findServer(QString name);
 	
 private:
 	static MainWindow* instance;

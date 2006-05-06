@@ -81,6 +81,7 @@ public:
 	QSettings* settings() { return m_settings; }
 	
 	void save();
+	void saveFile(QString localpath, QString remotenick, QString remotepath, QString hub, quint64 bytesDone);
 	
 	// Stuff that isn't saved
 	int slotsInUse() const {return m_slotsInUse;}
@@ -92,7 +93,6 @@ public:
 
 	int connectedHubs() const { return m_connectedHubs; };
 	void hubConnected();
-	void hubDisconnected();
 	qint64 getFreeSpace() const;
 
 	QByteArray getSavedXmlList();
@@ -120,6 +120,9 @@ private:
 	// Stuff that isn't saved
 	int m_slotsInUse;
 	int m_connectedHubs;
+
+private slots:
+	void hubDisconnected();
 
 signals:
 	void nickChanged(QString newnick);

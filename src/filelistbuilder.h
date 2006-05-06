@@ -47,8 +47,11 @@ public:
 	
 	static FileListBuilder* instance();
 
+	bool isReady() {return m_ready;}
+
 signals:
 	void progress(uint value, uint total);
+	void finished();
 	
 private:
 	void run();
@@ -62,6 +65,8 @@ private:
 	QByteArray m_XmlBZList;
 	QMutex m_mutex;
 	QDomDocument doc;
+
+	bool m_ready;
 };
 
 #endif

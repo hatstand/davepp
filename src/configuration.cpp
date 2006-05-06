@@ -70,7 +70,7 @@ Configuration::Configuration(QObject* parent)
 	m_connectedHubs = 0;
 
 	qint64 free = getFreeSpace();
-	qDebug() << free << "MB:" << free/1024/1024;
+	qDebug() << m_settings->fileName();
 }
 
 
@@ -152,6 +152,18 @@ void Configuration::save()
 	m_settings->endGroup();
 	
 	m_settings->sync();
+}
+
+void Configuration::saveFile(QString localpath, QString remotenick, QString remotepath, QString hub, quint64 bytesDone)
+{
+	m_settings->beginGroup("Files");
+	m_settings->beginGroup(localpath);
+	m_settings->setValue("RemoteNick", remotenick);
+	m_settings->setValue("RemotePath", remotepath);
+	m_settings->setValue("Hub", hub);
+	m_settings->setValue("BytesDone", bytesDone);
+	m_settings->endGroup();
+	m_settings->endGroup();
 }
 
 QString Configuration::connSpeedString() const

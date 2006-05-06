@@ -270,9 +270,9 @@ MainWindow::MainWindow()
 	showMaximized();
 	
 	m_config = new Configuration(this);
-//	m_config->setDownloadDir(QDir::homeDirPath() + "/testdump");
 	m_fileListBuilder = new FileListBuilder(m_config);
-	connect(m_fileListBuilder, SIGNAL(finished()), SLOT(updateStatusText()));
+	connect(m_fileListBuilder, SIGNAL(finished()), SLOT(updateStatusText()), Qt::QueuedConnection);
+//	connect(m_fileListBuilder, SIGNAL(finished()), SLOT(restartTransfers()), Qt::QueuedConnection);
 	connect(m_fileListBuilder, SIGNAL(progress(uint, uint)), SLOT(builderProgress(uint, uint)), Qt::QueuedConnection);
 	m_fileListBuilder->start();
 	m_configure = new ConfigureDialog(this, m_config);
@@ -386,6 +386,17 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
+	qDebug() << "Deleting mainwindow";
+	Q3ListViewItemIterator it(transferList);
+	while(it.current())
+	{
+		TransferListItem* item = (TransferListItem*)(it.current());
+		if(item->type() == TransferListItem::DownloadFile)
+		{
+			delete(item->client());
+		}
+		++it;
+	}
 	delete m_config;
 }
 
@@ -521,8 +532,6 @@ void MainWindow::connectToHub(HubDetailsListItem* item)
 	HubWidget* hubWidget = new HubWidget(item, server, userList);
 	hubTabWidget->addTab(hubWidget, item->name());
 	hubTabWidget->setCurrentWidget(hubWidget);
-	
-	connect(hubWidget, SIGNAL(newPrivateChat(PrivateChatWidget*)), SLOT(newPrivateChat(PrivateChatWidget*)));
 	
 	connect(this, SIGNAL(sortUserList()), SLOT(resortUserList()));
 	
@@ -1028,7 +1037,7 @@ void MainWindow::updateStatusText()
 		statusText1->setText(" Connected to " + QString::number(hubCount) + " hub" + (hubCount != 1 ? "s" : "") + " with " + QString::number(userCount) + " user" + (userCount != 1 ? "s" : "") + " sharing " + niceSize);
 	}
 	
-	if (m_fileListBuilder->isRunning())
+	if (!m_fileListBuilder->isReady())
 	{
 		statusText2->setText(" Building filelist...");
 		statusProgress->show();
@@ -1063,3 +1072,69 @@ void MainWindow::hubTabCurrentChanged()
 	((ChatWidget*)w)->setInputBoxFocus();
 }
 
+void MainWindow::restartTransfers()
+{
+	qDebug() << "Restarting transfers";
+	// Only need to do this once
+	disconnect(FileListBuilder::instance(), SIGNAL(finished()), this, SLOT(restartTransfers()));
+	
+	QSettings* settings = m_config->settings();
+
+	settings->beginGroup("Files");
+	QStringList files = settings->childGroups();
+	foreach(QString path, files)
+	{
+		qDebug() << "Found saved download";
+		settings->beginGroup(path);
+		QString hub = settings->value("Hub").toString();
+		QString remotenick = settings->value("RemoteNick").toString();
+		QString remotepath = settings->value("RemotePath").toString();
+		quint64 bytesdone = settings->value("BytesDone").toULongLong();
+		settings->endGroup();
+		Server* s = findServer(hub); // Try our local server list
+
+		if(s == NULL)
+		{
+			Q3ListViewItemIterator it(hubList); // Try the saved hub list
+			while(it.current())
+			{
+				HubDetailsListItem* item = (HubDetailsListItem*)(it.current());
+				if(item->name() == hub)
+				{
+					s = item->connection();
+					if(!item->isOpen())
+					{
+						s = new Server(this);
+						s->setHost(item->hostName(), item->port());
+						m_hubs << s;
+						item->setConnection(s);
+					}
+					break;
+				}
+			}
+			qWarning() << "Couldn't find hub for saved download";
+			return;
+		}
+
+		settings->endGroup();
+
+		if(s->state() == Server::NotConnected)
+		{
+			s->open();
+		}
+	
+		qDebug() << "Resuming download (MainWindow)";
+		s->resumeDownload(remotenick, remotepath, path, bytesdone);
+	}
+}
+
+Server* MainWindow::findServer(QString name)
+{
+	foreach(Server* s, m_hubs)
+	{
+		if(s->hubName() == name)
+			return s;
+	}
+
+	return NULL;
+}

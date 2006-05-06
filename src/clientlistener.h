@@ -80,6 +80,8 @@ private:
 	bool extendedClient;
 	bool supportsBZList;
 	bool supportsXmlBZList;
+
+	quint64 bytesWritten;
 };
 
 #endif

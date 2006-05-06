@@ -23,6 +23,7 @@
 #include "filelist.h"
 #include "user.h"
 #include "commands.h"
+#include "configuration.h"
 
 #include <QDebug>
 #include <QDir>
@@ -68,11 +69,21 @@ ClientListener::ClientListener(Server* server, User* user)
 	
 	connect(m_tcpServer, SIGNAL(newConnection()), SLOT(newConnection()));
 	connect(m_timer, SIGNAL(timeout()), SLOT(deleteLater()));
+
+	bytesWritten = 0;
+	m_totalSize = 0;
 }
 
 
 ClientListener::~ClientListener()
 {
+	qDebug() << "Deleting clientlistener";
+	if(!m_dclst && bytesWritten < m_totalSize)
+	{
+		qDebug() << "Saving file";
+		Configuration::instance()->saveFile(m_outFile->name(), m_user->nick, m_filename, m_server->hubName(), bytesWritten);
+	}
+
 	delete m_outFile;
 }
 
@@ -137,7 +148,7 @@ void ClientListener::socketReadyRead()
 	m_speedCount += bytesAvailable;
 	
 	if (!m_dclst) // Downloading a file
-		m_outFile->write(m_socket->readAll());
+		bytesWritten += m_outFile->write(m_socket->readAll());
 	else // Downloading a dclist
 		m_dclistData.append(m_socket->readAll());
 	
@@ -251,7 +262,11 @@ void ClientListener::parseCommand(QString command)
 				if (pos != -1)
 					trimmedFileName = m_filename.mid(pos+1);
 				
-				m_outFile = new QFile(m_downloadDir + QDir::separator() + trimmedFileName);
+				if(QFile::exists(m_downloadDir))
+					m_outFile = new QFile(m_downloadDir);
+				else
+					m_outFile = new QFile(m_downloadDir + QDir::separator() + trimmedFileName);
+
 				if(m_outFile->exists() && (m_offset == 1))
 					m_outFile->remove();
 				

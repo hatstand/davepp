@@ -64,6 +64,7 @@ Server::Server(QObject *parent)
 	connect(m_socket, SIGNAL(readyRead()), SLOT(socketReadyRead()));
 	connect(m_socket, SIGNAL(bytesWritten(qint64)), SLOT(socketBytesWritten(qint64)));
 	connect(m_socket, SIGNAL(disconnected()), SLOT(socketDisconnected()));
+	connect(this, SIGNAL(destroyed()), Configuration::instance(), SLOT(hubDisconnected()));
 	
 	//myAddress = m_socket->localAddress();
 	
@@ -98,6 +99,12 @@ void Server::setHost(QString host, int port)
 void Server::open()
 {
 	qDebug() << "Connecting...";
+
+	if(!FileListBuilder::instance()->isReady())
+	{
+		changeState(WaitingForFileList);
+		return;
+	}
 
 	qDebug() << m_host;
 	changeState(LookingUpHost);
@@ -506,8 +513,7 @@ void Server::disconnectFromHub()
 	
 		m_socket->close();
 	}
-	disconnect(Configuration::instance(), 0, 0, 0);
-	Configuration::instance()->hubDisconnected();
+//	Configuration::instance()->hubDisconnected();
 }
 
 void Server::searchHub(quint16 port, QString search, bool sizerestricted, bool isminimumsize, quint64 size, int datatype)
@@ -550,6 +556,8 @@ ClientListener* Server::browseFiles(QString nick)
 	
 	return listener;
 }
+
+
 
 ClientListener* Server::downloadFile(QString nick, QString filename)
 {
@@ -597,6 +605,8 @@ void Server::fileListUpdateFinished()
 	m_me->setShareSize(FileListBuilder::instance()->totalSize());
 	if (state() == Connected)
 		sendInfo();
+	else if(state() == WaitingForFileList)
+		open();
 }
 
 void Server::getUserIP(QString nick)
@@ -615,4 +625,11 @@ void Server::passiveSearchResult(QString result)
 //	qDebug() << "Sending passive search result";
 	m_stream << result; 
 	m_stream.flush();
+}
+
+void Server::resumeDownload(QString nick, QString remotefilename, QString localfilename, quint64 bytesDone)
+{
+	qDebug() << "Resuming download";
+
+//	m_queue << new Download(nick, remotefilename, localfilename, bytesDone);
 }

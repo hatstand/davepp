@@ -80,6 +80,7 @@ public:
 	User* user() {return m_user;}
 	TransferType type() {return m_type;}
 	QString path() {return m_path;}
+	Client* client() {return m_transfer;}
 	
 private slots:
 	void clientStateChanged(int state);

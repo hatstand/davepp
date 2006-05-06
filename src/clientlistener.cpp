@@ -262,9 +262,9 @@ void ClientListener::parseCommand(QString command)
 				if (pos != -1)
 					trimmedFileName = m_filename.mid(pos+1);
 				
-				if(QFile::exists(m_downloadDir))
-					m_outFile = new QFile(m_downloadDir);
-				else
+//				if(QFile::exists(m_downloadDir))
+//					m_outFile = new QFile(m_downloadDir);
+//				else
 					m_outFile = new QFile(m_downloadDir + QDir::separator() + trimmedFileName);
 
 				if(m_outFile->exists() && (m_offset == 1))

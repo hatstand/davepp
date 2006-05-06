@@ -696,8 +696,7 @@ void MainWindow::requestNewPrivateChat()
 	if(item != NULL)
 	{
 		User* user = item->user();
-		PrivateChatWidget* w = new PrivateChatWidget(user->server, user->nick);
-		getHubTabWidget()->setCurrentWidget(w);
+		user->server->getPrivateChat(user->nick);
 	}
 }
 
@@ -789,7 +788,7 @@ void MainWindow::hubTabClose()
 void MainWindow::chatTabClose()
 {
 	PrivateChatWidget* widget = (PrivateChatWidget*) hubTabWidget->widget(m_tabIndex);
-	
+	widget->server()->closePrivateChat(widget->nick());
 	hubTabWidget->removeTab(m_tabIndex);
 	delete widget;
 }

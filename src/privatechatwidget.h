@@ -17,27 +17,19 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef CHATWIDGET_H
-#define CHATWIDGET_H
+#ifndef PRIVATECHATWIDGET_H
+#define PRIVATECHATWIDGET_H
 
-#include <QTimer>
-
-class HubWidget;
-#include <ui_hubwidget.h>
+#include "ui_hubwidget.h"
 #include "chatwidget.h"
-#include "hubwidget.h"
 
 class PrivateChatWidget : public ChatWidget
 {
 	Q_OBJECT
 
-signals:
-	void privateChatClosed(PrivateChatWidget* widget);
-	void newPrivateChat(PrivateChatWidget* widget);
-
 public:
 	PrivateChatWidget(Server* server, QString nick);
-	QString nick() {return m_nick;}
+	virtual ~PrivateChatWidget(){}
 
 private:
 	bool userConnected;
@@ -46,7 +38,6 @@ private slots:
 	void disconnectPressed();
 	void userJoined(User* user);
 	void userQuit(User* user);
-	void privateChatMessage(QString from, QString message);
 
 };
 

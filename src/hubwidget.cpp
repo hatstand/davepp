@@ -30,12 +30,10 @@ HubWidget::HubWidget(HubDetailsListItem* details, Server* server, Q3ListView* us
  : ChatWidget(server, QString::null),
    m_details(details),
    m_userList(userList),
-   m_userHeader(NULL),
-   m_privateChats()
+   m_userHeader(NULL)
 {
+	m_server->setHubChat(this);
 	details->setConnection(m_server);
-	connect(server, SIGNAL(chatMessage(QString, QString)), SLOT(chatMessage(QString, QString)));
-	connect(server, SIGNAL(privateChatMessage(QString, QString)), SLOT(privateChatMessage(QString, QString)));
 	connect(server, SIGNAL(stateChanged(int)), SLOT(stateChanged(int)));
 	connect(server, SIGNAL(error(QString)), SLOT(error(QString)));
 }
@@ -43,35 +41,6 @@ HubWidget::HubWidget(HubDetailsListItem* details, Server* server, Q3ListView* us
 HubWidget::~HubWidget()
 {
 	delete m_server;
-}
-
-void HubWidget::chatMessage(QString from, QString message)
-{
-	ChatWidget::chatMessage(from, message);
-}
-
-void HubWidget::privateChatMessage(QString from, QString message)
-{
-	if(from.isEmpty())
-		return;
-	
-	DaveTabWidget* widg = MainWindow::getInstance()->getHubTabWidget();
-	for(int i = 1; i < widg->count(); ++i)
-	{
-		ChatWidget* w = (ChatWidget*)widg->widget(i);
-		
-		qDebug() << w->nick() << from;
-
-		if(w->nick() == from)
-			return;
-	}
-	
-	PrivateChatWidget* widget = new PrivateChatWidget(m_server, from);
-	widget->chatMessage(from, message);
-	emit newPrivateChat(widget);
-	m_privateChats << widget;
-	connect(widget, SIGNAL(privateChatClosed(PrivateChatWidget*)), SLOT(privateChatClosed(PrivateChatWidget*)));
-	MainWindow::getInstance()->getHubTabWidget()->setCurrentWidget(widget);
 }
 
 void HubWidget::stateChanged(int state)
@@ -93,7 +62,6 @@ void HubWidget::stateChanged(int state)
 	
 	statusLabel->setText("<b>" + label + "</b>");
 }
-
 
 void HubWidget::error(QString message)
 {
@@ -130,9 +98,4 @@ void HubWidget::userQuit(User* user)
 			m_userHeader = NULL;
 		}
 	}
-}
-
-void HubWidget::privateChatClosed(PrivateChatWidget* widget)
-{
-	m_privateChats.removeAll(widget);
 }

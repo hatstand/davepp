@@ -29,11 +29,14 @@
 #include <QList>
 #include <QListIterator>
 
+#include "privatechatwidget.h"
+
 class User;
 class Client;
 class ClientListener;
 class Configuration;
 class ClientConnector;
+class HubWidget;
 
 /**
 @author David Sansome
@@ -75,6 +78,9 @@ public:
 	ConnectionState state();
 	
 	void getUserIP(QString nick); // void return as result is emitted
+	void setHubChat(HubWidget* hubChat) { m_hubChat = hubChat; }
+	PrivateChatWidget* getPrivateChat(QString nick);
+	void closePrivateChat(QString nick);
 
 private:
 	void processChatCommand(QString nick, QString command, bool priv);
@@ -101,6 +107,9 @@ private:
 	QString m_buffer;
 
 	QList<User*> m_users;
+
+	QMap<QString, PrivateChatWidget*> m_privateChats;
+	HubWidget* m_hubChat;
 	
 private slots:
 	void socketHostFound();

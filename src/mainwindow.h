@@ -21,6 +21,8 @@
 #define MAINWINDOW_H
 
 #include "ui_mainwindow.h"
+#include "privatechatwidget.h"
+#include "hubwidget.h"
 
 #include <QMainWindow>
 #include <QListWidgetItem>
@@ -31,7 +33,6 @@
 
 class Server;
 class User;
-class PrivateChatWidget;
 class ActiveSearchListener;
 class SearchResult;
 class ResultsWidget;
@@ -121,6 +122,8 @@ public:
 	Server* getServer(QString address, QString nick);
 	static MainWindow* getInstance();
 	DaveTabWidget* getHubTabWidget() {return hubTabWidget;}
+	void privateChatClosed(PrivateChatWidget* widget);
+	void newPrivateChat(PrivateChatWidget* widget);
 	
 private slots:
 	void newHubClicked();
@@ -141,9 +144,7 @@ private slots:
 	void hubTabClose();
 	void chatTabClose();
 	void resortUserList();
-	void newPrivateChat(PrivateChatWidget* widget);
 	void requestNewPrivateChat();
-	void privateChatClosed(PrivateChatWidget* widget);
 	void startSearch(QString search, bool sizeRestricted, bool isMin, int size, int dataType);
 	void configure();
 	void configureAccept();

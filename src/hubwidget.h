@@ -23,14 +23,17 @@
 #include "ui_hubwidget.h"
 #include "chatwidget.h"
 #include "mainwindow.h"
+#include "server.h"
+
 
 #include <Q3ListView>
 #include <QTime>
 #include <QDebug>
 
-class Server;
-class PrivateChatWidget;
 class User;
+class HubDetailsListItem;
+class UserHeaderListItem;
+class Server;
 
 class HubWidget : public ChatWidget
 {
@@ -41,28 +44,20 @@ public:
 	
 	HubDetailsListItem* detailsListItem() {return m_details;}
 	Server* server() {return m_server;}
-	bool privateChatsOpen() {return m_privateChats.count() > 0;}
 	
 public slots:
 	void disconnectPressed();
-	void privateChatClosed(PrivateChatWidget* widget);
-	
-signals:
-	void newPrivateChat(PrivateChatWidget* widget);
 	
 private slots:
 	void stateChanged(int state);
 	void error(QString message);
 	void userJoined(User* user);
 	void userQuit(User* user);
-	void privateChatMessage(QString from, QString message);
-	void chatMessage(QString from, QString message);
 
 private:
 	HubDetailsListItem* m_details;
 	Q3ListView* m_userList;
 	UserHeaderListItem* m_userHeader;
-	QList<PrivateChatWidget*> m_privateChats;
 
 };
 

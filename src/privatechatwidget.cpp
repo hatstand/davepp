@@ -21,6 +21,7 @@
 #include "hubwidget.h"
 #include "server.h"
 #include "configuration.h"
+#include "user.h"
 
 #include <QTime>
 #include <QDebug>
@@ -32,15 +33,12 @@ PrivateChatWidget::PrivateChatWidget(Server* server, QString nick) : ChatWidget(
 	statusLabel->setText("Chat with <b>" + nick + "</b> on <b>" + server->hubName() + "</b>");
 	disconnectButton->setText("Close");
 
-	connect(server, SIGNAL(privateChatMessage(QString, QString)), SLOT(chatMessage(QString, QString)));
-	connect((PrivateChatWidget*)this, SIGNAL(newPrivateChat(PrivateChatWidget*)), MainWindow::getInstance(), SLOT(newPrivateChat(PrivateChatWidget*)));
-	connect(this, SIGNAL(privateChatClosed(PrivateChatWidget*)), MainWindow::getInstance(), SLOT(privateChatClosed(PrivateChatWidget*)));
-	emit newPrivateChat(this);
+	MainWindow::getInstance()->newPrivateChat(this);
 }
 
 void PrivateChatWidget::disconnectPressed()
 {
-	emit(privateChatClosed(this));
+	MainWindow::getInstance()->privateChatClosed(this);
 	deleteLater();	
 }
 
@@ -60,10 +58,4 @@ void PrivateChatWidget::userQuit(User* user)
 		userConnected = false;
 		chatBox->append("<b>(User disconnected)</b>");
 	}
-}
-
-void PrivateChatWidget::privateChatMessage(QString from, QString message)
-{
-	if(from == m_nick)
-		chatMessage(from, message);
 }

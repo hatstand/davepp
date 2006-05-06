@@ -17,27 +17,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef GENCHATWIDGET_H
-#define GENCHATWIDGET_H
+#ifndef CHATWIDGET_H
+#define CHATWIDGET_H
 
 #include <QTime>
 
-#include <ui_hubwidget.h>
-#include "server.h"
-#include "user.h"
+#include "ui_hubwidget.h"
 
+class Server;
+class User;
+
+// Abstract
 class ChatWidget : public QWidget, public Ui::UIHubWidget
 {
 	Q_OBJECT
 public:
  	ChatWidget(Server* server, QString nick);
-	 ~ChatWidget();
+	~ChatWidget();
 
 	bool isConnected();
 	QString nick() {return m_nick;}
+	Server* server() {return m_server;}
 	void setInputBoxFocus();
 	
-public slots:
 	void chatMessage(QString from, QString message);
 
 
@@ -51,9 +53,8 @@ protected:
 protected slots:
 	void sendPressed();
 	virtual void disconnectPressed() = 0;
-	virtual void userJoined(User* user) =0;
+	virtual void userJoined(User* user) = 0;
 	virtual void userQuit(User* user) = 0;
-	virtual void privateChatMessage(QString from, QString message) = 0;
 };
 
 #endif

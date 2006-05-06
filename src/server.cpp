@@ -27,6 +27,7 @@
 #include "configuration.h"
 #include "filelistbuilder.h"
 #include "searchreturner.h"
+#include "mainwindow.h"
 
 #include <QStringList>
 #include <QUdpSocket>
@@ -171,9 +172,34 @@ void Server::processChatCommand(QString nick, QString command, bool priv)
 	qDebug() << "Got" << (priv ? "private" : "") << "message from" << nick << ":" << message;
 
 	if(priv)
-		emit privateChatMessage(nick, message);
+	{
+		PrivateChatWidget* pChat = getPrivateChat(nick);
+		pChat->chatMessage(nick, message);
+	}
 	else
-		emit chatMessage(nick, message);
+	{
+		Q_ASSERT(m_hubChat != NULL);
+		m_hubChat->chatMessage(nick, message);
+	}
+}
+
+PrivateChatWidget* Server::getPrivateChat(QString nick)
+{
+	QMap<QString, PrivateChatWidget*>::const_iterator it = m_privateChats.find(nick);
+	if(it != m_privateChats.end())
+		return *it;
+	else
+	{
+		PrivateChatWidget* w = new PrivateChatWidget(this, nick);
+		m_privateChats.insert(nick, w);
+		MainWindow::getInstance()->getHubTabWidget()->setCurrentWidget(w);
+		return w;
+	}
+}
+
+void Server::closePrivateChat(QString nick)
+{
+	m_privateChats.remove(nick);
 }
 
 void Server::parseCommand(QString command)

@@ -197,7 +197,7 @@ PrivateChatWidget* Server::getPrivateChat(QString nick)
 		return *it;
 	else
 	{
-		PrivateChatWidget* w = new PrivateChatWidget(this, nick);
+		PrivateChatWidget* w = new PrivateChatWidget(this, nick, m_privateChats);
 		m_privateChats.insert(nick, w);
 		MainWindow::getInstance()->getHubTabWidget()->setCurrentWidget(w);
 		return w;

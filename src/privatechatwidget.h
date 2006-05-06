@@ -28,11 +28,12 @@ class PrivateChatWidget : public ChatWidget
 	Q_OBJECT
 
 public:
-	PrivateChatWidget(Server* server, QString nick);
-	virtual ~PrivateChatWidget(){}
+	PrivateChatWidget(Server* server, QString nick, QMap<QString, PrivateChatWidget*> map);
+	virtual ~PrivateChatWidget();
 
 private:
 	bool userConnected;
+	QMap<QString, PrivateChatWidget*> m_map;
 
 private slots:
 	void disconnectPressed();

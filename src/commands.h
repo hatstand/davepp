@@ -31,7 +31,7 @@ static const QString CANCELED = "$Canceled";
 static const QString DIRECTION = "$Direction";
 static const QString GETZBLOCK = "$GetZBlock";
 static const QString UGETZBLOCK = "$UGetZBlock";
-static const QString UGETBLOCK = "$UGettBlock";
+static const QString UGETBLOCK = "$UGetBlock";
 
 #endif
 

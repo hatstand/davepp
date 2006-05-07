@@ -64,7 +64,6 @@ void FileListBuilder::run()
 		m_XmlBZList = savedBZXml;
 		
 		m_ready = true;
-		emit finished();
 		return;
 	}
 
@@ -103,7 +102,6 @@ void FileListBuilder::run()
 	Configuration::instance()->setFileListDirty(false);
 	
 	m_ready = true;
-	emit finished();
 }
 
 FileList* FileListBuilder::list()

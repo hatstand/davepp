@@ -51,7 +51,6 @@ public:
 
 signals:
 	void progress(uint value, uint total);
-	void finished();
 	
 private:
 	void run();

@@ -603,7 +603,7 @@ QByteArray Utilities::encodeBZList(QByteArray inputData)
 	unsigned int sourceLen = inputData.size();
 
 	// Largest neccessary buffer is 101% + 600 bytes according to docs
-	unsigned int destLen = ((double)sourceLen * 1.01) + 600;
+	unsigned int destLen = sourceLen * 1.01 + 600;
 	char* dest = (char*)malloc(sizeof(char) * destLen);
 
 	int rc = BZ2_bzBuffToBuffCompress(dest, &destLen, source, sourceLen, 4, 0, 30);
@@ -637,4 +637,6 @@ QByteArray Utilities::encodeBZList(QByteArray inputData)
 		free(dest);
 		return *list;
 	}
+
+	return NULL;
 }

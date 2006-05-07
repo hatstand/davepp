@@ -27,10 +27,9 @@
 #include <QDebug>
 #include <QMetaMethod>
 
-PrivateChatWidget::PrivateChatWidget(Server* server, QString nick, QMap<QString, PrivateChatWidget*> map) :
+PrivateChatWidget::PrivateChatWidget(Server* server, QString nick) :
 	ChatWidget(server, nick),
-	userConnected(true),
-	m_map(map)
+	userConnected(true)
 {
 	statusLabel->setText("Chat with <b>" + nick + "</b> on <b>" + server->hubName() + "</b>");
 	disconnectButton->setText("Close");
@@ -41,7 +40,6 @@ PrivateChatWidget::PrivateChatWidget(Server* server, QString nick, QMap<QString,
 
 PrivateChatWidget::~PrivateChatWidget()
 {
-	m_map.remove(m_nick);
 	MainWindow::getInstance()->privateChatClosed(this);
 }
 

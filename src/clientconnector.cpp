@@ -335,8 +335,16 @@ void ClientConnector::socketDisconnected()
 {
 	qDebug() << "Disconnected";
 
-	changeState(Failed);
-	endTransfer();
+	if(m_sendPos < m_offset + m_numbytes)
+	{
+		changeState(Failed);
+		endTransfer();
+	}
+	else
+	{
+		changeState(Success);
+		endTransfer();
+	}
 }
 
 void ClientConnector::gotUserIP(QString host, QString nick)

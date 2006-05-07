@@ -82,7 +82,6 @@ public:
 	void getUserIP(QString nick); // void return as result is emitted
 	void setHubChat(HubWidget* hubChat) { m_hubChat = hubChat; }
 	PrivateChatWidget* getPrivateChat(QString nick);
-	void closePrivateChat(QString nick);
 
 private:
 	void processChatCommand(QString nick, QString command, bool priv);
@@ -126,6 +125,7 @@ private slots:
 	void nickChanged(QString newnick);
 	void passiveSearchResult(QString result);
 	void sendInfo();
+	void closePrivateChat(QObject* q);
 	
 signals:
 	void stateChanged(int newState);

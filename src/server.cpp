@@ -197,16 +197,18 @@ PrivateChatWidget* Server::getPrivateChat(QString nick)
 		return *it;
 	else
 	{
-		PrivateChatWidget* w = new PrivateChatWidget(this, nick, m_privateChats);
+		PrivateChatWidget* w = new PrivateChatWidget(this, nick);
 		m_privateChats.insert(nick, w);
+		connect(w, SIGNAL(destroyed(QObject*)), this, SLOT(closePrivateChat(QObject*)));
 		MainWindow::getInstance()->getHubTabWidget()->setCurrentWidget(w);
 		return w;
 	}
 }
 
-void Server::closePrivateChat(QString nick)
+void Server::closePrivateChat(QObject* q)
 {
-	m_privateChats.remove(nick);
+	PrivateChatWidget* w = dynamic_cast<PrivateChatWidget*>(q);
+	m_privateChats.remove(w->nick());
 }
 
 void Server::parseCommand(QString command)
@@ -467,7 +469,7 @@ void Server::sendInfo()
 			Configuration::instance()->niceUploadSpeed() + "/" + 
 			Configuration::instance()->niceDownloadSpeed() + "]";
 
-	QString tag = "<++ V:0.0.1,M:A,H:" + 
+	QString tag = "<++ V:0.401,M:A,H:" + 
 			QString::number(Configuration::instance()->connectedHubs()) + "/0/0,S:" +
 			QString::number(Configuration::instance()->numSlots()) + ",B:" +
 			QString::number(Configuration::instance()->uploadSpeed()) + ">";

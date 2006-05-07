@@ -28,7 +28,7 @@ class PrivateChatWidget : public ChatWidget
 	Q_OBJECT
 
 public:
-	PrivateChatWidget(Server* server, QString nick, QMap<QString, PrivateChatWidget*> map);
+	PrivateChatWidget(Server* server, QString nick);
 	virtual ~PrivateChatWidget();
 
 private:

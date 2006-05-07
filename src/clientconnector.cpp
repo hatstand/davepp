@@ -149,7 +149,7 @@ void ClientConnector::parseCommand(QString command)
 			m_stream << "$Key " << Utilities::lockToKey(m_lock) << "|";
 			m_stream.flush();
 		}
-		else if (words[0] == GET || words[0] == "$UGetBlock")
+		else if (words[0] == GET || words[0] == UGETBLOCK)
 		{
 			if(words[0] == GET)
 			{

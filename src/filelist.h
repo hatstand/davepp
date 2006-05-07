@@ -24,6 +24,7 @@ public:
 	QString toString();
 	QByteArray toAscii();
 	QDomDocument toXml();
+	QByteArray toUtf8();
 
 private:
 	FileNode* m_root;

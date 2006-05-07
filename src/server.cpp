@@ -207,8 +207,17 @@ PrivateChatWidget* Server::getPrivateChat(QString nick)
 
 void Server::closePrivateChat(QObject* q)
 {
-	PrivateChatWidget* w = dynamic_cast<PrivateChatWidget*>(q);
-	m_privateChats.remove(w->nick());
+	PrivateChatWidget* widget = dynamic_cast<PrivateChatWidget*>(q);
+	
+	QMap<QString, PrivateChatWidget*>::iterator it = m_privateChats.begin();
+
+	while(it != m_privateChats.end())
+	{
+		if(it.value() == widget)
+			m_privateChats.erase(it);
+
+		++it;
+	}
 }
 
 void Server::parseCommand(QString command)

@@ -13,6 +13,7 @@
 
 FileList::FileList(QTextStream* stream)
 {
+	stream->setCodec("UTF-8");
 	m_root = new FileNode(NULL, "<root>");
 	
 	int depth = 0;
@@ -102,6 +103,11 @@ QString FileList::toString()
 QByteArray FileList::toAscii()
 {
 	return(toString().toAscii());
+}
+
+QByteArray FileList::toUtf8()
+{
+	return(toString().toUtf8());
 }
 
 QString FileList::writeNodeToDcList(FileNode* node, QString indent)

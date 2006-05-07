@@ -797,7 +797,6 @@ void MainWindow::hubTabClose()
 void MainWindow::chatTabClose()
 {
 	PrivateChatWidget* widget = (PrivateChatWidget*) hubTabWidget->widget(m_tabIndex);
-	hubTabWidget->removeTab(m_tabIndex);
 	delete widget;
 }
 

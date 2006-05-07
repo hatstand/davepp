@@ -168,7 +168,7 @@ void ClientConnector::parseCommand(QString command)
 			
 			if (!Configuration::instance()->getSlot())
 			{
-				m_stream << "$MaxedOut|";
+				m_stream << MAXEDOUT << "|";
 				m_stream.flush();
 				m_error = "No slots";
 				

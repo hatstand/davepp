@@ -222,13 +222,13 @@ void ClientConnector::parseCommand(QString command)
 			}
 			else
 			{
-				if(m_numbytes + m_offset > m_fileLength || m_numbytes < 0)
-					m_numbytes = m_fileLength - m_offset;
-
-				if(m_offset < 0)
+				if(m_numbytes < 0)
 					m_stream << "$Sending|"; // Undocumented, unless you count the source as doc
 				else
 					m_stream << "$Sending " << m_numbytes << "|";
+
+				if(m_numbytes + m_offset > m_fileLength || m_numbytes < 0)
+					m_numbytes = m_fileLength - m_offset;
 
 				changeState(Transferring);
 				m_sendPos = m_offset;

@@ -71,6 +71,9 @@ Configuration::Configuration(QObject* parent)
 
 	qint64 free = getFreeSpace();
 	qDebug() << m_settings->fileName();
+
+
+	numBars = 0;
 }
 
 

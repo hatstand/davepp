@@ -195,7 +195,7 @@ void ClientConnector::parseCommand(QString command)
 				if (m_file.exists())
 				{
 					m_file.open(QIODevice::ReadOnly);
-					m_file.seek(m_offset-1);
+					m_file.seek(m_offset);
 				}
 			}
 			
@@ -360,6 +360,7 @@ void ClientConnector::gotUserIP(QString host, QString nick)
 
 void ClientConnector::endTransfer()
 {
+	qDebug() << "Ending Transfer";
 	if(state() == Success)
 		emit result(TransferSucceeded);
 	else

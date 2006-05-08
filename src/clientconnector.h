@@ -59,7 +59,7 @@ private:
 	QString m_lock;
 	QString m_nick;
 	QString m_fileName;
-	qint64 m_offset;
+	quint64 m_offset;
 	quint64 m_fileLength;
 	qint64 m_numbytes;
 	QFile m_file;

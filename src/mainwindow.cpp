@@ -397,6 +397,7 @@ MainWindow::~MainWindow()
 		}
 		++it;
 	}
+	qDebug() << "MainWindow destructor loop done";
 	delete m_config;
 }
 

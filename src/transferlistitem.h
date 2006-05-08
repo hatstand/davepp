@@ -25,6 +25,8 @@
 #include <QTimer>
 #include <QTime>
 
+#include "configuration.h"
+
 class Client;
 class ClientConnector;
 class User;
@@ -33,7 +35,8 @@ class User;
 class DaveProgressBar : public QProgressBar
 {
 public:
-	DaveProgressBar(QWidget* parent) : QProgressBar(parent) {}
+	DaveProgressBar(QWidget* parent) : QProgressBar(parent) {++Configuration::instance()->numBars;}
+	virtual ~DaveProgressBar() {--Configuration::instance()->numBars;}
 	QString text() const;
 	void setText(QString text);
 	

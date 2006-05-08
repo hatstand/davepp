@@ -222,6 +222,7 @@ void Server::closePrivateChat(QObject* q)
 
 void Server::parseCommand(QString command)
 {
+	qDebug() << "Progress Bars:" << Configuration::instance()->numBars;
 	using namespace ServerDetails;
 
 	if(command == "")
@@ -411,10 +412,6 @@ void Server::parseCommand(QString command)
 		else if (words[0].startsWith("$HubIsFull"))
 		{
 			changeState(HubFull);
-		}
-		else if (words[0].startsWith("$UserIP"))
-		{
-			emit gotUserIP(words[1], words[2]);
 		}
 		else
 			qDebug() << words[0] << "not understood";

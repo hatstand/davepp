@@ -40,7 +40,7 @@ class HubWidget : public ChatWidget
 	Q_OBJECT
 public:
 	HubWidget(HubDetailsListItem* details, Server* server, Q3ListView* userList);
-	~HubWidget();
+	virtual ~HubWidget();
 	
 	HubDetailsListItem* detailsListItem() {return m_details;}
 	Server* server() {return m_server;}

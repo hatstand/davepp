@@ -8,3 +8,7 @@ Cosmetic/UI changes:
   widget, it's got too many things displayed at the same time: 
   Prioritize.
 - Implement /me stuff
+- Pie in the sky: for each person in the user list, it does an 
+  nslookup of their IP address, takes the crsid (if present), enters 
+  it into lookup.cam.ac.uk, then enters the surname and college into 
+  facebook and displays their photo next to their username

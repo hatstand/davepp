@@ -365,6 +365,8 @@ void ClientConnector::endTransfer()
 		emit result(TransferSucceeded);
 	else
 		emit result(TransferFailed);
+
+	m_socket->disconnect();
 	
 	m_socket->abort();
 	deleteLater();

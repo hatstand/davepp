@@ -54,16 +54,23 @@ void ChatWidget::setInputBoxFocus()
 
 void ChatWidget::chatMessage(QString from, QString message)
 {
-	message = Q3StyleSheet::escape(message); // Breaks the layout
-	message.replace("\n", "<br />");
-
+	message = Q3StyleSheet::escape(message);
 	printTimeIfNeeded();
-	chatBox->append("<b>" + from + ":</b> " + message);
+
+	if(message.contains("\n"))
+	{
+		message.replace("\n", "<br />");
+		// <pre> makes it a new paragraph, which adds too much spacing
+		// Allows multiple spaces though
+		chatBox->append("<b>" + from + ":</b><pre>" + message + "</pre>");
+	}
+	else
+		chatBox->append("<b>" + from + ":</b> <tt>" + message + "</tt>");
 }
 
 void ChatWidget::printTime()
 {
-	chatBox->append("<font color=\"gray\"><small>" + QTime::currentTime().toString("h:mm") + "</small></font>");
+	chatBox->append("<center><font color=\"gray\"><small>" + QTime::currentTime().toString("h:mm") + "</small></font></center><br />");
 }
 
 void ChatWidget::printTimeIfNeeded()

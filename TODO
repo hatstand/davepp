@@ -12,4 +12,4 @@ Cosmetic/UI changes:
   nslookup of their IP address, takes the crsid (if present), enters 
   it into lookup.cam.ac.uk, then enters the surname and college into 
   facebook and displays their photo next to their username
-- download folders
+- download folders; add "download parent folder" to files

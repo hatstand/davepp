@@ -87,7 +87,7 @@ void ClientConnector::socketConnected()
 
 void ClientConnector::socketError(QAbstractSocket::SocketError err)
 {
-	if((err == QAbstractSocket::SocketTimeoutError || err == QAbstractSocket::ConnectionRefusedError) && state() != Failed) // Timeout, might be NAT'ed, let's try the Hub's IP
+/*	if((err == QAbstractSocket::SocketTimeoutError || err == QAbstractSocket::ConnectionRefusedError) && state() != Failed) // Timeout, might be NAT'ed, let's try the Hub's IP
 	{
 		qDebug() << "Socket connection failed. Getting Remote IP";
 		
@@ -100,10 +100,19 @@ void ClientConnector::socketError(QAbstractSocket::SocketError err)
 		m_timer->start(3000);
 
 		return;
+	} */ // Lets fix other bugs first
+
+	if(m_sendPos < m_numbytes)
+	{
+		qDebug() << "Error" << err;
+		changeState(Failed);
+	}
+	else
+	{
+		qDebug() << "Sent file";
+		changeState(Success);
 	}
 
-	qDebug() << "Error" << err;
-	changeState(Failed);
 	endTransfer();
 }
 

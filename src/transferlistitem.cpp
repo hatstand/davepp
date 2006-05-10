@@ -119,6 +119,8 @@ void TransferListItem::setFileUpload(ClientConnector* connector)
 	connect(connector, SIGNAL(infoChanged()), SLOT(clientInfoChanged()));
 	connect(connector, SIGNAL(speedChanged(quint64)), SLOT(clientSpeedChanged(quint64)));
 	connect(connector, SIGNAL(result(int)), SLOT(clientResult(int)));
+
+	clientStateChanged(connector->state());
 	
 	if (m_progress)
 	{
@@ -224,6 +226,15 @@ void TransferListItem::clientStateChanged(int state)
 {
 	switch(state)
 	{
+	case Client::NoSlots:
+		m_progress->setText("No slots available");
+		break;
+	case Client::Failed:
+		m_progress->setText("Transfer failed");
+		break;
+	case Client::Success:
+		m_progress->setText("Transfer Successful");
+		break;
 	case Client::WaitingForConnection:
 		m_progress->setText("Waiting for peer...");
 		break;
@@ -238,6 +249,9 @@ void TransferListItem::clientStateChanged(int state)
 		break;
 	case Client::Transferring:
 		m_progress->setText("");
+		break;
+	case Client::Idle:
+		m_progress->setText("Idle");
 		break;
 	}
 }

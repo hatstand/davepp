@@ -28,6 +28,7 @@
 #include <QStringList>
 #include <QList>
 #include <QListIterator>
+#include <QTime>
 
 #include "privatechatwidget.h"
 
@@ -111,6 +112,8 @@ private:
 
 	QMap<QString, PrivateChatWidget*> m_privateChats;
 	HubWidget* m_hubChat;
+
+	QTime infoTimer;
 	
 private slots:
 	void socketHostFound();
@@ -124,7 +127,7 @@ private slots:
 	void fileListUpdateFinished();
 	void nickChanged(QString newnick);
 	void passiveSearchResult(QString result);
-	void sendInfo();
+	void sendInfo(bool force = false);
 	void closePrivateChat(QObject* q);
 	
 signals:

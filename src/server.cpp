@@ -32,6 +32,7 @@
 #include <QStringList>
 #include <QUdpSocket>
 #include <QDebug>
+#include <QTime>
 
 namespace ServerDetails {
 
@@ -82,6 +83,8 @@ Server::Server(QObject *parent)
 	FileListBuilder* builder = FileListBuilder::instance();
 	m_me->setShareSize(builder->totalSize());
 	connect(builder, SIGNAL(finished()), SLOT(fileListUpdateFinished()));
+
+	infoTimer = QTime::currentTime();
 }
 
 
@@ -261,7 +264,7 @@ void Server::parseCommand(QString command)
 				qDebug() << "Sending login info";
 				m_stream << "$Version 1,0091|";
 				m_stream.flush();
-				sendInfo();
+				sendInfo(true);
 				getNickList();
 			}
 			
@@ -466,8 +469,12 @@ void Server::userQuit(QString nick)
 	delete user;
 }
 
-void Server::sendInfo()
+void Server::sendInfo(bool force)
 {
+	// Throttle the MyINFO packets
+	if(!force && infoTimer.elapsed() < (1000 * 10))
+		return;
+
 	// Tag assumes active mode for now
 	QString extras = "{" + 
 			QString::number(Configuration::instance()->slotsFree()) + "/" +
@@ -482,6 +489,8 @@ void Server::sendInfo()
 	
 	m_stream << "$MyINFO $ALL " << m_me->nick << " " << extras << " " << tag << "$ $" << m_me->speed << "$" << m_me->email << "$" << QString::number(m_me->shareSize) << "$|";
 	m_stream.flush();
+
+	infoTimer.restart();
 }
 
 void Server::socketDisconnected()

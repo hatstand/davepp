@@ -57,7 +57,14 @@ void ChatWidget::chatMessage(QString from, QString message)
 	message = Q3StyleSheet::escape(message);
 	printTimeIfNeeded();
 
-	message.replace("\n", "<br />");
+	if(message.count('\n') > 3)
+	{
+		qDebug() << "Long message";
+		message.prepend("<br>");
+	}
+
+	message.replace("\n", "<br>");
+	message.replace(" ", "&nbsp;");
 	chatBox->append("<b>" + from + ":</b> " + message);
 }
 

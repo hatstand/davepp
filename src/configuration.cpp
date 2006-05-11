@@ -24,13 +24,13 @@
 #include "filelistbuilder.h"
 
 
+// Icky Windows stuff
 #ifdef Q_OS_WIN32
 	#include <windows.h>
 	#include <stdio.h>
-
 	typedef BOOL (WINAPI *PGETDISKFREESPACEEX)(LPCSTR,
 						    PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER);
-
+// Nice Linux stuff
 #elif defined Q_OS_UNIX
 	#include <sys/statvfs.h>
 #endif
@@ -71,9 +71,6 @@ Configuration::Configuration(QObject* parent)
 
 	qint64 free = getFreeSpace();
 	qDebug() << m_settings->fileName();
-
-
-	numBars = 0;
 }
 
 

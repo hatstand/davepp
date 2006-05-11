@@ -225,7 +225,6 @@ void Server::closePrivateChat(QObject* q)
 
 void Server::parseCommand(QString command)
 {
-	qDebug() << "Progress Bars:" << Configuration::instance()->numBars;
 	using namespace ServerDetails;
 
 	if(command == "")

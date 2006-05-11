@@ -96,8 +96,6 @@ public:
 	qint64 getFreeSpace() const;
 
 	QByteArray getSavedXmlList();
-
-	int numBars;
 	
 private:
 	QString niceSpeed(int x) const;

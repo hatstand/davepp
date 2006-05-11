@@ -64,6 +64,14 @@ void ChatWidget::chatMessage(QString from, QString message)
 	}
 
 	message.replace("\n", "<br>");
+
+	if(message.startsWith("/me"))
+	{
+		message.replace("/me", "*** " + from);
+		chatBox->append(message);
+		return;
+	}
+
 	message.replace(" ", "&nbsp;");
 	chatBox->append("<b>" + from + ":</b> " + message);
 }

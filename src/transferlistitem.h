@@ -35,8 +35,7 @@ class User;
 class DaveProgressBar : public QProgressBar
 {
 public:
-	DaveProgressBar(QWidget* parent) : QProgressBar(parent) {++Configuration::instance()->numBars;}
-	virtual ~DaveProgressBar() {--Configuration::instance()->numBars;}
+	DaveProgressBar(QWidget* parent): QProgressBar(parent) {}
 	QString text() const;
 	void setText(QString text);
 	

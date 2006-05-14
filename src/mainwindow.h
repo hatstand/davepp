@@ -171,7 +171,7 @@ private slots:
 	void builderProgress(uint value, uint totalSteps);
 
 	void restartTransfers();
-	
+
 private:
 	void autoConnect();
 	void connectToHub(HubDetailsListItem* item);

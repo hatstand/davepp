@@ -47,7 +47,7 @@ void DaveProgressBar::setText(QString text)
 TransferListItem::TransferListItem(Q3ListView* parent)
  : Q3ListViewItem(parent), m_transfer(NULL), QObject(parent), m_speed(0), m_totalSize(0), m_update_time()
 {
-//	m_progress = new DaveProgressBar(listView()->viewport());
+	m_progress = new DaveProgressBar(listView()->viewport());
 	
 	qDebug() << "Height before" << height();
 	setHeight(QApplication::fontMetrics().height()*3 + 1);
@@ -72,7 +72,7 @@ TransferListItem::TransferListItem(TransferListItem* parent)
 
 TransferListItem::~TransferListItem()
 {
-//	delete m_progress;
+	delete m_progress;
 	
 	if (m_type == UploadFile)
 		delete m_transfer;
@@ -86,11 +86,11 @@ void TransferListItem::setFilelistDownload(User* user)
 	
 	connect(user->server, SIGNAL(userQuit(User*)), SLOT(userQuit(User*)));
 	
-/*	if (m_progress)
+	if (m_progress)
 	{
 		m_progress->move(3, itemPos() + QApplication::fontMetrics().height()*2);
 		m_progress->show();
-	} */
+	} 
 }
 
 void TransferListItem::setFileDownload(User* user, QString path)
@@ -102,11 +102,11 @@ void TransferListItem::setFileDownload(User* user, QString path)
 	
 	connect(user->server, SIGNAL(userQuit(User*)), SLOT(userQuit(User*)));
 	
-/*	if (m_progress)
+	if (m_progress)
 	{
 		m_progress->move(3, itemPos() + QApplication::fontMetrics().height()*2);
 		m_progress->show();
-	} */
+	} 
 }
 
 void TransferListItem::setFileUpload(ClientConnector* connector)
@@ -122,11 +122,11 @@ void TransferListItem::setFileUpload(ClientConnector* connector)
 
 	clientStateChanged(connector->state());
 	
-/*	if (m_progress)
+	if (m_progress)
 	{
 		m_progress->move(3, itemPos() + QApplication::fontMetrics().height()*2);
 		m_progress->show();
-	} */
+	} 
 }
 
 void TransferListItem::start()
@@ -156,7 +156,7 @@ void TransferListItem::start()
 void TransferListItem::stop()
 {
 	delete m_transfer;
-//	m_progress->setText("Paused");
+	m_progress->setText("Paused");
 }
 
 void TransferListItem::remove()
@@ -166,7 +166,7 @@ void TransferListItem::remove()
 		deleteLater();
 	else
 	{
-//		m_progress->setText("Cancelling...");
+		m_progress->setText("Cancelling...");
 		m_timer->start(1000);
 	}
 }
@@ -178,7 +178,7 @@ void TransferListItem::clientResult(int result)
 	
 	if (result == Client::TransferFailed)
 	{
-//		m_progress->setText("Error: " + m_transfer->error());
+		m_progress->setText("Error: " + m_transfer->error());
 	}
 	else
 	{
@@ -226,7 +226,7 @@ void TransferListItem::swapWith(TransferListItem* item)
 
 void TransferListItem::clientStateChanged(int state)
 {
-/*	switch(state)
+	switch(state)
 	{
 	case Client::NoSlots:
 		m_progress->setText("No slots available");
@@ -255,13 +255,13 @@ void TransferListItem::clientStateChanged(int state)
 	case Client::Idle:
 		m_progress->setText("Idle");
 		break;
-	} */
+	} 
 }
 
 void TransferListItem::clientProgress(uint size, uint totalSize)
 {
-//	m_progress->setRange(0, totalSize);
-//	m_progress->setValue(size);
+	m_progress->setRange(0, totalSize);
+	m_progress->setValue(size);
 	m_totalSize = totalSize;
 	m_size = size;
 	if(m_update_time.elapsed() > 100) // 10 fps
@@ -297,12 +297,12 @@ void TransferListItem::paintCell(QPainter* painter, const QColorGroup& cg, int c
 	if (isSelected())
 		painter->setPen(cg.highlightedText());
 	
-/*	if (m_progress)
+	if (m_progress)
 	{
 		m_progress->resize(width - 6, QApplication::fontMetrics().height());
 		
 		listView()->moveChild(m_progress, 3, itemPos() + QApplication::fontMetrics().height()*2);
-	} */
+	} 
 	
 	QFont font = painter->font();
 	QFont fontBold = painter->font();
@@ -419,7 +419,7 @@ void TransferListItem::userQuit(User* user)
 	if (user == m_user)
 	{
 		m_user = NULL;
-//		m_progress->setText("User left hub");
+		m_progress->setText("User left hub");
 	}
 }
 

@@ -141,6 +141,7 @@ signals:
 	void fileListUpdated(User* user);
 	void uploadRequest(ClientConnector* connector);
 	void gotUserIP(QString nick, QString host);
+	void becameOp(bool yes);
 };
 
 #endif

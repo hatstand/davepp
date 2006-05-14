@@ -53,11 +53,13 @@ private slots:
 	void error(QString message);
 	void userJoined(User* user);
 	void userQuit(User* user);
+	void becameOp(bool yes);
 
 private:
 	HubDetailsListItem* m_details;
 	Q3ListView* m_userList;
 	UserHeaderListItem* m_userHeader;
+	bool op;
 
 };
 

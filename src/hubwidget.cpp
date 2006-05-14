@@ -36,6 +36,9 @@ HubWidget::HubWidget(HubDetailsListItem* details, Server* server, Q3ListView* us
 	details->setConnection(m_server);
 	connect(server, SIGNAL(stateChanged(int)), SLOT(stateChanged(int)));
 	connect(server, SIGNAL(error(QString)), SLOT(error(QString)));
+	connect(server, SIGNAL(becameOp(bool)), SLOT(becameOp(bool)));
+
+	op = false;
 }
 
 HubWidget::~HubWidget()
@@ -59,6 +62,9 @@ void HubWidget::stateChanged(int state)
 		disconnectButton->setText("Connect");
 	else
 		disconnectButton->setText("Disconnect");
+
+	if(op)
+		label += "(Op)";
 	
 	statusLabel->setText("<b>" + label + "</b>");
 }
@@ -98,4 +104,16 @@ void HubWidget::userQuit(User* user)
 			m_userHeader = NULL;
 		}
 	}
+}
+
+void HubWidget::becameOp(bool yes)
+{
+	op = yes;
+
+	if(yes)
+	{
+		statusLabel->setText(statusLabel->text() + " (Op)");
+	}
+	else
+		statusLabel->setText("<b>" + m_server->hubName() + "</b>");
 }

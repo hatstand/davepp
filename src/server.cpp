@@ -319,6 +319,7 @@ void Server::parseCommand(QString command)
 				if (nick == m_me->nick)
 					user->me = true;
 				emit userJoined(user);
+				emit becameOp(true);
 			}
 		}
 		else if(words[0] == "$MyINFO")
@@ -414,6 +415,20 @@ void Server::parseCommand(QString command)
 		else if (words[0].startsWith("$HubIsFull"))
 		{
 			changeState(HubFull);
+		}
+		else if (words[0].startsWith("$GetPass"))
+		{
+			qDebug() << "Nick requires password on this hub";
+			m_stream << "$MyPass " << "somel33tpa55word" << "|";
+			m_stream.flush();
+		}
+		else if(words[0].startsWith("$LogedIn"))
+		{
+			qDebug() << "Successfully logged in as Op";
+		}
+		else if(words[0].startsWith("$BadPass"))
+		{
+			qDebug() << "Password wrong";
 		}
 		else
 			qDebug() << words[0] << "not understood";

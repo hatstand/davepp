@@ -36,6 +36,7 @@ class DaveProgressBar : public QProgressBar
 {
 public:
 	DaveProgressBar(QWidget* parent): QProgressBar(parent) {}
+	virtual ~DaveProgressBar() {}
 	QString text() const;
 	void setText(QString text);
 	

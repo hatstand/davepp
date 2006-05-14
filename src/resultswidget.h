@@ -32,7 +32,8 @@ class SearchResultListItem : public Q3ListViewItem
 {
 public:
 	SearchResultListItem(Q3ListView* parent, SearchResult* result);
-	
+	int compare(Q3ListViewItem* i, int col, bool ascending) const;	
+	int rtti() const { return 1005; }
 	SearchResult* result;
 };
 

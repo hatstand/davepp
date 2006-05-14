@@ -16,6 +16,8 @@ class SearchResult
 		int totalslots;
 		QString hubaddress;
 		QString hash;
+
+		QString niceFilename() { return filename.section('\\', -1); }
 };
 
 #endif

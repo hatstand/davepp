@@ -33,7 +33,7 @@
 SearchResultListItem::SearchResultListItem(Q3ListView* parent, SearchResult* result)
  : Q3ListViewItem(parent), result(result)
 {
-	setText(0, result->filename);
+	setText(0, result->niceFilename());
 		
 	if (result->size <= 0)
 		setText(1, "(folder)");
@@ -43,6 +43,33 @@ SearchResultListItem::SearchResultListItem(Q3ListView* parent, SearchResult* res
 	setText(3, result->nick);
 }
 
+int SearchResultListItem::compare(Q3ListViewItem* i, int col, bool ascending) const
+{
+	if(i->rtti() == 1005)
+	{
+		SearchResultListItem* other = (SearchResultListItem*)i;
+		switch(col)
+		{
+			case 0:
+				return result->filename.toLower().compare(other->result->filename.toLower());
+			case 1:
+				if(result->size > other->result->size)
+					return 1;
+				else if(result->size == other->result->size)
+					return 0;
+				else
+					return -1;
+			case 2:
+				return result->openslots - other->result->openslots;
+			case 3:
+				return result->nick.toLower().compare(other->result->nick.toLower());
+			default:
+				return 0;
+		}
+	}
+	else
+		return Q3ListViewItem::compare(i, col, ascending);
+}
 
 
 ResultsWidget::ResultsWidget(MainWindow* parent, User* user, Q3ListView* transferList)

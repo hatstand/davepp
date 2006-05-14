@@ -481,7 +481,7 @@ void Server::sendInfo(bool force)
 			Configuration::instance()->niceUploadSpeed() + "/" + 
 			Configuration::instance()->niceDownloadSpeed() + "]";
 
-	QString tag = "<++ V:0.401,M:A,H:" + 
+	QString tag = "<Dave++ V:0.401,M:A,H:" + 
 			QString::number(Configuration::instance()->connectedHubs()) + "/0/0,S:" +
 			QString::number(Configuration::instance()->numSlots()) + ",B:" +
 			QString::number(Configuration::instance()->uploadSpeed()) + ">";

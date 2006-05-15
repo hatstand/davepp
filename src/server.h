@@ -84,6 +84,8 @@ public:
 	void setHubChat(HubWidget* hubChat) { m_hubChat = hubChat; }
 	PrivateChatWidget* getPrivateChat(QString nick);
 
+	void kickUser(QString nick);
+
 private:
 	void processChatCommand(QString nick, QString command, bool priv);
 	void parseCommand(QString command);

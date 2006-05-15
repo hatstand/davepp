@@ -278,7 +278,7 @@ void ClientConnector::sendSomeData()
 	if (m_sendPos >= m_numbytes + m_offset - 1)
 	{
 		qDebug() << "Sending finished (" << m_sendPos << m_fileLength << ")";
-		changeState(Idle);
+		changeState(Success);
 		endTransfer();
 		return;
 	}
@@ -377,6 +377,7 @@ void ClientConnector::endTransfer()
 
 	m_socket->disconnect();
 	
+	m_socket->flush();
 	m_socket->abort();
 	deleteLater();
 }

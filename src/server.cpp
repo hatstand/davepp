@@ -303,23 +303,28 @@ void Server::parseCommand(QString command)
 			qDebug() << "Ops:";
 			foreach (QString nick, ops)
 			{
+				qDebug() << nick;
 				User* user = getUser(nick);
 				if (user != NULL)
 				{
 					if (user->op)
 						continue;
-					user->op = true;
 					emit userInfoChanged(user);
-					break;
+				}
+				else
+				{
+					user = new User(this, nick);
+					m_users << user;
+					emit userJoined(user);
 				}
 				
-				user = new User(this, nick);
 				user->op = true;
-				m_users << user;
 				if (nick == m_me->nick)
+				{
 					user->me = true;
-				emit userJoined(user);
-				emit becameOp(true);
+					emit becameOp(true);
+					qDebug() << "Op on this server";
+				}
 			}
 		}
 		else if(words[0] == "$MyINFO")
@@ -663,4 +668,11 @@ void Server::resumeDownload(QString nick, QString remotefilename, QString localf
 	qDebug() << "Resuming download";
 
 //	m_queue << new Download(nick, remotefilename, localfilename, bytesDone);
+}
+
+void Server::kickUser(QString nick)
+{
+	qDebug() << "Kicking user";
+	m_stream << "$Kick " << nick << "|";
+	m_stream.flush();
 }

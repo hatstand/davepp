@@ -319,6 +319,13 @@ MainWindow::MainWindow()
 	m_userContextMenu = new QMenu(this);
 	m_userContextMenu->addAction("Browse files", this, SLOT(browseUserFiles()));
 	m_userContextMenu->addAction("Chat", this, SLOT(requestNewPrivateChat()));
+
+	m_opUserContextMenu = new QMenu(this);
+	m_opUserContextMenu->addAction("Browse files", this, SLOT(browseUserFiles()));
+	m_opUserContextMenu->addAction("Chat", this, SLOT(requestNewPrivateChat()));
+	m_opUserContextMenu->addSeparator();
+	m_opUserContextMenu->addAction("Kick", this, SLOT(kickUser()));
+	m_opUserContextMenu->addAction("Ban", this, SLOT(banUser()));
 	
 	m_hubTabDisconnect = new QAction("Disconnect", this);
 	connect(m_hubTabDisconnect, SIGNAL(activated()), SLOT(hubTabDisconnect()));
@@ -676,7 +683,13 @@ void MainWindow::userRightClick(Q3ListViewItem* item, const QPoint& point)
 {
 	if ((!item) || (item->rtti() != 1002))
 		return;
-	m_userContextMenu->popup(point);
+
+	UserListItem* bob = (UserListItem*)item;
+
+	if(bob->user()->server->me()->op)
+		m_opUserContextMenu->popup(point);
+	else
+		m_userContextMenu->popup(point);
 }
 
 UserListItem* MainWindow::getUserListItem()
@@ -707,6 +720,28 @@ void MainWindow::requestNewPrivateChat()
 	{
 		User* user = item->user();
 		user->server->getPrivateChat(user->nick);
+	}
+}
+
+void MainWindow::kickUser()
+{
+	UserListItem* item = getUserListItem();
+
+	if(item != NULL)
+	{
+		User* user = item->user();
+		user->server->kickUser(user->nick);
+	}
+}
+
+void MainWindow::banUser()
+{
+	UserListItem* item = getUserListItem();
+
+	if(item != NULL)
+	{
+		User* user = item->user();
+		// Do nothing. Ban is non-standard
 	}
 }
 

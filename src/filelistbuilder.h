@@ -42,12 +42,13 @@ public:
 	QByteArray xmlBZList();
 	quint64 totalSize();
 	
-	void lock() { m_mutex.lock(); }
-	void unlock() { m_mutex.unlock(); }
-	
 	static FileListBuilder* instance();
 
 	bool isReady() {return m_ready;}
+
+	QMutex* m_mutex;
+
+	void regenList();
 
 signals:
 	void progress(uint value, uint total);
@@ -62,10 +63,10 @@ private:
 	QByteArray m_huffmanList;
 	QByteArray m_BZList;
 	QByteArray m_XmlBZList;
-	QMutex m_mutex;
 	QDomDocument doc;
 
 	bool m_ready;
+	bool ignoreSaved;
 };
 
 #endif

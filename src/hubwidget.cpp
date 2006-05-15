@@ -64,9 +64,9 @@ void HubWidget::stateChanged(int state)
 		disconnectButton->setText("Disconnect");
 
 	if(op)
-		label += "(Op)";
-	
-	statusLabel->setText("<b>" + label + "</b>");
+		statusLabel->setText("<b>" + label + "</b>" + " (Op)");
+	else
+		statusLabel->setText("<b>" + label + "</b>");
 }
 
 void HubWidget::error(QString message)

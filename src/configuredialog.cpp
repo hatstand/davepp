@@ -22,6 +22,7 @@
 #include "configuration.h"
 
 #include <QDebug>
+#include "filelistbuilder.h"
 
 ConfigureDialog::ConfigureDialog(QWidget* parent, Configuration* config)
  : QDialog(parent), Ui::UIConfigureDialog(), m_config(config), m_shareListDirty(false)
@@ -102,6 +103,7 @@ void ConfigureDialog::accept()
 			m_config->shareAdd(it.current()->text(0), it.current()->text(1));
 			++it;
 		}
+		FileListBuilder::instance()->regenList();
 	}
 	m_config->setUploadSpeed(uploadSpeedBox->value());
 	m_config->setNumSlots(slotsBox->value());
@@ -112,6 +114,7 @@ void ConfigureDialog::accept()
 	m_config->setDownloadDir(downloadDirBox->text());
 	m_config->setDownloadSpeed(downloadSpeedBox->value());
 	m_config->save();
+
 	
 	QDialog::accept();
 }

@@ -24,6 +24,7 @@
 
 #include <QBuffer>
 #include <QDebug>
+#include <QMutexLocker>
 
 FileListBuilder* fileListBuilderInstance = NULL;
 
@@ -32,11 +33,14 @@ FileListBuilder::FileListBuilder(Configuration* config)
 {
 	fileListBuilderInstance = this;
 	m_ready = false;
+	m_mutex = new QMutex();
+	ignoreSaved = false;
 }
 
 
 FileListBuilder::~FileListBuilder()
 {
+	delete(m_mutex);
 }
 
 FileListBuilder* FileListBuilder::instance()
@@ -51,20 +55,24 @@ void FileListBuilder::run()
 	uint totalSteps = 3;
 	uint step = 0;
 
-	QByteArray savedBZXml = m_config->getSavedXmlList();
-	if(!savedBZXml.isEmpty()) // Yay! We found a saved file list
+	if(!ignoreSaved)
 	{
-		emit progress(++step, totalSteps);
-		qDebug() << "Using saved XML";
-		m_list = new FileList(Utilities::decodeBZList(savedBZXml));
-		emit progress(++step, totalSteps);
-		m_list->calculateTotalSize();
-		emit progress(++step, totalSteps);
+		QByteArray savedBZXml = m_config->getSavedXmlList();
+		if(!savedBZXml.isEmpty()) // Yay! We found a saved file list
+		{
+			QMutexLocker locker(m_mutex);
+			emit progress(++step, totalSteps);
+			qDebug() << "Using saved XML";
+			m_list = new FileList(Utilities::decodeBZList(savedBZXml));
+			emit progress(++step, totalSteps);
+			m_list->calculateTotalSize();
+			emit progress(++step, totalSteps);
 
-		m_XmlBZList = savedBZXml;
+			m_XmlBZList = savedBZXml;
 		
-		m_ready = true;
-		return;
+			m_ready = true;
+			return;
+		}
 	}
 
 	qDebug() << "Creating new filelist";
@@ -85,16 +93,17 @@ void FileListBuilder::run()
 		emit progress(step++, totalSteps);
 	}
 	
-	m_mutex.lock();
-	delete m_list; // Remove old filelist
-	emit progress(step++, totalSteps);
+	{
+		QMutexLocker locker(m_mutex);
+		delete m_list; // Remove old filelist
+		emit progress(step++, totalSteps);
 
-	// Generate File List in memory
-	m_list = new FileList(root);
+		// Generate File List in memory
+		m_list = new FileList(root);
+		emit progress(step++, totalSteps);
+		m_list->calculateTotalSize();
+	}
 	emit progress(step++, totalSteps);
-	m_list->calculateTotalSize();
-	emit progress(step++, totalSteps);
-	m_mutex.unlock();
 
 	// Don't bother creating useful lists until they're requested
 	// BZList is rarely requested for example, so why bother?
@@ -106,45 +115,41 @@ void FileListBuilder::run()
 
 FileList* FileListBuilder::list()
 {
-	m_mutex.lock();
+	QMutexLocker locker(m_mutex);
 	FileList* ret = m_list;
-	m_mutex.unlock();
 	return ret;
 }
 
 QByteArray FileListBuilder::huffmanList()
 {
-	m_mutex.lock();
+	QMutexLocker locker(m_mutex);
 
 	if(m_huffmanList.isEmpty())
 		m_huffmanList = Utilities::encodeList(m_list->toAscii());
 
 	QByteArray ret = m_huffmanList;
-	m_mutex.unlock();
 	return ret;
 } 
 
 QByteArray FileListBuilder::bzList()
 {
-	m_mutex.lock();
+	QMutexLocker locker(m_mutex);
 
 	if(m_BZList.isEmpty())
 		m_BZList = Utilities::encodeBZList(m_list->toAscii());
 
 	QByteArray ret = m_BZList;
-	m_mutex.unlock();
 	return ret;
 }
 
 QByteArray FileListBuilder::xmlBZList()
 {
-	m_mutex.lock();
+	QMutexLocker locker(m_mutex);
 
 	if(m_XmlBZList.isEmpty())
 		m_XmlBZList = Utilities::encodeBZList(m_list->toXml().toByteArray());
 
 	QByteArray ret = m_XmlBZList;
-	m_mutex.unlock();
 	return ret;
 }
 
@@ -155,3 +160,9 @@ quint64 FileListBuilder::totalSize()
 	return m_list->totalSize();
 }
 
+void FileListBuilder::regenList()
+{
+	ignoreSaved = true;
+	start();
+	ignoreSaved = false;
+}

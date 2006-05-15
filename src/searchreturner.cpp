@@ -5,6 +5,7 @@
 
 #include <QDebug>
 #include <QUdpSocket>
+#include <QMutexLocker>
 
 const QString SearchReturner::audio = "\\.(mp3)|(mp2)|(wav)|(au)|(rm)|(mid)|(sm)$";
 const QString SearchReturner::compressed = "\\.(zip)|(arj)|(rar)|(lzh)|(gz)|(z)|(arc)|(pak)|(tar)|(bz2)$";
@@ -100,13 +101,11 @@ void SearchReturner::run()
 	if(!isPassive)
 		m_sock = new QUdpSocket();
   
-	m_builder->lock();
+	QMutexLocker locker(m_builder->m_mutex);
 
 	FileNode* root = m_list->root();
 
 	SearchDescend(root);
-
-	m_builder->unlock();
 }
 
 void SearchReturner::SearchDescend(FileNode* current)

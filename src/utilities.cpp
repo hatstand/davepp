@@ -638,5 +638,6 @@ QByteArray Utilities::encodeBZList(QByteArray inputData)
 		return *list;
 	}
 
+	free(dest);
 	return NULL;
 }

@@ -172,6 +172,9 @@ private slots:
 
 	void restartTransfers();
 
+	void kickUser();
+	void banUser();
+
 private:
 	void autoConnect();
 	void connectToHub(HubDetailsListItem* item);
@@ -186,6 +189,7 @@ private:
 	QList<Server*> m_hubs;
 	QMenu* m_userListMenu;
 	QMenu* m_userContextMenu;
+	QMenu* m_opUserContextMenu;
 	QMenu* m_hubTabContextMenu;
 	QMenu* m_chatTabContextMenu;
 	QMenu* m_hubContextMenu;

@@ -102,7 +102,6 @@ void ChatWidget::sendPressed()
 		m_server->sendMessage(message, m_nick);
 		inputBox->clear();
 
-		message = Q3StyleSheet::escape(message);
 		QString from = Configuration::instance()->nick();
 		chatMessage(from, message);
 	}

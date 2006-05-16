@@ -179,8 +179,6 @@ int UserListItem::compare( Q3ListViewItem* i, int col, bool ascending ) const
 	else
 		return 0;
 	
-	// Unreachable code
-	/*
 	UserListItem* item = (UserListItem*) i;
 	User* otherUser = item->user();
 	
@@ -197,7 +195,7 @@ int UserListItem::compare( Q3ListViewItem* i, int col, bool ascending ) const
 		if (m_user->shareSize == item->user()->shareSize)
 			return 0;
 		return 1;
-	} */
+	} 
 }
 
 UserHeaderListItem::UserHeaderListItem(Q3ListView* parent, Server* server)

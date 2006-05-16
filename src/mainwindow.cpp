@@ -169,14 +169,18 @@ int UserListItem::compare( Q3ListViewItem* i, int col, bool ascending ) const
 		QString otherName = ((UserHeaderListItem*)i)->server()->hubName();
 		return m_user->server->hubName().lower().compare(otherName.lower());
 	}
-	else
+	else if(i->rtti() == 1002)
 	{
 		QString otherName = ((UserListItem*)i)->user()->server->hubName();
 		int compare = m_user->server->hubName().lower().compare(otherName.lower());
 		if (compare != 0)
 			return compare;
 	}
+	else
+		return 0;
 	
+	// Unreachable code
+	/*
 	UserListItem* item = (UserListItem*) i;
 	User* otherUser = item->user();
 	
@@ -193,7 +197,7 @@ int UserListItem::compare( Q3ListViewItem* i, int col, bool ascending ) const
 		if (m_user->shareSize == item->user()->shareSize)
 			return 0;
 		return 1;
-	}
+	} */
 }
 
 UserHeaderListItem::UserHeaderListItem(Q3ListView* parent, Server* server)
@@ -227,12 +231,14 @@ int UserHeaderListItem::compare( Q3ListViewItem* i, int col, bool ascending ) co
 	QString otherName;
 	if (i->rtti() == 1003)
 		otherName = ((UserHeaderListItem*)i)->server()->hubName();
-	else
+	else if(i->rtti() == 1002)
 	{
 		if (((UserListItem*)i)->user()->server == m_server)
 			return -1;
 		otherName = ((UserListItem*)i)->user()->server->hubName();
 	}
+	else
+		return 0;
 	
 	return m_server->hubName().lower().compare(otherName.lower());
 }

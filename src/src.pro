@@ -74,7 +74,8 @@ edithub.ui.commands = $$IDL_COMPILER
 QT = core qt3support network gui xml
 TARGET = ../bin/daveplusplus
 CONFIG += \
-warn_on
+warn_on \
+debug
 resultswidget.ui.commands = $$IDL_COMPILER $$IDL_OPTIONS $$resultswidget.ui.target
 resultswidget.ui.target = resultswidget.ui
 hubwidget.ui.target = hubwidget.ui

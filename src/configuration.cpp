@@ -31,7 +31,7 @@
 	typedef BOOL (WINAPI *PGETDISKFREESPACEEX)(LPCSTR,
 						    PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER);
 // Nice Linux stuff
-#elif defined Q_OS_UNIX
+#elif defined Q_OS_LINUX
 	#include <sys/statvfs.h>
 #endif
 
@@ -214,7 +214,7 @@ qint64 Configuration::getFreeSpace() const
 	}
 	else
 		return -1;
-#elif defined Q_OS_UNIX // statvfs should be available on most unices
+#elif defined Q_OS_LINUX // statvfs should be available on most unices
 	struct statvfs results;
 	statvfs(m_downloadDir, &results);
 	return (qint64)(results.f_bavail * results.f_bsize);

@@ -376,10 +376,14 @@ void Server::parseCommand(QString command)
 			client->connectToClient(host, port);
 			emit uploadRequest(client);
 		}
-/*		else if(words[0] == "$RevConnectToMe")
+		else if(words[0] == "$RevConnectToMe")
 		{
-			m_stream << "$ConnectToMe" << words[2];
-		} */
+			ClientConnector* client = new ClientConnector(this, true);
+			quint16 port = client->listenForClients(1234);
+			emit uploadRequest(client);
+			m_stream << "$ConnectToMe " << words[1] << " " << m_socket->localAddress().toString() << ":" << port << "|";
+			m_stream.flush();
+		}
 		else if(words[0] == "$UserIP")
 		{
 			emit gotUserIP(words[1], words[2]);

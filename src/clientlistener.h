@@ -57,7 +57,6 @@ private:
 	QTimer* m_timer;
 
 private:
-	QTcpServer* m_tcpServer;
 	bool m_receiving;
 	// Where we're downloading to
 	QString m_downloadDir;
@@ -69,7 +68,6 @@ private:
 	// The user we're currently downloading from
 	User* m_user;
 
-	Server* m_server;
 	uint m_offset;
 	
 	uint m_size;

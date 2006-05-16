@@ -27,6 +27,8 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <QTimer>
+#include <QTcpServer>
+#include <QAbstractSocket>
 
 ClientConnector::ClientConnector(Server* server)
  : Client(server),
@@ -51,6 +53,56 @@ ClientConnector::ClientConnector(Server* server)
 	m_stream.setDevice(m_socket);
 	
 	changeState(Idle);
+
+	m_passive = false;
+}
+
+ClientConnector::ClientConnector(Server* server, bool isPassive)
+ : Client(server),
+ 	extendedClient(false),
+	supportsBZList(false),
+	supportsXmlBZList(false),
+	gotSlot(false)
+{
+	m_passive = isPassive;
+
+	if(!m_passive)
+	{
+		qDebug() << "WTF!";
+		return;
+	}
+
+	m_tcpServer = new QTcpServer(this);
+
+	m_timer = new QTimer(this);
+
+
+	connect(m_timer, SIGNAL(timeout()), SLOT(sendSomeData()));
+	m_timer->setSingleShot(true);
+	
+	
+	changeState(Idle);
+}
+
+void ClientConnector::newPassiveConnection()
+{
+	m_socket = m_tcpServer->nextPendingConnection();
+	m_tcpServer->close();
+
+	connect(m_socket, SIGNAL(error(QAbstractSocket::SocketError)), SLOT(socketError(QAbstractSocket::SocketError)));
+	connect(m_socket, SIGNAL(readyRead()), SLOT(socketReadyRead()));
+	connect(m_socket, SIGNAL(bytesWritten(qint64)), SLOT(socketBytesWritten(qint64)));
+	connect(m_socket, SIGNAL(disconnected()), SLOT(socketDisconnected()));
+
+	m_stream.setDevice(m_socket);
+}
+
+quint16 ClientConnector::listenForClients(quint16 port)
+{
+	m_tcpServer->listen();
+	connect(m_tcpServer, SIGNAL(newConnection()), SLOT(newPassiveConnection()));
+
+	return m_tcpServer->serverPort();
 }
 
 
@@ -134,6 +186,18 @@ void ClientConnector::parseCommand(QString command)
 			m_lock = words[1];
 			if(m_lock.startsWith("EXTENDEDPROTOCOL"))
 				extendedClient = true;
+
+			if(m_passive)
+			{
+				m_stream << MYNICK << " " << m_server->me()->nick << "|";
+				m_stream << "$Lock EXTENDEDPROTOCOLsomething|";
+				if(extendedClient)
+					m_stream << SUPPORTS << " BZList XmlBZList |";
+				
+				m_stream << "$Direction Upload 1234|";
+				m_stream << "$Key " << Utilities::lockToKey(m_lock) << "|";
+				m_stream.flush();
+			}
 		}
 		else if (words[0] == SUPPORTS)
 		{
@@ -147,6 +211,9 @@ void ClientConnector::parseCommand(QString command)
 		}
 		else if (words[0] == "$Key")
 		{
+			if(m_passive)
+				return;
+
 			if(extendedClient)
 			{
 				// XmlBZList implies support for UGetBlock
@@ -175,19 +242,28 @@ void ClientConnector::parseCommand(QString command)
 			
 			emit infoChanged();
 			
-			if (!Configuration::instance()->getSlot())
-			{
-				m_stream << MAXEDOUT << "|";
-				m_stream.flush();
-				m_error = "No slots";
-				
-				emit result(TransferFailed);
-				changeState(NoSlots);
-				endTransfer();
-				return;
-			}
+			bool dcLst;
+			if(m_fileName == "MyList.DcLst" || m_fileName == "MyList.bz2" || m_fileName == "files.xml.bz2")
+				dcLst = true;
 			else
-				gotSlot = true;
+				dcLst = false;
+
+			if(!dcLst)
+			{
+				if (!Configuration::instance()->getSlot())
+				{
+					m_stream << MAXEDOUT << "|";
+					m_stream.flush();
+					m_error = "No slots";
+				
+					emit result(TransferFailed);
+					changeState(NoSlots);
+					endTransfer();
+					return;
+				}
+				else
+					gotSlot = true;
+			}
 			
 			FileListBuilder* builder = FileListBuilder::instance();
 			if (m_fileName == "MyList.DcLst")

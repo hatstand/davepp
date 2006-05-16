@@ -25,7 +25,8 @@
 class Server;
 
 #include <QObject>
-#include <QAbstractSocket>
+#include <QTcpSocket>
+#include <QTcpServer>
 #include <QTextStream>
 #include <QTimer>
 
@@ -75,7 +76,8 @@ signals:
 	
 protected:
 	Server* m_server;
-	QAbstractSocket* m_socket;
+	QTcpSocket* m_socket;
+	QTcpServer* m_tcpServer;
 	QTextStream m_stream;
 	QString m_error;
 	

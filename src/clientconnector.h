@@ -32,9 +32,11 @@ class ClientConnector : public Client
 Q_OBJECT
 public:
 	ClientConnector(Server* server);
+	ClientConnector(Server* server, bool isPassive);
 	~ClientConnector();
 	
 	void connectToClient(QString hostName, quint16 port);
+	quint16 listenForClients(quint16 port);
 	
 	QString nick() {return m_nick;}
 	QString fileName() {return m_fileName;}
@@ -48,6 +50,7 @@ private slots:
 	void sendSomeData();
 	void gotUserIP(QString nick, QString host);
 	void endTransfer();
+	void newPassiveConnection();
 	
 signals:
 	void infoChanged();
@@ -74,6 +77,8 @@ private:
 	qint64 m_sendPos;
 
 	bool gotSlot;
+
+	bool m_passive;
 };
 
 #endif

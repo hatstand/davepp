@@ -110,6 +110,8 @@ ClientConnector::~ClientConnector()
 {
 	if(gotSlot)
 		Configuration::instance()->revokeSlot();
+
+	delete(m_socket);
 }
 
 void ClientConnector::connectToClient(QString hostName, quint16 port)

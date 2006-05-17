@@ -41,7 +41,8 @@ HEADERS += server.h \
 			  searchreturner.h \
 			  commands.h \
 			  xmllistparser.h \
-			  zcompress.h
+			  zcompress.h \
+			  tigerhash.cpp
 SOURCES += main.cpp \
            server.cpp \
            user.cpp \
@@ -67,7 +68,8 @@ SOURCES += main.cpp \
            filelistbuilder.cpp \
 			  searchreturner.cpp \
 			  xmllistparser.cpp \
-			  zcompress.cpp
+			  zcompress.cpp \
+			  tigerhash.cpp
 mainwindow.ui.commands = $$IDL_COMPILER
 hubwidget.ui.commands = $$IDL_COMPILER
 edithub.ui.commands = $$IDL_COMPILER

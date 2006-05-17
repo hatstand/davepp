@@ -93,6 +93,7 @@ void SearchReturner::begin()
 
 SearchReturner::~SearchReturner()
 {
+	delete(m_sock);
 }
 
 void SearchReturner::run()

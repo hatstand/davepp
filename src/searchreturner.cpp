@@ -87,13 +87,15 @@ void SearchReturner::begin()
 			break;
 	}
 
+	connect(this, SIGNAL(finished()), SLOT(deleteLater()));
 	start();
 
 }
 
 SearchReturner::~SearchReturner()
 {
-	delete(m_sock);
+	if(!isPassive)
+		delete(m_sock);
 }
 
 void SearchReturner::run()
@@ -170,7 +172,7 @@ void SearchReturner::SubmitResult(FileNode* node)
 	{
 		thingy += "|";
 		QByteArray bleh = thingy.toLatin1();
-		m_sock->writeDatagram(bleh, bleh.size(), m_client, m_port);
+		m_sock->writeDatagram(bleh, m_client, m_port);
 		m_sock->flush();
 	}
 }

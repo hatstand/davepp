@@ -55,6 +55,9 @@ ClientConnector::ClientConnector(Server* server)
 	changeState(Idle);
 
 	m_passive = false;
+
+	realBytesWritten = 0;
+	thinkWritten = 0;
 }
 
 ClientConnector::ClientConnector(Server* server, bool isPassive)
@@ -82,6 +85,9 @@ ClientConnector::ClientConnector(Server* server, bool isPassive)
 	
 	
 	changeState(Idle);
+
+	realBytesWritten = 0;
+	thinkWritten = 0;
 }
 
 void ClientConnector::newPassiveConnection()
@@ -112,6 +118,8 @@ ClientConnector::~ClientConnector()
 		Configuration::instance()->revokeSlot();
 
 	delete(m_socket);
+
+	qDebug() << "Real bytes written:" << realBytesWritten << "Think written:" << thinkWritten;
 }
 
 void ClientConnector::connectToClient(QString hostName, quint16 port)
@@ -120,7 +128,7 @@ void ClientConnector::connectToClient(QString hostName, quint16 port)
 		return;
 
 	changeState(LookingUpHost);
-	m_socket->connectToHost(hostName, port);
+	m_socket->connectToHost(hostName, port, QIODevice::ReadWrite | QIODevice::Unbuffered);
 }
 
 void ClientConnector::socketHostFound()
@@ -319,6 +327,8 @@ void ClientConnector::parseCommand(QString command)
 
 				changeState(Transferring);
 				m_sendPos = m_offset;
+				m_stream.flush();
+				realBytesWritten = 0;
 				sendSomeData();
 			}
 			
@@ -331,6 +341,7 @@ void ClientConnector::parseCommand(QString command)
 			changeState(Transferring);
 			m_sendPos = m_offset;
 //			qDebug() << "**** Send" << m_offset << m_sendPos;
+			realBytesWritten = 0;
 			sendSomeData();
 		}
 		else
@@ -353,7 +364,7 @@ void ClientConnector::sendSomeData()
 		return;
 	}
 	
-	if (m_sendPos >= m_numbytes + m_offset - 1)
+	if (m_sendPos >= m_numbytes + m_offset)
 	{
 		qDebug() << "Sending finished (" << m_sendPos << m_fileLength << ")";
 		changeState(Success);
@@ -365,7 +376,7 @@ void ClientConnector::sendSomeData()
 	int uploadSpeed;
 	
 	int slotsInUse = Configuration::instance()->slotsInUse(); 
-	if(slotsInUse > 0)
+	if(slotsInUse > 1)
 		uploadSpeed = Configuration::instance()->uploadSpeed() / slotsInUse;
 	else
 		uploadSpeed = Configuration::instance()->uploadSpeed();
@@ -389,15 +400,26 @@ void ClientConnector::sendSomeData()
 	else
 		data = m_file.read(uploadBytes);
 	
-	m_sendPos += m_socket->write(data);
+	qint64 temp = m_socket->write(data);
+	if(temp < 0)
+		qDebug() << "Error in socket writing";
+	else
+		m_sendPos += temp;
+
 	m_sendTimer.start();
 	m_socket->flush();
 	
+	if(data.length() <= 0)
+		qDebug() << "No data to read";
+
+	thinkWritten += temp;
 	// qDebug() << "Writing" << data.size() << "bytes";
 }
 
 void ClientConnector::socketBytesWritten(qint64 num)
 {
+	realBytesWritten += num;
+
 	// qDebug() << "Bytes written" << num;
 	if (state() != Transferring)
 		return;
@@ -407,7 +429,7 @@ void ClientConnector::socketBytesWritten(qint64 num)
 	if (m_socket->bytesToWrite() > 0)
 		return;
 	
-	emit progress(m_sendPos - m_offset + 1, m_numbytes);
+	emit progress(m_sendPos - m_offset, m_numbytes);
 	
 	if ((Configuration::instance()->uploadSpeed() != 0) && (m_sendTimer.elapsed() < 1000))
 	{
@@ -455,7 +477,8 @@ void ClientConnector::endTransfer()
 
 	m_socket->disconnect();
 	
-	m_socket->flush();
-	m_socket->abort();
+	if(m_socket->isValid())
+		m_socket->abort();
+
 	deleteLater();
 }

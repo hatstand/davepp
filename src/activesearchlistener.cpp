@@ -21,6 +21,8 @@ ActiveSearchListener::ActiveSearchListener(QObject* parent)
 	timer = new QTimer(this);
 	timer->start(1000);
 	connect(timer, SIGNAL(timeout()), SLOT(timeout()));
+
+	connect(this, SIGNAL(finished()), SLOT(deleteLater()));
 }
 
 ActiveSearchListener::~ActiveSearchListener()

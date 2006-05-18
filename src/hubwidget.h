@@ -59,7 +59,8 @@ private:
 	HubDetailsListItem* m_details;
 	Q3ListView* m_userList;
 	UserHeaderListItem* m_userHeader;
-	bool op;
+	bool m_op;
+	int m_state;
 
 };
 

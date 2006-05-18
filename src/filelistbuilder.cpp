@@ -111,6 +111,8 @@ void FileListBuilder::run()
 	Configuration::instance()->setFileListDirty(false);
 	
 	m_ready = true;
+
+	ignoreSaved = false;
 }
 
 FileList* FileListBuilder::list()
@@ -162,7 +164,7 @@ quint64 FileListBuilder::totalSize()
 
 void FileListBuilder::regenList()
 {
+	qDebug() << "Regen list";
 	ignoreSaved = true;
 	start();
-	ignoreSaved = false;
 }

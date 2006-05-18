@@ -79,6 +79,9 @@ private:
 	bool gotSlot;
 
 	bool m_passive;
+
+	quint64 realBytesWritten;
+	quint64 thinkWritten;
 };
 
 #endif

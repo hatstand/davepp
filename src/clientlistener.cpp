@@ -83,7 +83,6 @@ ClientListener::~ClientListener()
 	}
 
 	delete m_outFile;
-	delete m_socket;
 }
 
 quint16 ClientListener::listenForClients(int port)

@@ -22,6 +22,7 @@
 #define TIGER_HASH_H
 
 #include <QByteArray>
+#include <QtGlobal>
 
 class TigerHash {
 public:
@@ -30,9 +31,9 @@ public:
 
 	TigerHash() : pos(0) 
 	{
-		res[0]=quint64(0x0123456789ABCDEF);
-		res[1]=quint64(0xFEDCBA9876543210);
-		res[2]=quint64(0xF096A5B4C3B2E187);
+		res[0]=quint64(0x0123456789ABCDEFull);
+		res[1]=quint64(0xFEDCBA9876543210ull);
+		res[2]=quint64(0xF096A5B4C3B2E187ull);
 	}
 
 	TigerHash(QByteArray chunk);

@@ -258,7 +258,7 @@ void ClientConnector::parseCommand(QString command)
 			else
 				dcLst = false;
 
-			if(!dcLst)
+			if(!dcLst && !gotSlot)
 			{
 				if (!Configuration::instance()->getSlot())
 				{

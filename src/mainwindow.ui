@@ -235,17 +235,18 @@
      <string>Meep</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuTools" >
-    <property name="title" >
-     <string>Settings</string>
-    </property>
-    <addaction name="actionConfigure" />
-   </widget>
    <widget class="QMenu" name="menuFile" >
     <property name="title" >
      <string>File</string>
     </property>
     <addaction name="actionQuit" />
+   </widget>
+   <widget class="QMenu" name="menuTools" >
+    <property name="title" >
+     <string>Settings</string>
+    </property>
+    <addaction name="actionConfigure" />
+    <addaction name="actionReloadFileList" />
    </widget>
    <addaction name="menuFile" />
    <addaction name="menuTools" />
@@ -268,6 +269,11 @@
   <action name="actionConfigure" >
    <property name="text" >
     <string>Configure Dave++...</string>
+   </property>
+  </action>
+  <action name="actionReloadFileList" >
+   <property name="text" >
+    <string>Reload filelist</string>
    </property>
   </action>
  </widget>

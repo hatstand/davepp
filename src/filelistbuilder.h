@@ -48,6 +48,7 @@ public:
 
 	QMutex* m_mutex;
 
+public slots:
 	void regenList();
 
 signals:

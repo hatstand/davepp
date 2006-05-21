@@ -45,7 +45,7 @@ void DaveProgressBar::setText(QString text)
 
 
 TransferListItem::TransferListItem(Q3ListView* parent)
- : Q3ListViewItem(parent), m_transfer(NULL), QObject(parent), m_speed(0), m_totalSize(0), m_update_time()
+ : Q3ListViewItem(parent), m_transfer(NULL), QObject(parent), m_speed(0), m_totalSize(0), m_update_time(), m_result(-1)
 {
 	m_progress = new DaveProgressBar(listView()->viewport());
 	
@@ -61,7 +61,7 @@ TransferListItem::TransferListItem(Q3ListView* parent)
 }
 
 TransferListItem::TransferListItem(TransferListItem* parent)
- : Q3ListViewItem(parent), m_transfer(NULL), QObject(parent), m_speed(0), m_progress(NULL), m_totalSize(0), m_update_time()
+ : Q3ListViewItem(parent), m_transfer(NULL), QObject(parent), m_speed(0), m_progress(NULL), m_totalSize(0), m_update_time(), m_result(-1)
 {
 	m_timer = new QTimer(this);
 	m_timer->setSingleShot(true);
@@ -176,6 +176,8 @@ void TransferListItem::clientResult(int result)
 	if (m_user == NULL)
 		return;
 	
+	m_result = result;
+	
 	if (result == Client::TransferFailed)
 	{
 		m_progress->setText("Error: " + m_transfer->error());
@@ -185,6 +187,8 @@ void TransferListItem::clientResult(int result)
 		disconnect(m_transfer);
 		m_timer->start(1000);
 	}
+	
+	listView()->repaintItem(this);
 }
 
 void TransferListItem::doNextQueued()
@@ -255,7 +259,7 @@ void TransferListItem::clientStateChanged(int state)
 	case Client::Idle:
 		m_progress->setText("Idle");
 		break;
-	} 
+	}
 }
 
 void TransferListItem::clientProgress(uint size, uint totalSize)
@@ -292,7 +296,16 @@ void TransferListItem::paintCell(QPainter* painter, const QColorGroup& cg, int c
 	if (isSelected())
 		painter->fillRect(0, 0, width, height(), cg.highlight());
 	else
-		painter->fillRect(0, 0, width, height(), cg.base());
+	{
+		QColor bgColor;
+		if (m_result == Client::TransferFailed)
+			bgColor.setRgb(255, 155, 155);
+		else if (type() == UploadFile)
+			bgColor.setRgb(200, 200, 255);
+		else
+			bgColor.setRgb(155, 255, 155);
+		painter->fillRect(0, 0, width, height(), bgColor);
+	}
 	
 	if (isSelected())
 		painter->setPen(cg.highlightedText());

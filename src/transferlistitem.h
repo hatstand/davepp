@@ -109,6 +109,7 @@ private:
 	uint m_size;
 	QTimer* m_timer;
 	QTime m_update_time;
+	int m_result;
 };
 
 #endif

@@ -281,6 +281,7 @@ MainWindow::MainWindow()
 	m_fileListBuilder->start();
 	m_configure = new ConfigureDialog(this, m_config);
 	
+	connect(actionReloadFileList, SIGNAL(triggered()), m_fileListBuilder, SLOT(regenList()));
 	connect(m_configure, SIGNAL(accepted()), SLOT(configureAccept()));
 	
 	int hubCount = m_config->settings()->beginReadArray("Hubs");

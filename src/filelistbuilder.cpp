@@ -107,6 +107,9 @@ void FileListBuilder::run()
 
 	// Don't bother creating useful lists until they're requested
 	// BZList is rarely requested for example, so why bother?
+	m_huffmanList.clear();
+	m_BZList.clear();
+	m_XmlBZList.clear();
 	
 	Configuration::instance()->setFileListDirty(false);
 	

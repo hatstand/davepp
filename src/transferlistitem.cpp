@@ -432,7 +432,8 @@ void TransferListItem::userQuit(User* user)
 	if (user == m_user)
 	{
 		m_user = NULL;
-		m_progress->setText("User left hub");
+		if (m_progress != NULL)
+			m_progress->setText("User left hub");
 	}
 }
 

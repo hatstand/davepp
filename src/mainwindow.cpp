@@ -36,6 +36,7 @@
 #include <QPainter>
 #include <QActionGroup>
 #include <QDir>
+#include <QPoint>
 
 MainWindow* MainWindow::instance = NULL;
 
@@ -393,8 +394,9 @@ MainWindow::MainWindow()
 	statusProgress->setTextVisible(true);
 	updateStatusText();
 	
-	m_trayIcon = new TrayIcon(QPixmap(":icon.png"), "Wibble", NULL, this);
+	m_trayIcon = new TrayIcon(QPixmap(":icon.png"), "Dave++", NULL, this);
 	m_trayIcon->show();
+	connect(m_trayIcon, SIGNAL(clicked(const QPoint&, int)), SLOT(trayIconClicked(const QPoint&, int)));
 	
 	autoConnect();
 }
@@ -1180,4 +1182,15 @@ Server* MainWindow::findServer(QString name)
 	}
 
 	return NULL;
+}
+
+void MainWindow::trayIconClicked(const QPoint& point, int button)
+{
+	if (isVisible())
+		hide();
+	else
+	{
+		show();
+		activateWindow();
+	}
 }

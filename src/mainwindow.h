@@ -168,6 +168,8 @@ private slots:
 	void userFileListUpdated(User* user);
 	void uploadRequest(ClientConnector* connector);
 	
+	void trayIconClicked(const QPoint& point, int button);
+	
 	void updateStatusText();
 	void builderProgress(uint value, uint totalSteps);
 

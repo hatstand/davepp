@@ -248,7 +248,7 @@ int UserHeaderListItem::compare( Q3ListViewItem* i, int col, bool ascending ) co
 
 
 MainWindow::MainWindow()
- : Ui::MainWindow(), m_sortingLater(false)
+ : Ui::MainWindow(), m_sortingLater(false), quittingFromTray(false)
 {
 	instance = this;
 
@@ -394,9 +394,13 @@ MainWindow::MainWindow()
 	statusProgress->setTextVisible(true);
 	updateStatusText();
 	
-	m_trayIcon = new TrayIcon(QPixmap(":icon.png"), "Dave++", NULL, this);
+	QMenu* trayIconMenu = new QMenu(this);
+	m_hideRestoreAction = trayIconMenu->addAction("Hide", this, SLOT(trayIconClicked()));
+	trayIconMenu->addAction("Quit", this, SLOT(trayIconQuit()));
+	
+	m_trayIcon = new TrayIcon(QPixmap(":icon.png"), "Dave++", trayIconMenu, this);
 	m_trayIcon->show();
-	connect(m_trayIcon, SIGNAL(clicked(const QPoint&, int)), SLOT(trayIconClicked(const QPoint&, int)));
+	connect(m_trayIcon, SIGNAL(clicked(const QPoint&, int)), SLOT(trayIconClicked()));
 	
 	autoConnect();
 }
@@ -1184,13 +1188,34 @@ Server* MainWindow::findServer(QString name)
 	return NULL;
 }
 
-void MainWindow::trayIconClicked(const QPoint& point, int button)
+void MainWindow::trayIconClicked()
 {
 	if (isVisible())
+	{
 		hide();
+		m_hideRestoreAction->setText("Show");
+	}
 	else
 	{
 		show();
 		activateWindow();
+		m_hideRestoreAction->setText("Hide");
 	}
+}
+
+void MainWindow::closeEvent(QCloseEvent* e)
+{
+	if (quittingFromTray)
+		e->accept();
+	else
+	{
+		e->ignore();
+		hide();
+	}
+}
+
+void MainWindow::trayIconQuit()
+{
+	quittingFromTray = true;
+	close();
 }

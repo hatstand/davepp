@@ -168,7 +168,8 @@ private slots:
 	void userFileListUpdated(User* user);
 	void uploadRequest(ClientConnector* connector);
 	
-	void trayIconClicked(const QPoint& point, int button);
+	void trayIconClicked();
+	void trayIconQuit();
 	
 	void updateStatusText();
 	void builderProgress(uint value, uint totalSteps);
@@ -184,6 +185,7 @@ private:
 	void updateHiddenUsers();
 	void updateHiddenUser(UserListItem* item);
 	void saveHubList();
+	void closeEvent(QCloseEvent* e);
 	UserListItem* getUserListItem();
 	Server* findServer(QString name);
 	
@@ -209,10 +211,12 @@ private:
 	QAction* m_transferBottom;
 	QAction* m_resultsClose;
 	QAction* m_resultsCloseAll;
+	QAction* m_hideRestoreAction;
 	ConfigureDialog* m_configure;
 	Configuration* m_config;
 	
 	TrayIcon* m_trayIcon;
+	bool quittingFromTray;
 	
 	QLabel* statusText1;
 	QLabel* statusText2;

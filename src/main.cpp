@@ -38,11 +38,12 @@
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
-	app.setQuitOnLastWindowClosed(true);
 	
 	MainWindow* w = new MainWindow();
 	w->setAttribute(Qt::WA_DeleteOnClose);
 	w->show();
+	
+	app.setMainWidget(w);
 	
 	return app.exec();
 }

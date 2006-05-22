@@ -30,6 +30,7 @@
 #include "configuration.h"
 #include "filelistbuilder.h"
 #include "filelist.h"
+#include "trayicon/trayicon.h"
 
 #include <QDebug>
 #include <QPainter>
@@ -391,6 +392,9 @@ MainWindow::MainWindow()
 	statusProgress->hide();
 	statusProgress->setTextVisible(true);
 	updateStatusText();
+	
+	m_trayIcon = new TrayIcon(QPixmap(":icon.png"), "Wibble", NULL, this);
+	m_trayIcon->show();
 	
 	autoConnect();
 }

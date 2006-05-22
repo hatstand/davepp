@@ -3,6 +3,7 @@
 # Subdir relative project main directory: ./src
 # Target is an application:  ../bin/daveplusplus
 
+include(trayicon/trayicon.pri)
 FORMS += mainwindow.ui \
          edithub.ui \
          hubwidget.ui \
@@ -70,6 +71,7 @@ SOURCES += main.cpp \
 			  xmllistparser.cpp \
 			  zcompress.cpp \
 			  tigerhash.cpp
+RESOURCES=../data/data.qrc
 mainwindow.ui.commands = $$IDL_COMPILER
 hubwidget.ui.commands = $$IDL_COMPILER
 edithub.ui.commands = $$IDL_COMPILER

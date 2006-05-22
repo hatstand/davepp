@@ -40,6 +40,7 @@ class ConfigureDialog;
 class Configuration;
 class FileListBuilder;
 class ClientConnector;
+class TrayIcon;
 
 class HubDetailsListItem : public Q3ListViewItem
 {
@@ -208,6 +209,8 @@ private:
 	QAction* m_resultsCloseAll;
 	ConfigureDialog* m_configure;
 	Configuration* m_config;
+	
+	TrayIcon* m_trayIcon;
 	
 	QLabel* statusText1;
 	QLabel* statusText2;

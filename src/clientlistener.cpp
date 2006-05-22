@@ -76,7 +76,7 @@ ClientListener::ClientListener(Server* server, User* user)
 ClientListener::~ClientListener()
 {
 	qDebug() << "Deleting clientlistener";
-	if(!m_dclst && bytesWritten < m_totalSize)
+	if(!m_dclst && (m_outFile != NULL) && bytesWritten < m_totalSize)
 	{
 		qDebug() << "Saving file";
 		Configuration::instance()->saveFile(m_outFile->name(), m_user->nick, m_filename, m_server->hubName(), bytesWritten);

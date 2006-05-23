@@ -3,7 +3,6 @@
 # Subdir relative project main directory: ./src
 # Target is an application:  ../bin/daveplusplus
 
-include(trayicon/trayicon.pri)
 FORMS += mainwindow.ui \
          edithub.ui \
          hubwidget.ui \
@@ -30,7 +29,7 @@ HEADERS += server.h \
            filelist.h \
            filenode.h \
            chatwidget.h \
-			  privatechatwidget.h \
+           privatechatwidget.h \
            resultswidget.h \
            transferlistitem.h \
            searchresult.h \
@@ -39,39 +38,15 @@ HEADERS += server.h \
            shareeditdialog.h \
            configuration.h \
            filelistbuilder.h \
-			  searchreturner.h \
-			  commands.h \
-			  xmllistparser.h \
-			  zcompress.h \
-			  tigerhash.cpp
-SOURCES += main.cpp \
-           server.cpp \
-           user.cpp \
-           mainwindow.cpp \
-           edithub.cpp \
-           hubwidget.cpp \
-           utilities.cpp \
-           clientconnector.cpp \
-           clientlistener.cpp \
-           client.cpp \
-           davetabwidget.cpp \
-           filelist.cpp \
-           filenode.cpp \
-           chatwidget.cpp \
-			  privatechatwidget.cpp \
-           resultswidget.cpp \
-           transferlistitem.cpp \
-           searchresult.cpp \
-           activesearchlistener.cpp \
-           configuredialog.cpp \
-           shareeditdialog.cpp \
-           configuration.cpp \
-           filelistbuilder.cpp \
-			  searchreturner.cpp \
-			  xmllistparser.cpp \
-			  zcompress.cpp \
-			  tigerhash.cpp
-RESOURCES=../data/data.qrc
+           searchreturner.h \
+           commands.h \
+           xmllistparser.h \
+           zcompress.h \
+           tigerhash.cpp \
+           magicalsheep.h 
+SOURCES += ../data/data.qrc \
+           magicalsheep.cpp 
+include(trayicon/trayicon.pri)
 mainwindow.ui.commands = $$IDL_COMPILER
 hubwidget.ui.commands = $$IDL_COMPILER
 edithub.ui.commands = $$IDL_COMPILER
@@ -91,9 +66,6 @@ edithub.ui.target = edithub.ui
 mainwindow.ui.target = mainwindow.ui
 LIBS += -lbz2
 DEFINES += _GLIBCXX_CONCEPT_CHECKS
-
-# for weird cambridge people
-cambridge {
-	DEFINES += CAMBRIDGE
+cambridge{
+  DEFINES += CAMBRIDGE
 }
-

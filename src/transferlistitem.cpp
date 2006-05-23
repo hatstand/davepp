@@ -18,10 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "transferlistitem.h"
-#include "clientlistener.h"
-#include "clientconnector.h"
 #include "user.h"
 #include "server.h"
+#include "negotiator.h"
+#include "newclient.h"
+#include "uploader.h"
 
 #include <QTimer>
 #include <QDebug>
@@ -109,19 +110,13 @@ void TransferListItem::setFileDownload(User* user, QString path)
 	} 
 }
 
-void TransferListItem::setFileUpload(ClientConnector* connector)
+void TransferListItem::setFileUpload(Uploader* n)
 {
 	m_type = UploadFile;
-	m_transfer = connector;
-	connect(connector, SIGNAL(stateChanged(int)), SLOT(clientStateChanged(int)));
-	connect(connector, SIGNAL(progress(uint, uint)), SLOT(clientProgress(uint, uint)));
-	connect(connector, SIGNAL(destroyed()), SLOT(clientDestroyed()));
-	connect(connector, SIGNAL(infoChanged()), SLOT(clientInfoChanged()));
-	connect(connector, SIGNAL(speedChanged(quint64)), SLOT(clientSpeedChanged(quint64)));
-	connect(connector, SIGNAL(result(int)), SLOT(clientResult(int)));
+	m_transfer = dynamic_cast<NewClient*>(n);
 
-	clientStateChanged(connector->state());
-	
+	clientReady(n);
+
 	if (m_progress)
 	{
 		m_progress->move(3, itemPos() + QApplication::fontMetrics().height()*2);
@@ -129,9 +124,18 @@ void TransferListItem::setFileUpload(ClientConnector* connector)
 	} 
 }
 
+void TransferListItem::clientReady(NewClient* client)
+{
+	connect(client, SIGNAL(stateChanged(int)), SLOT(clientStateChanged(int)));
+	connect(client, SIGNAL(progress(uint, uint)), SLOT(clientProgress(uint, uint)));
+	connect(client, SIGNAL(destroyed()), SLOT(clientDestroyed()));
+	connect(client, SIGNAL(speedChanged(quint64)), SLOT(clientSpeedChanged(quint64)));
+	connect(client, SIGNAL(result(int)), SLOT(clientResult(int)));
+}
+
 void TransferListItem::start()
 {
-	ClientListener* listener;
+	Negotiator* listener;
 	if (!m_user)
 		return;
 	
@@ -144,13 +148,12 @@ void TransferListItem::start()
 		listener = m_user->server->downloadFile(m_nick, m_path, m_destination);
 		break;
 	}
-	
-	m_transfer = (Client*) listener;
-	connect(listener, SIGNAL(stateChanged(int)), SLOT(clientStateChanged(int)));
-	connect(listener, SIGNAL(result(int)), SLOT(clientResult(int)));
-	connect(listener, SIGNAL(progress(uint, uint)), SLOT(clientProgress(uint, uint)));
-	connect(listener, SIGNAL(destroyed()), SLOT(clientDestroyed()));
-	connect(listener, SIGNAL(speedChanged(quint64)), SLOT(clientSpeedChanged(quint64)));
+	m_neg = listener;
+	NewClient* temp = m_neg->getClient();
+	if(temp)
+		clientReady(temp);
+	else
+		connect(listener, SIGNAL(clientReady(NewClient*)), SLOT(clientReady(NewClient*)));
 }
 
 void TransferListItem::stop()
@@ -178,7 +181,7 @@ void TransferListItem::clientResult(int result)
 	
 	m_result = result;
 	
-	if (result == Client::TransferFailed)
+	if (result == NewClient::TransferFailed)
 	{
 		m_progress->setText("Error: " + m_transfer->error());
 	}
@@ -232,31 +235,31 @@ void TransferListItem::clientStateChanged(int state)
 {
 	switch(state)
 	{
-	case Client::NoSlots:
+	case NewClient::NoSlots:
 		m_progress->setText("No slots available");
 		break;
-	case Client::Failed:
+	case NewClient::Failed:
 		m_progress->setText("Transfer failed");
 		break;
-	case Client::Success:
+	case NewClient::Success:
 		m_progress->setText("Transfer Successful");
 		break;
-	case Client::WaitingForConnection:
+	case NewClient::WaitingForConnection:
 		m_progress->setText("Waiting for peer...");
 		break;
-	case Client::LookingUpHost:
+	case NewClient::LookingUpHost:
 		m_progress->setText("Looking up host...");
 		break;
-	case Client::Connecting:
+	case NewClient::Connecting:
 		m_progress->setText("Connecting...");
 		break;
-	case Client::Handshaking:
+	case NewClient::Handshaking:
 		m_progress->setText("Handshaking...");
 		break;
-	case Client::Transferring:
+	case NewClient::Transferring:
 		m_progress->setText("");
 		break;
-	case Client::Idle:
+	case NewClient::Idle:
 		m_progress->setText("Idle");
 		break;
 	}
@@ -298,7 +301,7 @@ void TransferListItem::paintCell(QPainter* painter, const QColorGroup& cg, int c
 	else
 	{
 		QColor bgColor;
-		if (m_result == Client::TransferFailed)
+		if (m_result == NewClient::TransferFailed)
 			bgColor.setRgb(255, 155, 155);
 		else if (type() == UploadFile)
 			bgColor.setRgb(200, 200, 255);
@@ -340,7 +343,7 @@ void TransferListItem::paintCell(QPainter* painter, const QColorGroup& cg, int c
 	}
 	else
 	{
-		ClientConnector* connector = (ClientConnector*) m_transfer;
+		Uploader* connector = dynamic_cast<Uploader*>(m_transfer);
 		if (!m_nick.isEmpty())
 			line1Text = "Upload to " + m_nick;
 		else
@@ -435,14 +438,6 @@ void TransferListItem::userQuit(User* user)
 		if (m_progress != NULL)
 			m_progress->setText("User left hub");
 	}
-}
-
-void TransferListItem::clientInfoChanged()
-{
-	ClientConnector* connector = (ClientConnector*) m_transfer;
-	m_nick = connector->nick();
-	m_path = connector->fileName();
-	listView()->repaintItem(this);
 }
 
 void TransferListItem::clientSpeedChanged(quint64 speed)

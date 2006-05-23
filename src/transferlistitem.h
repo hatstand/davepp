@@ -27,9 +27,10 @@
 
 #include "configuration.h"
 
-class Client;
-class ClientConnector;
 class User;
+class NewClient;
+class Uploader;
+class Negotiator;
 
 
 class DaveProgressBar : public QProgressBar
@@ -60,7 +61,7 @@ public:
 	
 	void setFilelistDownload(User* user);
 	void setFileDownload(User* user, QString path);
-	void setFileUpload(ClientConnector* connector);
+	void setFileUpload(Uploader* connector);
 	void setDestination(QString destination) {m_destination = destination;}
 	bool isRunning() {return m_transfer != NULL;}
 	bool isTopLevel() {return depth() == 0;}
@@ -84,7 +85,8 @@ public:
 	User* user() {return m_user;}
 	TransferType type() {return m_type;}
 	QString path() {return m_path;}
-	Client* client() {return m_transfer;}
+	Negotiator* negotiator() {return m_neg;}
+	NewClient* client() { return m_transfer; }
 	
 private slots:
 	void clientStateChanged(int state);
@@ -93,8 +95,8 @@ private slots:
 	void clientDestroyed();
 	void doNextQueued();
 	void userQuit(User* user);
-	void clientInfoChanged();
 	void clientSpeedChanged(quint64 speed);
+	void clientReady(NewClient* client);
 	
 private:
 	void swapWith(TransferListItem* item);
@@ -102,7 +104,8 @@ private:
 	TransferType m_type;
 	User* m_user;
 	QString m_nick;
-	Client* m_transfer;
+	NewClient* m_transfer;
+	Negotiator* m_neg;
 	QString m_path;
 	DaveProgressBar* m_progress;
 	quint64 m_speed;

@@ -18,21 +18,20 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "server.h"
-#include "clientconnector.h"
-#include "clientlistener.h"
 #include "utilities.h"
 #include "filelist.h"
 #include "user.h"
-#include "client.h"
 #include "configuration.h"
 #include "filelistbuilder.h"
 #include "searchreturner.h"
 #include "mainwindow.h"
+#include "negotiator.h"
 
 #include <QStringList>
 #include <QUdpSocket>
 #include <QDebug>
 #include <QTime>
+
 
 namespace ServerDetails {
 
@@ -371,16 +370,13 @@ void Server::parseCommand(QString command)
 			QString host = words[2].section(':', 0, 0);
 			quint16 port = words[2].section(':', 1).toUShort();
 			
-			qDebug() << "New connector" << (uintptr_t)this;
-			ClientConnector* client = new ClientConnector(this);
-			client->connectToClient(host, port);
-			emit uploadRequest(client);
+			Negotiator* n = new Negotiator(this);
+			n->connectToClient(QHostAddress(host), port);
 		}
 		else if(words[0] == "$RevConnectToMe")
 		{
-			ClientConnector* client = new ClientConnector(this, true);
-			quint16 port = client->listenForClients(1234);
-			emit uploadRequest(client);
+			Negotiator* n = new Negotiator(this);
+			quint16 port = n->listenForClient();
 			m_stream << "$ConnectToMe " << words[1] << " " << m_socket->localAddress().toString() << ":" << port << "|";
 			m_stream.flush();
 		}
@@ -582,32 +578,39 @@ Server::ConnectionState Server::state()
 	return m_state;
 }
 
-ClientListener* Server::browseFiles(QString nick)
+Negotiator* Server::browseFiles(QString nick)
 {
 	qDebug() << "Browse" << nick;
 	
-	ClientListener* listener = new ClientListener(this, getUser(nick));
+/*	ClientListener* listener = new ClientListener(this, getUser(nick));
 	quint64 port = listener->listenForClients(1234);
 	
 	connect(listener, SIGNAL(stateChanged(int)), SLOT(listenerStateChanged(int)));
 	connect(listener, SIGNAL(result(int)), SLOT(listenerResult(int)));
 	
 	m_stream << "$ConnectToMe " << nick << " " << m_socket->localAddress().toString() << ":" << port << "|";
-	m_stream.flush();
+	m_stream.flush(); */
+
+	Negotiator* n = new Negotiator(this, true);
+	m_stream << "$ConnectToMe " << nick << " " << m_socket->localAddress().toString() << ":" << n->listenForClient() << "|";
+   m_stream.flush();
 	
-	return listener;
+	return n;
 }
 
 
 
-ClientListener* Server::downloadFile(QString nick, QString filename, QString destination)
+Negotiator* Server::downloadFile(QString nick, QString filename, QString destination)
 {
 	qDebug() << "Attempting to download" << filename;
 	
+/*	ClientListener* listener = new ClientListener(this, getUser(nick), filename, Configuration::instance()->downloadDir());
+=======
 	if (destination.isNull())
 		destination = Configuration::instance()->downloadDir();
 	
 	ClientListener* listener = new ClientListener(this, getUser(nick), filename, destination);
+>>>>>>> .r125
 	quint16 realPort = listener->listenForClients(1234);
 	
 	connect(listener, SIGNAL(stateChanged(int)), SLOT(listenerStateChanged(int)));
@@ -616,7 +619,13 @@ ClientListener* Server::downloadFile(QString nick, QString filename, QString des
 	m_stream << "$ConnectToMe " << nick << " " << m_socket->localAddress().toString() << ":" << realPort << "|";
 	m_stream.flush();
 	
-	return listener;
+	return listener; */
+
+	Negotiator* n = new Negotiator(this, filename, 0, 0);
+	m_stream << "$ConnectToMe " << nick << " " << m_socket->localAddress().toString() << ":" << n->listenForClient() << "|";
+	m_stream.flush();
+
+	return n;
 }
 
 void Server::listenerStateChanged(int state)
@@ -626,12 +635,12 @@ void Server::listenerStateChanged(int state)
 
 void Server::listenerResult(int result)
 {
-	ClientListener* listener = (ClientListener*) sender();
+/*	ClientListener* listener = (ClientListener*) sender();
 	if (result == ClientListener::TransferSucceeded)
 	{
 		if (listener->isFileList())
 			emit fileListUpdated(listener->user());
-	}
+	} */
 }
 
 QString Server::ip()
@@ -684,3 +693,5 @@ void Server::kickUser(QString nick)
 	m_stream << "$Kick " << nick << "|";
 	m_stream.flush();
 }
+
+

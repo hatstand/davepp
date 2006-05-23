@@ -600,11 +600,14 @@ ClientListener* Server::browseFiles(QString nick)
 
 
 
-ClientListener* Server::downloadFile(QString nick, QString filename)
+ClientListener* Server::downloadFile(QString nick, QString filename, QString destination)
 {
 	qDebug() << "Attempting to download" << filename;
 	
-	ClientListener* listener = new ClientListener(this, getUser(nick), filename, Configuration::instance()->downloadDir());
+	if (destination.isNull())
+		destination = Configuration::instance()->downloadDir();
+	
+	ClientListener* listener = new ClientListener(this, getUser(nick), filename, destination);
 	quint16 realPort = listener->listenForClients(1234);
 	
 	connect(listener, SIGNAL(stateChanged(int)), SLOT(listenerStateChanged(int)));

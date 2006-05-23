@@ -59,7 +59,8 @@ public slots:
 private slots:
 	void contextMenuRequested(Q3ListViewItem* item, const QPoint& pos, int col);
 	void downloadSelected();
-	void download(Q3ListViewItem* item);
+	void downloadToSelected();
+	void download(Q3ListViewItem* item, QString destination = QString::null);
 	void search();
 	void sizeRestrictionChanged(int index);
 	void browseFiles();
@@ -69,6 +70,7 @@ private:
 	
 	QMenu* m_contextMenu;
 	QAction* m_downloadAction;
+	QAction* m_downloadToAction;
 	User* m_user;
 	Q3ListView* m_transferList;
 	MainWindow* m_mainWindow;

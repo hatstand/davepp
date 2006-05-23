@@ -61,6 +61,7 @@ public:
 	void setFilelistDownload(User* user);
 	void setFileDownload(User* user, QString path);
 	void setFileUpload(ClientConnector* connector);
+	void setDestination(QString destination) {m_destination = destination;}
 	bool isRunning() {return m_transfer != NULL;}
 	bool isTopLevel() {return depth() == 0;}
 	bool isTopOfQueue() {return (!isTopLevel() && (depth() != itemAbove()->depth()));}
@@ -110,6 +111,7 @@ private:
 	QTimer* m_timer;
 	QTime m_update_time;
 	int m_result;
+	QString m_destination;
 };
 
 #endif

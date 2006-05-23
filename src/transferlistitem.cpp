@@ -141,7 +141,7 @@ void TransferListItem::start()
 		listener = m_user->server->browseFiles(m_nick);
 		break;
 	case DownloadFile:
-		listener = m_user->server->downloadFile(m_nick, m_path);
+		listener = m_user->server->downloadFile(m_nick, m_path, m_destination);
 		break;
 	}
 	

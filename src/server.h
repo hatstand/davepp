@@ -56,7 +56,7 @@ public:
 	User* getUser(QString nick);
 	void sendMessage(QString message, QString othernick = QString::null);
 	ClientListener* browseFiles(QString nick);
-	ClientListener* downloadFile(QString nick, QString filename);
+	ClientListener* downloadFile(QString nick, QString filename, QString destination = QString::null);
 	void resumeDownload(QString nick, QString remotefilename, QString localfilename, quint64 bytesDone);
 	void disconnectFromHub();
 	void searchHub(quint16 port, QString search, bool sizerestricted = FALSE, bool isminimumsize = TRUE, quint64 size = 0, int datatype = 1);

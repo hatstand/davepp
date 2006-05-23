@@ -29,6 +29,7 @@
 #include <QDebug>
 #include <QMenu>
 #include <QMessageBox>
+#include <QFileDialog>
 
 SearchResultListItem::SearchResultListItem(Q3ListView* parent, SearchResult* result)
  : Q3ListViewItem(parent), result(result)
@@ -85,6 +86,7 @@ ResultsWidget::ResultsWidget(MainWindow* parent, User* user, Q3ListView* transfe
 	
 	m_contextMenu = new QMenu(this);
 	m_downloadAction = m_contextMenu->addAction("Download", this, SLOT(downloadSelected()));
+	m_downloadToAction = m_contextMenu->addAction("Download to...", this, SLOT(downloadToSelected()));
 	
 	searchFrame->hide();
 }
@@ -106,6 +108,7 @@ ResultsWidget::ResultsWidget(MainWindow* parent, Q3ListView* transferList)
 	
 	m_contextMenu = new QMenu(this);
 	m_downloadAction = m_contextMenu->addAction("Download", this, SLOT(downloadSelected()));
+	m_downloadToAction = m_contextMenu->addAction("Download to...", this, SLOT(downloadToSelected()));
 	m_contextMenu->addAction("Browse files", this, SLOT(browseFiles()));
 	
 	connect(searchButton, SIGNAL(clicked()), SLOT(search()));
@@ -166,7 +169,25 @@ void ResultsWidget::downloadSelected()
 	}
 }
 
-void ResultsWidget::download(Q3ListViewItem* item)
+void ResultsWidget::downloadToSelected()
+{
+	Q3ListViewItemIterator it(listView);
+	
+	QString destination = QFileDialog::getExistingDirectory(this, "Download to...", QDir::homePath());
+	if (destination.isNull())
+		return;
+	
+	while (it.current())
+	{
+		if (it.current()->isSelected())
+		{
+			download(it.current(), destination);
+		}
+		++it;
+	}
+}
+
+void ResultsWidget::download(Q3ListViewItem* item, QString destination)
 {
 	QString path;
 	User* user;
@@ -210,6 +231,7 @@ void ResultsWidget::download(Q3ListViewItem* item)
 		{
 			TransferListItem* transfer = new TransferListItem(i);
 			transfer->setFileDownload(user, path);
+			transfer->setDestination(destination);
 			i->setOpen(true);
 			return;
 		}
@@ -219,6 +241,7 @@ void ResultsWidget::download(Q3ListViewItem* item)
 	
 	TransferListItem* transfer = new TransferListItem(m_transferList);
 	transfer->setFileDownload(user, path);
+	transfer->setDestination(destination);
 	transfer->start();
 }
 
@@ -294,6 +317,7 @@ void ResultsWidget::browseFiles()
 void ResultsWidget::setUser(User* user)
 {
 	m_downloadAction->setEnabled(user != NULL);
+	m_downloadToAction->setEnabled(user != NULL);
 	m_user = user;
 }
 

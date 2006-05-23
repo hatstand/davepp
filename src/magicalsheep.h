@@ -60,6 +60,9 @@ private:
 	Server* m_server;
 	QTextStream m_stream;
 	QString m_buffer;
+	bool m_weWant;
+	bool m_theyWant;
+	int m_random;
 };
 
 #endif

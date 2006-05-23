@@ -150,49 +150,86 @@ void MagicalSheep::parseCommand(QString command)
 			m_stream << "$Lock EXTENDEDPROTOCOLsomething Pk=DavePlusPlus|";
 			if(extendedClient)
 				m_stream << SUPPORTS << " BZList XmlBZList |";
+
+			m_random = Utilites::randomDirection();
 			
 			if (m_server->isFileQueuedFrom(m_nick))
-				m_stream << "$Direction Download " << Utilities::randomDirection() << "|";
+			{
+				m_weWant = true;
+				m_stream << DIRECTION << " Download " << m_random << "|";
+			}
+			else
+			{
+				m_weWant = false;
+				m_stream << DIRECTION << " Upload " << m_random << "|";
+			}
+
 			m_stream << "$Key " << Utilities::lockToKey(m_lock) << "|";
 			m_stream.flush();
 		}
 	}
 	else if (words[0] == SUPPORTS)
 	{
-		if(words[1].contains("BZList"))
+		if(words.contains("BZList"))
 			supportsBZList = true;
-		if(words[1].contains("XmlBZList"))
+		if(words.contains("XmlBZList"))
 			supportsXmlBZList = true;
 	}
 	else if (words[0] == DIRECTION)
 	{
+		if(words[1] == "Download")
+			m_theyWant = true;
+		else
+			m_theyWant = false;
+
+		if(m_weWant && m_theyWant)
+		{
+			if(m_random > words[2].toInt()) // We get to download
+			{
+				// Download shit here
+			}
+		}
+		else if(m_weWant)
+			// Download shit here
 	}
 	else if (words[0] == "$Key")
 	{
-		if(m_passive)
+		if(m_direction == Listening)
+		{
+			// Actually download 
 			return;
+		}
 
 		if(extendedClient)
 		{
 			// XmlBZList implies support for UGetBlock
 			m_stream << SUPPORTS << " BZList XmlBZList |";
-			//m_stream << SUPPORTS << " BZList |";
 		}
-		qDebug() << "Sending key:" << Utilities::lockToKey(m_lock);
-		m_stream << DIRECTION << " Upload 1234|";
+
+		m_random = Utilities::randomDirection();
+		m_stream << DIRECTION;
+		if(m_weWant)
+			m_stream << " Download ";
+		else
+			m_stream << " Upload ";
+
+		m_stream << m_random << "|";
 		m_stream << "$Key " << Utilities::lockToKey(m_lock) << "|";
 		m_stream.flush();
 	}
 	else if (words[0] == GET || words[0] == UGETBLOCK)
 	{
+		bool uget;
 		if(words[0] == GET)
 		{
+			uget = false;
 			QString temp = command.section(" ", 1);
 			m_fileName = temp.section("$", 0, 0);
 			m_offset = temp.section("$", 1).toLongLong() - 1;
 		}
 		else
 		{
+			uget = true;
 			m_offset = words[1].toULongLong();
 			m_fileName = command.section(" ", 3);
 			m_numbytes = words[2].toLongLong();;
@@ -215,8 +252,6 @@ void MagicalSheep::parseCommand(QString command)
 				m_error = "No slots";
 			
 				emit result(TransferFailed);
-				changeState(NoSlots);
-				endTransfer();
 				return;
 			}
 			else
@@ -253,12 +288,10 @@ void MagicalSheep::parseCommand(QString command)
 			emit result(TransferFailed);
 			qDebug() << "File not found";
 			m_stream.flush();
-			changeState(Failed);
-			endTransfer();
 			return;
 		}
 		
-		if(words[0] == GET)
+		if(!uget)
 		{
 			m_stream << FILELENGTH << " " << m_fileLength << "|";
 			m_numbytes = m_fileLength - m_offset;
@@ -294,8 +327,6 @@ void MagicalSheep::parseCommand(QString command)
 	else
 	{
 		qDebug() << words[0] << "not understood";
-		changeState(Failed);
-		endTransfer();
 	}
 }
 

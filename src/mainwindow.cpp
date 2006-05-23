@@ -548,7 +548,7 @@ void MainWindow::connectToHub(HubDetailsListItem* item)
 	connect(server, SIGNAL(userInfoChanged(User*)), SLOT(userInfoChanged(User*)));
 	connect(server, SIGNAL(userQuit(User*)), SLOT(userQuit(User*)));
 	connect(server, SIGNAL(fileListUpdated(User*)), SLOT(userFileListUpdated(User*)));
-	connect(server, SIGNAL(uploadRequest(Uploader*)), SLOT(uploadRequest(Uploader*)));
+	connect(server, SIGNAL(uploadRequest(ClientConnector*)), SLOT(uploadRequest(ClientConnector*)));
 	
 	server->setHost(item->hostName(), item->port());
 	
@@ -1052,7 +1052,7 @@ void MainWindow::saveHubList()
 	m_config->settings()->sync();
 }
 
-void MainWindow::uploadRequest(Uploader* connector)
+void MainWindow::uploadRequest(ClientConnector* connector)
 {
 	TransferListItem* transfer = new TransferListItem(transferList);
 	transfer->setFileUpload(connector);

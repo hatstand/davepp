@@ -33,16 +33,10 @@
 #include <QDir>
 #include <QTextStream>
 #include <QDebug>
-
-#include <stdlib.h>
-#include <time.h>
-
 #include "utilities.h"
 
 int main(int argc, char *argv[])
 {
-	srand((int)(time(NULL)));
-
 	QApplication app(argc, argv);
 	
 	MainWindow* w = new MainWindow();

@@ -39,7 +39,7 @@ class ResultsWidget;
 class ConfigureDialog;
 class Configuration;
 class FileListBuilder;
-class Uploader;
+class ClientConnector;
 class TrayIcon;
 
 class HubDetailsListItem : public Q3ListViewItem
@@ -166,7 +166,7 @@ private slots:
 	void userInfoChanged(User* user);
 	void userQuit(User* user);
 	void userFileListUpdated(User* user);
-	void uploadRequest(Uploader* connector);
+	void uploadRequest(ClientConnector* connector);
 	
 	void trayIconClicked();
 	void trayIconQuit();

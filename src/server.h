@@ -33,9 +33,11 @@
 #include "privatechatwidget.h"
 
 class User;
+class Client;
+class ClientListener;
 class Configuration;
+class ClientConnector;
 class HubWidget;
-class Negotiator;
 
 /**
 @author David Sansome
@@ -53,8 +55,8 @@ public:
 	
 	User* getUser(QString nick);
 	void sendMessage(QString message, QString othernick = QString::null);
-	Negotiator* browseFiles(QString nick);
-	Negotiator* downloadFile(QString nick, QString filename, QString destination);
+	ClientListener* browseFiles(QString nick);
+	ClientListener* downloadFile(QString nick, QString filename, QString destination = QString::null);
 	void resumeDownload(QString nick, QString remotefilename, QString localfilename, quint64 bytesDone);
 	void disconnectFromHub();
 	void searchHub(quint16 port, QString search, bool sizerestricted = FALSE, bool isminimumsize = TRUE, quint64 size = 0, int datatype = 1);
@@ -139,7 +141,7 @@ signals:
 	void privateChatMessage(QString from, QString message);
 	void error(QString message);
 	void fileListUpdated(User* user);
-//	void uploadRequest(Uploader* connector);
+	void uploadRequest(ClientConnector* connector);
 	void gotUserIP(QString nick, QString host);
 	void becameOp(bool yes);
 };

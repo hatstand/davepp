@@ -43,11 +43,7 @@ HEADERS += server.h \
 			  commands.h \
 			  xmllistparser.h \
 			  zcompress.h \
-			  tigerhash.h \
-			  negotiator.h \
-			  downloader.h \
-			  uploader.h \
-			  newclient.h
+			  tigerhash.cpp
 SOURCES += main.cpp \
            server.cpp \
            user.cpp \
@@ -74,11 +70,7 @@ SOURCES += main.cpp \
 			  searchreturner.cpp \
 			  xmllistparser.cpp \
 			  zcompress.cpp \
-			  tigerhash.cpp \
-			  negotiator.cpp \
-			  downloader.cpp \
-			  uploader.cpp \
-			  newclient.cpp
+			  tigerhash.cpp
 RESOURCES=../data/data.qrc
 mainwindow.ui.commands = $$IDL_COMPILER
 hubwidget.ui.commands = $$IDL_COMPILER

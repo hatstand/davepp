@@ -27,6 +27,8 @@
 
 #include <bzlib.h>
 
+#include <stdlib.h>
+
 using namespace Utilities;
 
 QString Utilities::lockToKey(QString lock)
@@ -640,4 +642,9 @@ QByteArray Utilities::encodeBZList(QByteArray inputData)
 
 	free(dest);
 	return NULL;
+}
+
+int Utilities::randomDirection()
+{
+	return rand() % 32767;
 }

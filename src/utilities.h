@@ -80,7 +80,7 @@ namespace Utilities
 	void freeHufNode(hufnode* node);
 	//bool huf_insert_glist(hufnode* a, hufnode* b);
 	QString niceSize(quint64 size);
-
+	int randomDirection();
 }
 
 #endif

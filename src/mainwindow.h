@@ -146,6 +146,7 @@ private slots:
 	void chatTabClose();
 	void resortUserList();
 	void requestNewPrivateChat();
+	void requestUserInfo();
 	void startSearch(QString search, bool sizeRestricted, bool isMin, int size, int dataType);
 	void configure();
 	void configureAccept();

@@ -9,14 +9,16 @@ FORMS += mainwindow.ui \
          hubwidget.ui \
          resultswidget.ui \
          configure.ui \
-         shareedit.ui 
+         shareedit.ui \
+			userinfo.ui
 IDLS += mainwindow.ui \
         edithub.ui \
         hubwidget.ui \
         resultswidget.ui \
         prefrences.ui \
         configure.ui \
-        shareedit.ui 
+        shareedit.ui \
+		  userinfo.ui
 HEADERS += server.h \
            user.h \
            mainwindow.h \
@@ -44,7 +46,8 @@ HEADERS += server.h \
 			  xmllistparser.h \
 			  zcompress.h \
 			  tigerhash.h \
-			  magicalsheep.h
+			  magicalsheep.h \
+			  userinfo.h
 SOURCES += main.cpp \
            server.cpp \
            user.cpp \
@@ -72,7 +75,8 @@ SOURCES += main.cpp \
 			  xmllistparser.cpp \
 			  zcompress.cpp \
 			  tigerhash.cpp \
-			  magicalsheep.cpp
+			  magicalsheep.cpp \
+			  userinfo.cpp
 RESOURCES=../data/data.qrc
 mainwindow.ui.commands = $$IDL_COMPILER
 hubwidget.ui.commands = $$IDL_COMPILER

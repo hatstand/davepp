@@ -31,6 +31,7 @@
 #include "filelistbuilder.h"
 #include "filelist.h"
 #include "trayicon/trayicon.h"
+#include "userinfo.h"
 
 #include <QDebug>
 #include <QPainter>
@@ -326,10 +327,12 @@ MainWindow::MainWindow()
 	m_userContextMenu = new QMenu(this);
 	m_userContextMenu->addAction("Browse files", this, SLOT(browseUserFiles()));
 	m_userContextMenu->addAction("Chat", this, SLOT(requestNewPrivateChat()));
+	m_userContextMenu->addAction("Info", this, SLOT(requestUserInfo()));
 
 	m_opUserContextMenu = new QMenu(this);
 	m_opUserContextMenu->addAction("Browse files", this, SLOT(browseUserFiles()));
 	m_opUserContextMenu->addAction("Chat", this, SLOT(requestNewPrivateChat()));
+	m_opUserContextMenu->addAction("Info", this, SLOT(requestUserInfo()));
 	m_opUserContextMenu->addSeparator();
 	m_opUserContextMenu->addAction("Kick", this, SLOT(kickUser()));
 	m_opUserContextMenu->addAction("Ban", this, SLOT(banUser()));
@@ -1218,4 +1221,15 @@ void MainWindow::trayIconQuit()
 {
 	quittingFromTray = true;
 	close();
+}
+
+void MainWindow::requestUserInfo()
+{
+	UserListItem* item = getUserListItem();
+	
+	if(item != NULL)
+	{
+		UserInfo* t = new UserInfo(this, item->user());
+		t->show();
+	}
 }

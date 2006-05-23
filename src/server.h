@@ -86,6 +86,8 @@ public:
 
 	void kickUser(QString nick);
 
+	bool isFileQueuedFrom(QString nick) { return false; }
+
 private:
 	void processChatCommand(QString nick, QString command, bool priv);
 	void parseCommand(QString command);

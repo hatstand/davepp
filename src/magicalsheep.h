@@ -20,8 +20,13 @@
 #ifndef MAGICALSHEEP_H
 #define MAGICALSHEEP_H
 
+#include "filelistbuilder.h"
+
 #include <QTcpSocket>
 #include <QTcpServer>
+#include <QTextStream>
+#include <QFile>
+#include <QTimer>
 
 class Server;
 
@@ -29,7 +34,7 @@ class MagicalSheep : public QObject
 {
 	Q_OBJECT
 public:
-	MagicalSheep(Server* parent, QString host = QString::null, quint16 port);
+	MagicalSheep(Server* parent, QString host = QString::null, quint16 port = 0);
 	~MagicalSheep();
 	
 	quint16 listen();
@@ -39,9 +44,17 @@ public:
 		Connecting,
 		Listening
 	};
-	
+
+	enum TransferResult
+	{
+		TransferFailed,
+		TransferSucceeded
+	};
+
 private:
 	void parseCommand(QString command);
+	void setupSocket();
+	void sendSomeData();
 	
 private slots:
 	void newConnection();
@@ -52,6 +65,10 @@ private slots:
 	void socketHostFound();
 	void socketBytesWritten(quint64 num);
 	void socketReadyRead();
+
+signals:
+	void infoChanged();
+	void result(TransferResult);
 	
 private:
 	Direction m_direction;
@@ -63,6 +80,20 @@ private:
 	bool m_weWant;
 	bool m_theyWant;
 	int m_random;
+	QString m_nick;
+	QString m_lock;
+	bool m_extendedClient;
+	bool m_supportsBZList;
+	bool m_supportsXmlBZList;
+	QString m_fileName;
+	quint64 m_offset;
+	quint64 m_length;
+	qint64 m_numbytes;
+	quint64 m_sendPos;
+	bool m_gotSlot;
+	QString m_error;
+	QFile m_file;
+	QTimer m_sendTimer;
 };
 
 #endif

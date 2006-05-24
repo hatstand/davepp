@@ -16,6 +16,7 @@ UserInfo::~UserInfo()
 
 void UserInfo::show()
 {
+	setWindowTitle("User Info - " + m_user->nick);
 	nick->setText(m_user->nick);
 	speed->setText(m_user->speed);
 	share->setText(m_user->niceShareSize);
@@ -26,4 +27,5 @@ void UserInfo::show()
 void UserInfo::accept()
 {
 	close();
+	deleteLater();
 }

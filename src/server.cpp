@@ -145,6 +145,7 @@ void Server::open()
 
 	qDebug() << m_host;
 	changeState(LookingUpHost);
+	me()->nick = Configuration::instance()->nick();
 	m_socket->connectToHost(m_host, m_port);
 }
 
@@ -356,6 +357,7 @@ void Server::parseCommand(QString command)
 				if (nick == m_me->nick)
 				{
 					user->me = true;
+					me()->op = true;
 					emit becameOp(true);
 					qDebug() << "Op on this server";
 				}

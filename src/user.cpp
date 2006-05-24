@@ -23,6 +23,7 @@
 #include <QDebug>
 #include "utilities.h"
 #include "filelist.h"
+#include "mainwindow.h"
 
 User::User(Server* server, QString nick)
  : server(server), nick(nick), op(false), me(false), shareSize(0), totalSlots(0), freeSlots(0), fileList(NULL)
@@ -55,6 +56,8 @@ void User::setFileList(FileList* f)
 	if (fileList != NULL)
 		delete fileList;
 	fileList = f;	
+
+	MainWindow::getInstance()->userFileListUpdated(this);
 }
 
 User::~User()

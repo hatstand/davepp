@@ -335,7 +335,7 @@ MainWindow::MainWindow()
 	m_opUserContextMenu->addAction("Info", this, SLOT(requestUserInfo()));
 	m_opUserContextMenu->addSeparator();
 	m_opUserContextMenu->addAction("Kick", this, SLOT(kickUser()));
-	m_opUserContextMenu->addAction("Ban", this, SLOT(banUser()));
+//	m_opUserContextMenu->addAction("Ban", this, SLOT(banUser()));
 	
 	m_hubTabDisconnect = new QAction("Disconnect", this);
 	connect(m_hubTabDisconnect, SIGNAL(activated()), SLOT(hubTabDisconnect()));
@@ -550,7 +550,6 @@ void MainWindow::connectToHub(HubDetailsListItem* item)
 	connect(server, SIGNAL(userJoined(User*)), SLOT(userJoined(User*)));
 	connect(server, SIGNAL(userInfoChanged(User*)), SLOT(userInfoChanged(User*)));
 	connect(server, SIGNAL(userQuit(User*)), SLOT(userQuit(User*)));
-	connect(server, SIGNAL(fileListUpdated(User*)), SLOT(userFileListUpdated(User*)));
 	connect(server, SIGNAL(uploadRequest(ClientConnector*)), SLOT(uploadRequest(ClientConnector*)));
 	
 	server->setHost(item->hostName(), item->port());

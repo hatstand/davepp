@@ -126,6 +126,8 @@ public:
 	void privateChatClosed(PrivateChatWidget* widget);
 	void newPrivateChat(PrivateChatWidget* widget);
 	
+	void userFileListUpdated(User* user);
+
 private slots:
 	void newHubClicked();
 	void deleteHubClicked();
@@ -166,7 +168,6 @@ private slots:
 	void userJoined(User* user);
 	void userInfoChanged(User* user);
 	void userQuit(User* user);
-	void userFileListUpdated(User* user);
 	void uploadRequest(ClientConnector* connector);
 	
 	void trayIconClicked();

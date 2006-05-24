@@ -21,6 +21,7 @@
 #define MAGICALSHEEP_H
 
 #include "filelistbuilder.h"
+#include "user.h"
 
 #include <QTcpSocket>
 #include <QTcpServer>
@@ -101,6 +102,7 @@ private:
 	Server* m_server;
 	QTextStream m_stream;
 	QString m_buffer;
+	QByteArray m_lstBuffer;
 	bool m_weWant;
 	bool m_theyWant;
 	int m_ourRandom;
@@ -113,12 +115,15 @@ private:
 	quint64 m_length;
 	qint64 m_numbytes;
 	quint64 m_sendPos;
+	qint64 m_bytesRead;
 	bool m_gotSlot;
 	QString m_error;
 	QFile m_file;
 	QTimer m_sendTimer;
 	Transfer* m_transfer;
 	bool m_dcLst;
+	// This could be NULL, careful
+	User* m_user;
 };
 
 #endif

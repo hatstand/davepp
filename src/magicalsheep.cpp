@@ -23,6 +23,7 @@
 #include "server.h"
 #include "user.h"
 #include "configuration.h"
+#include "filelist.h"
 
 #include <QFileInfo>
 #include <QFile>
@@ -126,7 +127,41 @@ void MagicalSheep::socketBytesWritten(quint64 num)
 void MagicalSheep::socketReadyRead()
 {
 	qDebug() << "Socket ready read";
-	
+
+
+	if(m_state == Transferring)
+	{
+		m_bytesRead += m_socket->bytesAvailable();
+		if(m_dcLst)
+			m_lstBuffer.append(m_socket->readAll());
+		else
+			m_file.write(m_socket->readAll());
+
+		if(m_bytesRead >= m_length)
+		{
+			emit result(TransferSucceeded);
+			m_socket->close();
+			if(m_dcLst && m_user)
+			{
+				QByteArray decodedList;
+
+				if(m_supportsBZList || m_supportsXmlBZList)
+					decodedList = Utilities::decodeBZList(m_lstBuffer);
+				else
+					decodedList = Utilities::decodeList(m_lstBuffer);
+
+				if(m_supportsXmlBZList)
+					m_user->setFileList(new FileList(decodedList));
+				else
+				{
+					QTextStream stream(decodedList);
+					m_user->setFileList(new FileList(&stream));
+				}
+			}
+		}
+		return;
+	}
+
 	QString data = m_socket->readAll();
 	data = m_buffer + data;
 	if(data.endsWith("|"))
@@ -141,7 +176,7 @@ void MagicalSheep::socketReadyRead()
 	}
 	else
 	{
-		qDebug() << "DATA TO BUFFER" << data;
+//		qDebug() << "DATA TO BUFFER" << data;
 		m_buffer += data;
 	}
 }
@@ -155,7 +190,12 @@ void MagicalSheep::parseCommand(QString command)
 	QStringList words = command.split(" ");
 	if (words[0] == MYNICK)
 	{
-		m_transfer->setUserName(command.section(' ', 1));
+		QString nick = command.section(' ', 1);
+		m_user = m_server->getUser(nick);
+		if(!m_user)
+			qWarning() << "User not connected to hub";
+
+		m_transfer->setUserName(nick);
 	}
 	else if (words[0] == "$Lock")
 	{
@@ -342,6 +382,7 @@ void MagicalSheep::parseCommand(QString command)
 		m_stream << SEND << "|";
 		m_stream.flush();
 		
+		m_buffer.clear();
 		setState(Transferring);
 		
 		qDebug() << "Opening file";
@@ -361,6 +402,7 @@ void MagicalSheep::parseCommand(QString command)
 			
 			m_file.open(QIODevice::WriteOnly | QIODevice::Append);
 		}
+		m_bytesRead = 0;
 	}
 	else if (words[0] == SEND)
 	{

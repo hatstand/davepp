@@ -117,8 +117,6 @@ ClientConnector::~ClientConnector()
 	if(gotSlot)
 		Configuration::instance()->revokeSlot();
 
-	delete(m_socket);
-
 	qDebug() << "Real bytes written:" << realBytesWritten << "Think written:" << thinkWritten;
 }
 

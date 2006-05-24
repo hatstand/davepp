@@ -29,6 +29,7 @@
 #include <QTimer>
 
 class Server;
+class Transfer;
 
 class MagicalSheep : public QObject
 {
@@ -39,10 +40,26 @@ public:
 	
 	quint16 listen();
 	
-	enum Direction
+	enum ConnDirection
 	{
 		Connecting,
 		Listening
+	};
+	
+	enum DataDirection
+	{
+		Downloading,
+		Uploading
+	};
+	
+	enum State
+	{
+		WaitingForConnection,
+		LookingUpHost,
+		ConnectingToHost,
+		Handshaking,
+		Transferring,
+		Finished
 	};
 
 	enum TransferResult
@@ -50,11 +67,17 @@ public:
 		TransferFailed,
 		TransferSucceeded
 	};
+	
+	QString nick(QString nick);
+	State state() {return m_state;}
 
 private:
 	void parseCommand(QString command);
 	void setupSocket();
 	void sendSomeData();
+	void negotiateDirection();
+	void startDownload();
+	void setState(State state) {m_state = state;}
 	
 private slots:
 	void newConnection();
@@ -67,11 +90,12 @@ private slots:
 	void socketReadyRead();
 
 signals:
-	void infoChanged();
-	void result(TransferResult);
+	void result(int);
 	
 private:
-	Direction m_direction;
+	ConnDirection m_direction;
+	DataDirection m_dataDirection;
+	State m_state;
 	QTcpSocket* m_socket;
 	QTcpServer* m_tcpServer;
 	Server* m_server;
@@ -79,13 +103,12 @@ private:
 	QString m_buffer;
 	bool m_weWant;
 	bool m_theyWant;
-	int m_random;
-	QString m_nick;
+	int m_ourRandom;
+	int m_theirRandom;
 	QString m_lock;
 	bool m_extendedClient;
 	bool m_supportsBZList;
 	bool m_supportsXmlBZList;
-	QString m_fileName;
 	quint64 m_offset;
 	quint64 m_length;
 	qint64 m_numbytes;
@@ -94,6 +117,8 @@ private:
 	QString m_error;
 	QFile m_file;
 	QTimer m_sendTimer;
+	Transfer* m_transfer;
+	bool m_dcLst;
 };
 
 #endif

@@ -722,12 +722,9 @@ void MainWindow::browseUserFiles()
 {
 	UserListItem* item = getUserListItem();
 	
-	if(item != NULL)
-	{
-		TransferListItem* transfer = new TransferListItem(transferList);
-		transfer->setFilelistDownload(item->user());
-		transfer->start();
-	}
+	qDebug() << "Browsing" << item->user()->nick;
+	
+	item->user()->server->browseFiles(item->user()->nick);
 }
 
 void MainWindow::requestNewPrivateChat()

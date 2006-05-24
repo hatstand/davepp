@@ -28,6 +28,7 @@
 #include "filelistbuilder.h"
 #include "searchreturner.h"
 #include "mainwindow.h"
+#include "magicalsheep.h"
 
 #include <QStringList>
 #include <QUdpSocket>
@@ -53,6 +54,39 @@ QString encodeChatMessage(QString message)
 }
 
 }
+
+Transfer::Transfer()
+ : m_direction(Unknown), m_sheep(NULL)
+{
+	
+}
+
+void Transfer::baaaaa(MagicalSheep* sheep)
+{
+	if (m_sheep != NULL)
+		delete m_sheep;
+	m_sheep = sheep;
+	
+	connect(m_sheep, SIGNAL(destroyed()), SLOT(sheepDetonated()));
+	connect(m_sheep, SIGNAL(result(int)), SLOT(sheepResult(int)));
+}
+
+void Transfer::sheepDetonated()
+{
+	m_sheep = NULL;
+	if (state() == Active)
+		setState(AwaitingRetry);
+}
+
+void Transfer::sheepResult(int result)
+{
+	if (result == MagicalSheep::TransferFailed)
+		setState(AwaitingRetry);
+	else if (result == MagicalSheep::TransferSucceeded)
+		setState(Complete);
+}
+
+
 
 Server::Server(QObject *parent)
 	: QObject(parent), m_state(NotConnected)
@@ -582,20 +616,43 @@ Server::ConnectionState Server::state()
 	return m_state;
 }
 
-ClientListener* Server::browseFiles(QString nick)
+void Server::browseFiles(QString nick)
 {
 	qDebug() << "Browse" << nick;
 	
-	ClientListener* listener = new ClientListener(this, getUser(nick));
-	quint64 port = listener->listenForClients(1234);
+	Transfer* transfer = new Transfer();
+	transfer->setDirection(Transfer::Download);
+	transfer->setState(Transfer::Queued);
+	transfer->setUserName(nick);
+	transfer->setFileList(true);
 	
-	connect(listener, SIGNAL(stateChanged(int)), SLOT(listenerStateChanged(int)));
-	connect(listener, SIGNAL(result(int)), SLOT(listenerResult(int)));
+	m_downloadQueue[nick].enqueue(transfer);
 	
-	m_stream << "$ConnectToMe " << nick << " " << m_socket->localAddress().toString() << ":" << port << "|";
-	m_stream.flush();
+	hitDownloadQueue();
+}
+
+void Server::hitDownloadQueue()
+{
+	QMapIterator<QString, QQueue<Transfer*> > i(m_downloadQueue);
+	while (i.hasNext())
+	{
+		i.next();
+		qDebug() << "Looking at queue of" << i.key();
+		if (hasActiveTransfers(i.key()))
+			continue;
+		qDebug() << "  - Has no active transfers";
+		if (!isFileQueuedFrom(i.key()))
+			continue;
+		qDebug() << "  - Has queued files";
+		
+		qDebug() << "Downloading queued file from" << i.key();
+		MagicalSheep* sheep = new MagicalSheep(this);
+		quint16 port = sheep->listen();
+		
+		m_stream << "$ConnectToMe " << i.key() << " " << m_socket->localAddress().toString() << ":" << port << "|";
+		m_stream.flush();
+	}
 	
-	return listener;
 }
 
 
@@ -683,4 +740,38 @@ void Server::kickUser(QString nick)
 	qDebug() << "Kicking user";
 	m_stream << "$Kick " << nick << "|";
 	m_stream.flush();
+}
+
+bool Server::isFileQueuedFrom(QString nick)
+{
+	return (firstFileQueuedFrom(nick) != NULL);
+}
+
+Transfer* Server::firstFileQueuedFrom(QString nick)
+{
+	if (!m_downloadQueue.contains(nick) || m_downloadQueue[nick].isEmpty())
+		return NULL;
+	
+	foreach (Transfer* transfer, m_downloadQueue[nick])
+	{
+		Transfer::State state = transfer->state();
+		if (state == Transfer::Queued || state == Transfer::AwaitingRetry)
+			return transfer;
+	}
+	
+	return NULL;
+}
+
+bool Server::hasActiveTransfers(QString nick)
+{
+	if (!m_downloadQueue.contains(nick) || m_downloadQueue[nick].isEmpty())
+		return false;
+	
+	foreach (Transfer* transfer, m_downloadQueue[nick])
+	{
+		Transfer::State state = transfer->state();
+		if (state == Transfer::Active)
+			return true;
+	}
+	return false;
 }

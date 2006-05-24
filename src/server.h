@@ -29,6 +29,8 @@
 #include <QList>
 #include <QListIterator>
 #include <QTime>
+#include <QDebug>
+#include <QQueue>
 
 #include "privatechatwidget.h"
 
@@ -38,10 +40,79 @@ class ClientListener;
 class Configuration;
 class ClientConnector;
 class HubWidget;
+class MagicalSheep;
 
-/**
-@author David Sansome
-*/
+class Transfer : public QObject
+{
+	Q_OBJECT
+	
+public:
+	Transfer(); // For uploads
+	
+	enum State
+	{
+		Queued,
+		Active,
+		Complete,
+		UserOffline,
+		AwaitingRetry
+	};
+	
+	enum Direction
+	{
+		Unknown,
+		Upload,
+		Download
+	};
+	
+	QString fileName() {return m_fileName;}
+	void setFileName(QString fileName) {m_fileName = fileName; qDebug() << "Filename changed to" << fileName;}
+	
+	bool isFileList() {return m_fileList;}
+	void setFileList(bool fileList) {m_fileList = fileList;}
+	
+	QString userName() {return m_userName;}
+	void setUserName(QString userName) {m_userName = userName; qDebug() << "Username changed to" << userName;}
+	
+	QString destination() {return m_destination;}
+	
+	State state() {return m_state;}
+	void setState(State state) {m_state = state; qDebug() << "State changed to" << m_state;}
+	
+	Direction direction() {return m_direction;}
+	void setDirection(Direction direction) {m_direction = direction;}
+	
+	void baaaaa(MagicalSheep* sheep);
+	
+	/*quint64 progress() {return m_progress;}
+	
+	QString progressText();*/
+	
+	/*void start();
+	void pause();*/
+	
+private slots:
+	void sheepDetonated();
+	void sheepResult(int result);
+	
+private:
+	QString m_fileName;
+	bool m_fileList;
+	QString m_userName;
+	QString m_destination;
+	
+	State m_state;
+	
+	quint64 m_progress;
+	
+	Server* m_server;
+	MagicalSheep* m_sheep;
+	Direction m_direction;
+	
+	QTimer* m_retryTimer;
+	QTime m_retryTime;
+};
+
 class Server : public QObject
 {
 	Q_OBJECT
@@ -55,7 +126,7 @@ public:
 	
 	User* getUser(QString nick);
 	void sendMessage(QString message, QString othernick = QString::null);
-	ClientListener* browseFiles(QString nick);
+	void browseFiles(QString nick);
 	ClientListener* downloadFile(QString nick, QString filename, QString destination = QString::null);
 	void resumeDownload(QString nick, QString remotefilename, QString localfilename, quint64 bytesDone);
 	void disconnectFromHub();
@@ -86,7 +157,9 @@ public:
 
 	void kickUser(QString nick);
 
-	bool isFileQueuedFrom(QString nick) { return false; }
+	bool isFileQueuedFrom(QString nick);
+	Transfer* firstFileQueuedFrom(QString nick);
+	bool hasActiveTransfers(QString nick);
 
 private:
 	void processChatCommand(QString nick, QString command, bool priv);
@@ -97,6 +170,7 @@ private:
 	void getInfo(QString othernick);
 	void getInfoAll();
 	void getNickList();
+	void hitDownloadQueue();
 
 	QString m_host;
 	int m_port;
@@ -113,6 +187,7 @@ private:
 	QString m_buffer;
 
 	QList<User*> m_users;
+	QMap<QString, QQueue<Transfer*> > m_downloadQueue;
 
 	QMap<QString, PrivateChatWidget*> m_privateChats;
 	HubWidget* m_hubChat;

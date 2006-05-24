@@ -28,20 +28,28 @@
 #include <QFile>
 #include <QStringList>
 #include <QDebug>
+#include <QDir>
 
 MagicalSheep::MagicalSheep(Server* parent, QString host, quint16 port)
  : QObject(parent), m_socket(NULL), m_server(parent)
 {
 	if (host.isNull())
+	{
 		m_direction = Listening;
+		setState(WaitingForConnection);
+	}
 	else
 	{
 		m_direction = Connecting;
+		setState(LookingUpHost);
 		
 		m_socket = new QTcpSocket(this);
 		m_socket->connectToHost(host, port);
 		setupSocket();
 	}
+	
+	m_transfer = new Transfer();
+	m_transfer->baaaaa(this);
 }
 
 MagicalSheep::~MagicalSheep()
@@ -83,6 +91,7 @@ void MagicalSheep::newConnection()
 void MagicalSheep::socketConnected()
 {
 	qDebug() << "Socket connected";
+	setState(Handshaking);
 	
 	if (m_direction != Connecting)
 		return;
@@ -95,6 +104,7 @@ void MagicalSheep::socketConnected()
 void MagicalSheep::socketDisconnected()
 {
 	qDebug() << "Socket disconnected";
+	setState(Finished);
 }
 
 void MagicalSheep::socketError(QAbstractSocket::SocketError error)
@@ -105,6 +115,7 @@ void MagicalSheep::socketError(QAbstractSocket::SocketError error)
 void MagicalSheep::socketHostFound()
 {
 	qDebug() << "Socket host found";
+	setState(ConnectingToHost);
 }
 
 void MagicalSheep::socketBytesWritten(quint64 num)
@@ -144,14 +155,14 @@ void MagicalSheep::parseCommand(QString command)
 	QStringList words = command.split(" ");
 	if (words[0] == MYNICK)
 	{
-		m_nick = command.section(' ', 1);
-		emit infoChanged();
+		m_transfer->setUserName(command.section(' ', 1));
 	}
 	else if (words[0] == "$Lock")
 	{
 		m_lock = words[1];
 		if(m_lock.startsWith("EXTENDEDPROTOCOL"))
 			m_extendedClient = true;
+		m_weWant = m_server->isFileQueuedFrom(m_transfer->userName());
 
 		if(m_direction == Listening)
 		{
@@ -160,18 +171,12 @@ void MagicalSheep::parseCommand(QString command)
 			if(m_extendedClient)
 				m_stream << SUPPORTS << " BZList XmlBZList |";
 
-			m_random = Utilities::randomDirection();
+			m_ourRandom = Utilities::randomDirection();
 			
-			if (m_server->isFileQueuedFrom(m_nick))
-			{
-				m_weWant = true;
-				m_stream << DIRECTION << " Download " << m_random << "|";
-			}
+			if (m_weWant)
+				m_stream << DIRECTION << " Download " << m_ourRandom << "|";
 			else
-			{
-				m_weWant = false;
-				m_stream << DIRECTION << " Upload " << m_random << "|";
-			}
+				m_stream << DIRECTION << " Upload " << m_ourRandom << "|";
 
 			m_stream << "$Key " << Utilities::lockToKey(m_lock) << "|";
 			m_stream.flush();
@@ -190,23 +195,20 @@ void MagicalSheep::parseCommand(QString command)
 			m_theyWant = true;
 		else
 			m_theyWant = false;
+		
+		m_theirRandom = words[2].toInt();
 
-		if(m_weWant && m_theyWant)
+		if (m_direction == Listening)
 		{
-			if(m_random > words[2].toInt()) // We get to download
-			{
-				// Download shit here
-			}
+			negotiateDirection();
 		}
-		else if(m_weWant)
-			;
-			// Download shit here
 	}
 	else if (words[0] == "$Key")
 	{
 		if(m_direction == Listening)
 		{
-			// Actually download 
+			if (m_dataDirection == Downloading)
+				startDownload();
 			return;
 		}
 
@@ -216,44 +218,51 @@ void MagicalSheep::parseCommand(QString command)
 			m_stream << SUPPORTS << " BZList XmlBZList |";
 		}
 
-		m_random = Utilities::randomDirection();
-		m_stream << DIRECTION;
+		m_ourRandom = Utilities::randomDirection();
+		
 		if(m_weWant)
-			m_stream << " Download ";
+			m_stream << DIRECTION << " Download " << m_ourRandom << "|";
 		else
-			m_stream << " Upload ";
+			m_stream << DIRECTION << " Upload " << m_ourRandom << "|";
 
-		m_stream << m_random << "|";
 		m_stream << "$Key " << Utilities::lockToKey(m_lock) << "|";
 		m_stream.flush();
+		
+		if (m_direction == Connecting)
+		{
+			negotiateDirection();
+			
+			if (m_dataDirection == Downloading)
+				startDownload();
+		}
 	}
 	else if (words[0] == GET || words[0] == UGETBLOCK)
 	{
 		bool uget;
+		QString fileName;
 		if(words[0] == GET)
 		{
 			uget = false;
 			QString temp = command.section(" ", 1);
-			m_fileName = temp.section("$", 0, 0);
+			fileName = temp.section("$", 0, 0);
 			m_offset = temp.section("$", 1).toLongLong() - 1;
 		}
 		else
 		{
 			uget = true;
 			m_offset = words[1].toULongLong();
-			m_fileName = command.section(" ", 3);
+			fileName = command.section(" ", 3);
 			m_numbytes = words[2].toLongLong();;
 		}
 		
-		emit infoChanged();
+		m_transfer->setFileName(fileName);
 		
-		bool dcLst;
-		if(m_fileName == "MyList.DcLst" || m_fileName == "MyList.bz2" || m_fileName == "files.xml.bz2")
-			dcLst = true;
+		if(m_transfer->fileName() == "MyList.DcLst" || m_transfer->fileName() == "MyList.bz2" || m_transfer->fileName() == "files.xml.bz2")
+			m_dcLst = true;
 		else
-			dcLst = false;
+			m_dcLst = false;
 
-		if(!dcLst && !m_gotSlot)
+		if(!m_dcLst && !m_gotSlot)
 		{
 			if (!Configuration::instance()->getSlot())
 			{
@@ -269,15 +278,15 @@ void MagicalSheep::parseCommand(QString command)
 		}
 		
 		FileListBuilder* builder = FileListBuilder::instance();
-		if (m_fileName == "MyList.DcLst")
+		if (m_transfer->fileName() == "MyList.DcLst")
 			m_length = builder->huffmanList().length();
-		else if(m_fileName == "MyList.bz2")
+		else if(m_transfer->fileName() == "MyList.bz2")
 			m_length = builder->bzList().length();
-		else if(m_fileName == "files.xml.bz2")
+		else if(m_transfer->fileName() == "files.xml.bz2")
 			m_length = builder->xmlBZList().length();
 		else
 		{
-			QString fileName = Configuration::instance()->sharedFilename(m_fileName);
+			QString fileName = Configuration::instance()->sharedFilename(m_transfer->fileName());
 			m_length = QFileInfo(fileName).size();
 			m_file.setFileName(fileName);
 			if (m_file.exists())
@@ -323,10 +332,39 @@ void MagicalSheep::parseCommand(QString command)
 		
 		m_stream.flush();
 
-		qDebug() << "Uploading" << m_fileName << "from position" << m_offset << "(length" << m_numbytes << ")";
+		qDebug() << "Uploading" << m_transfer->fileName() << "from position" << m_offset << "(length" << m_numbytes << ")";
+	}
+	else if (words[0] == FILELENGTH)
+	{
+		m_length = words[1].toUInt();
+		m_offset = 1;
+		
+		m_stream << SEND << "|";
+		m_stream.flush();
+		
+		setState(Transferring);
+		
+		qDebug() << "Opening file";
+		
+		if (!m_dcLst)
+		{
+			QString trimmedFileName = m_transfer->fileName();
+			trimmedFileName.replace('\\', '/');
+			int pos = trimmedFileName.lastIndexOf('/');
+			if (pos != -1)
+				trimmedFileName = m_transfer->fileName().mid(pos+1);
+			
+			m_file.setFileName(m_transfer->destination() + QDir::separator() + trimmedFileName);
+
+			if(m_file.exists() && (m_offset == 1))
+				m_file.remove();
+			
+			m_file.open(QIODevice::WriteOnly | QIODevice::Append);
+		}
 	}
 	else if (words[0] == SEND)
 	{
+		setState(Transferring);
 		m_sendPos = m_offset;
 		sendSomeData();
 	}
@@ -334,6 +372,46 @@ void MagicalSheep::parseCommand(QString command)
 	{
 		qDebug() << words[0] << "not understood";
 	}
+}
+
+void MagicalSheep::negotiateDirection()
+{
+	if(m_weWant)
+	{
+		if(m_theyWant && (m_ourRandom < m_theirRandom))
+			m_dataDirection = Uploading;
+		else
+			m_dataDirection = Downloading;
+	}
+	else
+		m_dataDirection = Uploading;
+	
+	 qDebug() << "We are " << ((m_dataDirection == Uploading) ? "Uploading" : "Downloading");
+	
+	if (m_dataDirection == Downloading)
+	{
+		QString userName = m_transfer->userName();
+		
+		delete m_transfer;
+		m_transfer = m_server->firstFileQueuedFrom(userName);
+		m_transfer->baaaaa(this);
+	}
+}
+
+void MagicalSheep::startDownload()
+{
+	if (m_transfer->isFileList())
+	{
+		if (m_supportsBZList)
+			m_transfer->setFileName("MyList.bz2");
+		else if (m_supportsXmlBZList)
+			m_transfer->setFileName("files.xml.bz2");
+		else
+			m_transfer->setFileName("MyList.DcLst");
+	}
+	
+	m_stream << "$Get " << m_transfer->fileName() << "$1|";
+	m_stream.flush();
 }
 
 void MagicalSheep::sendSomeData()
@@ -371,11 +449,11 @@ void MagicalSheep::sendSomeData()
 	if(uploadBytes > m_numbytes)
 		uploadBytes = m_numbytes;
 	
-	if (m_fileName == "MyList.DcLst")
+	if (m_transfer->fileName() == "MyList.DcLst")
 		data = FileListBuilder::instance()->huffmanList().mid(m_sendPos, uploadBytes);
-	else if(m_fileName == "MyList.bz2")
+	else if(m_transfer->fileName() == "MyList.bz2")
 		data = FileListBuilder::instance()->bzList().mid(m_sendPos, uploadBytes);
-	else if(m_fileName == "files.xml.bz2")
+	else if(m_transfer->fileName() == "files.xml.bz2")
 		data = FileListBuilder::instance()->xmlBZList().mid(m_sendPos, uploadBytes);
 	else
 		data = m_file.read(uploadBytes);

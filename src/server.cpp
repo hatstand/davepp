@@ -29,6 +29,7 @@
 #include "searchreturner.h"
 #include "mainwindow.h"
 #include "magicalsheep.h"
+#include "ui_nickinuse.h"
 
 #include <QStringList>
 #include <QUdpSocket>
@@ -285,8 +286,38 @@ void Server::parseCommand(QString command)
 		}
 		else if (words[0] == "$ValidateDenide")
 		{
-			qWarning() << "Nick already requested or reserved";
-			m_socket->disconnectFromHost();
+			QDialog* dialog = new QDialog(MainWindow::getInstance());
+			Ui_NickInUseDialog ui;
+			ui.setupUi(dialog);
+			ui.nickLabel->setText("The nickname <b>" + m_me->nick + "</b> is already in use.");
+			
+			QString suggestion = m_me->nick;
+			QRegExp re("(\\d*)$");
+			if (re.indexIn(suggestion) == -1) // No numbers at the end of the nick
+				suggestion += "1";
+			else
+			{
+				suggestion.chop(re.cap(1).length());
+				suggestion += QString::number(re.cap(1).toInt() + 1);
+			}
+			ui.newNickBox->setText(suggestion);
+			ui.newNickBox->selectAll();
+			
+			if (dialog->exec() == QDialog::Rejected)
+			{
+				delete dialog;
+				m_socket->disconnectFromHost();
+				return;
+			}
+			
+			m_me->nick = ui.newNickBox->text();
+			if (ui.alwaysUseBox->isChecked())
+				Configuration::instance()->setNick(ui.newNickBox->text());
+			
+			delete dialog;
+			
+			m_stream << "$ValidateNick " << m_me->nick << "|";
+			m_stream.flush();
 		}
 		else if (words[0] == "$Hello")
 		{

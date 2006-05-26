@@ -10,7 +10,8 @@ FORMS += mainwindow.ui \
          resultswidget.ui \
          configure.ui \
          shareedit.ui \
-			userinfo.ui
+         userinfo.ui \
+         nickinuse.ui
 IDLS += mainwindow.ui \
         edithub.ui \
         hubwidget.ui \

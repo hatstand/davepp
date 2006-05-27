@@ -65,7 +65,7 @@ void MagicalSheep::setupSocket()
 	connect(m_socket, SIGNAL(disconnected()), SLOT(socketDisconnected()));
 	connect(m_socket, SIGNAL(error(QAbstractSocket::SocketError)), SLOT(socketError(QAbstractSocket::SocketError)));
 	connect(m_socket, SIGNAL(hostFound()), SLOT(socketHostFound()));
-	connect(m_socket, SIGNAL(bytesWritten(quint64)), SLOT(socketBytesWritten(quint64)));
+	connect(m_socket, SIGNAL(bytesWritten(qint64)), SLOT(socketBytesWritten(qint64)));
 	connect(m_socket, SIGNAL(readyRead()), SLOT(socketReadyRead()));
 	
 	m_stream.setDevice(m_socket);
@@ -119,7 +119,7 @@ void MagicalSheep::socketHostFound()
 	setState(ConnectingToHost);
 }
 
-void MagicalSheep::socketBytesWritten(quint64 num)
+void MagicalSheep::socketBytesWritten(qint64 num)
 {
 	qDebug() << "Socket bytes written" << num;
 }
@@ -139,6 +139,7 @@ void MagicalSheep::socketReadyRead()
 
 		if(m_bytesRead >= m_length)
 		{
+			setState(Finished);
 			emit result(TransferSucceeded);
 			m_socket->close();
 			if(m_dcLst && m_user)

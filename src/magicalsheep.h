@@ -87,7 +87,7 @@ private slots:
 	void socketDisconnected();
 	void socketError(QAbstractSocket::SocketError error);
 	void socketHostFound();
-	void socketBytesWritten(quint64 num);
+	void socketBytesWritten(qint64 num);
 	void socketReadyRead();
 
 signals:

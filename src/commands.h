@@ -20,7 +20,7 @@ static const QString UGETBLOCK = "$EGUtBlock";
 #else
 
 static const QString GETLISTLEN = "$GetListLen";
-static const QString LISTLEN = "$ListtLen";
+static const QString LISTLEN = "$ListLen";
 static const QString MYNICK = "$MyNick";
 static const QString MAXEDOUT = "$MaxedOut";
 static const QString SUPPORTS = "$Supports";

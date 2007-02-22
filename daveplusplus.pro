@@ -7,3 +7,4 @@ SUBDIRS += src
  
 TEMPLATE=subdirs
 CONFIG=debug
+
